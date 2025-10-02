@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { Head as InertiaHead } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-
+import Knob from 'primevue/knob';
 const breadcrumbs = [{ label: 'Dashboard' }];
 const value = ref(0);
 </script>
