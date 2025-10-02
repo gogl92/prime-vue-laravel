@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { Head as InertiaHead } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import { ref } from 'vue';
+import { Head as InertiaHead } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
 
-const breadcrumbs = [{ label: 'Dashboard' }]
+const breadcrumbs = [{ label: 'Dashboard' }];
+const value = ref(0);
 </script>
 
 <template>
@@ -11,9 +13,15 @@ const breadcrumbs = [{ label: 'Dashboard' }]
     <AppLayout :breadcrumbs>        
         <Card>
             <template #content>
-                <p class="m-0">
-                    You are logged in!
-                </p>
+                <template>
+                    <div class="card flex flex-col items-center gap-2">
+                        <Knob v-model="value" :size="150" readonly />
+                        <div class="flex gap-2">
+                            <Button icon="pi pi-plus" @click="value++" :disabled="value >= 100" />
+                            <Button icon="pi pi-minus" @click="value--" :disabled="value <= 0" />
+                        </div>
+                    </div>
+                </template>
             </template>
         </Card>
     </AppLayout>
