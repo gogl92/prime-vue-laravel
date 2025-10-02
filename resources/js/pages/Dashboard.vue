@@ -15,7 +15,6 @@ const value = ref(0);
     <AppLayout :breadcrumbs>        
         <Card>
             <template #content>
-                <template>
                     <div class="card flex flex-col items-center gap-2">
                         <Knob v-model="value" :size="150" readonly />
                         <div class="flex gap-2">
@@ -23,7 +22,6 @@ const value = ref(0);
                             <Button icon="pi pi-minus" @click="value--" :disabled="value <= 0" />
                         </div>
                     </div>
-                </template>
             </template>
         </Card>
     </AppLayout>
