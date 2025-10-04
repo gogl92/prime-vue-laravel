@@ -386,6 +386,22 @@ const loadInvoices = async () => {
             query = query.lookFor(filters.search)
         }
 
+        // Filter by city
+        if (filters.city) {
+            // exact match filter
+            query = query.where('city', filters.city)
+        }
+
+        // Filter by country
+        if (filters.country) {
+            query = query.where('country', filters.country)
+        }
+
+        // Sorting
+        if (sortField.value) {
+            query = query.orderBy(sortField.value, sortOrder.value === 1 ? 'asc' : 'desc')
+        }
+
         // Get the results
         const response = await query.get()
         invoices.value = response
