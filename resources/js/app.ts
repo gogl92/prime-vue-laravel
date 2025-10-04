@@ -8,6 +8,7 @@ import { ZiggyVue } from 'ziggy-js'
 
 import PrimeVue from 'primevue/config'
 import Toast from 'primevue/toast'
+import Tooltip from 'primevue/tooltip'
 import ToastService from 'primevue/toastservice'
 import { useToast } from 'primevue/usetoast'
 
@@ -74,6 +75,7 @@ createInertiaApp({
                 pt: globalPt,
             })
             .use(ToastService)
+            .directive('tooltip', Tooltip)
             .provide('colorMode', colorMode)
             .mount(el);
 
