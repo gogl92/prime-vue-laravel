@@ -155,6 +155,7 @@
             :header="editingInvoice ? 'Edit Invoice' : 'Create Invoice'"
             :modal="true"
             :style="{ width: '600px' }"
+            appendTo="body"
         >
             <form @submit.prevent="saveInvoice" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -262,6 +263,7 @@
             header="Confirm Delete"
             :modal="true"
             :style="{ width: '400px' }"
+            appendTo="body"
         >
             <div class="flex items-center gap-3 mb-4">
                 <i class="pi pi-exclamation-triangle text-orange-500 text-2xl"></i>
