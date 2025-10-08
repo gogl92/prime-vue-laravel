@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { LayoutGrid, House, Settings, LogOut, FileText } from 'lucide-vue-next';
 import { type MenuItem } from '@/types';
@@ -58,23 +58,33 @@ export function useAppLayout() {
         },
     ];
 
-    // Mobile menu
-    const mobileMenuOpen = ref(false);
+    // Sidebar menu (for both mobile and desktop) - persistent across navigation
+    const sidebarOpen = ref(false);
+
     if (typeof window !== 'undefined') {
-        const windowWidth = ref(window.innerWidth);
-        const updateWidth = () => {
-            windowWidth.value = window.innerWidth;
-        };
+        // Load sidebar state from localStorage on mount
         onMounted(() => {
-            window.addEventListener('resize', updateWidth);
-        });
-        onUnmounted(() => {
-            window.removeEventListener('resize', updateWidth);
-        });
-        watchEffect(() => {
-            if (windowWidth.value > 1024) {
-                mobileMenuOpen.value = false;
+            const savedState = localStorage.getItem('sidebar-open');
+            if (savedState !== null) {
+                sidebarOpen.value = JSON.parse(savedState);
             }
+
+            // Set up window resize listener
+            const windowWidth = ref(window.innerWidth);
+            const updateWidth = () => {
+                windowWidth.value = window.innerWidth;
+            };
+            window.addEventListener('resize', updateWidth);
+
+            // Cleanup on unmount
+            onUnmounted(() => {
+                window.removeEventListener('resize', updateWidth);
+            });
+        });
+
+        // Watch sidebar state and persist to localStorage
+        watch(sidebarOpen, (newValue) => {
+            localStorage.setItem('sidebar-open', JSON.stringify(newValue));
         });
     }
 
@@ -82,7 +92,7 @@ export function useAppLayout() {
         currentRoute,
         menuItems,
         userMenuItems,
-        mobileMenuOpen,
+        sidebarOpen,
         logout,
     };
 }

@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<{
 
 const page = usePage();
 const {
-    mobileMenuOpen,
+    sidebarOpen,
     menuItems,
     userMenuItems,
 } = useAppLayout();
@@ -29,70 +29,67 @@ const {
     <div class="h-screen flex flex-col">
         <ClientOnly>
             <Teleport to="body">
-                <!-- Mobile drawer menu -->
-                <Drawer
-                    v-model:visible="mobileMenuOpen"
-                    position="right"
-                >
-                    <div>
-                        <PanelMenu
-                            :model="menuItems"
-                            class="mt-1 w-full"
-                        />
-                    </div>
-                    <template #footer>
-                        <PopupMenuButton
-                            name="mobile-user-menu-dd"
-                            button-size="large"
-                            :menu-items="userMenuItems"
-                            :button-label="page.props.auth.user.name"
-                        >
-                            <template #toggleIcon>
-                                <ChevronsUpDown />
-                            </template>
-                        </PopupMenuButton>
-                    </template>
-                </Drawer>
                 <ScrollTop
                     :button-props="{ class: 'fixed! right-4! bottom-4! md:right-8! md:bottom-8! z-[1000]!', rounded: true, raised: true }"
                 />
             </Teleport>
         </ClientOnly>
 
-        <!-- Mobile Header -->
-        <header class="block lg:fixed top-0 left-0 right-0 z-50">
-            <nav class="dynamic-bg shadow-sm flex justify-between items-center lg:hidden">
+        <!-- Top Navbar (Always visible) -->
+        <header class="fixed top-0 left-0 right-0 z-50 dynamic-bg shadow-sm border-b dynamic-border">
+            <nav class="flex justify-between items-center">
                 <Container class="grow">
-                    <div class="flex justify-between items-center gap-4 py-4">
-                        <div>
-                            <NavLogoLink />
-                        </div>
-                        <div>
+                    <div class="flex justify-between items-center gap-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <!-- Hamburger Menu Button -->
                             <Button
                                 severity="secondary"
                                 text
-                                @click="mobileMenuOpen = true"
+                                class="!p-2"
+                                @click="sidebarOpen = !sidebarOpen"
                             >
                                 <template #icon>
                                     <MenuIcon class="size-6!" />
                                 </template>
                             </Button>
+                            <!-- App Name - Right of hamburger menu -->
+                            <div class="flex items-center gap-2">
+                                <NavLogoLink />
+                            </div>
+                        </div>
+                        <!-- Right side of navbar - space for future elements -->
+                        <div class="flex items-center gap-2">
+                            <!-- User menu on mobile -->
+                            <div class="lg:hidden">
+                                <PopupMenuButton
+                                    name="mobile-top-user-menu"
+                                    button-size="small"
+                                    :menu-items="userMenuItems"
+                                    :button-label="page.props.auth.user.name"
+                                >
+                                    <template #toggleIcon>
+                                        <ChevronsUpDown class="size-4" />
+                                    </template>
+                                </PopupMenuButton>
+                            </div>
+                            <!-- Additional navbar items can be added here -->
                         </div>
                     </div>
                 </Container>
             </nav>
         </header>
 
-        <div class="flex-1">
-            <!-- Desktop Sidebar -->
+        <div class="flex-1 pt-[60px]">
+            <!-- Mobile/Desktop Sidebar (Collapsible) -->
             <aside
-                class="w-[18rem] inset-0 hidden lg:block fixed overflow-y-auto overflow-x-hidden dynamic-bg border-r dynamic-border"
+                class="w-[18rem] fixed overflow-y-auto overflow-x-hidden dynamic-bg border-r dynamic-border transition-transform duration-300 top-[60px] bottom-0 lg:block"
+                :class="[
+                    // Mobile: always slides from left, desktop: slides from left when toggled
+                    sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                ]"
             >
                 <div class="w-full h-full flex flex-col justify-between p-4">
                     <div class="space-y-6">
-                        <div class="p-2">
-                            <NavLogoLink />
-                        </div>
                         <div>
                             <PanelMenu
                                 :model="menuItems"
@@ -102,7 +99,7 @@ const {
                     </div>
                     <div>
                         <PopupMenuButton
-                            name="desktop-user-menu-dd"
+                            name="sidebar-user-menu-dd"
                             :menu-items="userMenuItems"
                             :button-label="page.props.auth.user.name"
                         >
@@ -114,8 +111,20 @@ const {
                 </div>
             </aside>
 
+            <!-- Mobile overlay when sidebar is open -->
+            <div
+                v-if="sidebarOpen"
+                class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                @click="sidebarOpen = false"
+            />
+
             <!-- Scrollable Content -->
-            <main class="flex flex-col h-full lg:pl-[18rem]">
+            <main
+                class="flex flex-col h-full transition-all duration-300"
+                :class="[
+                    sidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-0'
+                ]"
+            >
                 <Container
                     vertical
                     fluid
