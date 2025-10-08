@@ -46,6 +46,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'auth' => [
                 'user' => $request->user(),
+                'token' => fn () => $request->session()->pull('auth_token'), // pull retrieves and removes
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('flash_success'),

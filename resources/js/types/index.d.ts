@@ -15,6 +15,7 @@ export interface User {
 
 export interface AuthProps {
     user: User;
+    token?: string;
 }
 
 export interface FlashProps {

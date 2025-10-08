@@ -14,6 +14,7 @@ import ToastService from 'primevue/toastservice'
 import { useToast } from 'primevue/usetoast'
 
 import { useSiteColorMode } from '@/composables/useSiteColorMode'
+import { useAuthToken } from '@/composables/useAuthToken'
 import globalPt from '@/theme/global-pt'
 import themePreset from '@/theme/noir-preset'
 import orionService from '@/services/orion'
@@ -37,6 +38,9 @@ createInertiaApp({
         // Root component with Global Toast
         const Root = {
             setup() {
+                // Initialize auth token handling
+                useAuthToken()
+
                 // show error toast instead of standard Inertia modal response
                 const toast = useToast()
                 router.on('invalid', (event) => {

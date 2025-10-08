@@ -46,6 +46,12 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        // Generate Sanctum token for Orion API access
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Share token with Inertia for frontend to store
+        session(['auth_token' => $token]);
+
         return redirect(route('dashboard', absolute: false));
     }
 }

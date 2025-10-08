@@ -2,6 +2,7 @@ import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue'
 import { usePage, useForm } from '@inertiajs/vue3'
 import { LayoutGrid, House, Info, Settings, LogOut, ExternalLink, FileSearch, FolderGit2 } from 'lucide-vue-next'
 import { MenuItem } from '@/types'
+import orionService from '@/services/orion'
 
 export function useAppLayout() {
     const page = usePage()
@@ -62,6 +63,11 @@ export function useAppLayout() {
     // User menu and logout functionality.
     const logoutForm = useForm({})
     const logout = () => {
+        // Clear auth token from localStorage and Orion service
+        localStorage.removeItem('auth_token')
+        orionService.clearAuth()
+
+        // Perform logout
         logoutForm.post(route('logout'))
     }
     const userMenuItems: MenuItem[] = [

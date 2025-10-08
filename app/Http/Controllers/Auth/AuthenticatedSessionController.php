@@ -33,6 +33,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Generate Sanctum token for Orion API access
+        $user = $request->user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Share token with Inertia for frontend to store
+        session(['auth_token' => $token]);
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -41,6 +48,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Revoke all tokens for the user
+        $user = $request->user();
+        if ($user) {
+            $user->tokens()->delete();
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
