@@ -20,9 +20,9 @@ class InvoiceFactory extends Factory
             'name' => $this->faker->name(),
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'address' => $this->faker->address(),
+            'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
-            'state' => $this->faker->state(),
+            'state' => $this->faker->randomElement(['CA', 'NY', 'TX', 'FL', 'IL', 'PA', 'OH', 'GA', 'NC', 'MI']),
             'zip' => $this->faker->postcode(),
             'country' => $this->faker->country(),
         ];

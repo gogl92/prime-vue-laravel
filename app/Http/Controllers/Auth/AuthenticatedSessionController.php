@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +36,9 @@ class AuthenticatedSessionController extends Controller
 
         // Generate Sanctum token for Orion API access
         $user = $request->user();
+
+        assert($user instanceof User);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Share token with Inertia for frontend to store

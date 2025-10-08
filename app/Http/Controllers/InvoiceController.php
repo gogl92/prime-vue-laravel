@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use Illuminate\Auth\Access\Response;
 
 class InvoiceController extends BaseOrionController
 {
@@ -18,23 +19,29 @@ class InvoiceController extends BaseOrionController
     /**
      * Request classes for validation
      */
-    protected $storeRequest = StoreInvoiceRequest::class;
-    protected $updateRequest = UpdateInvoiceRequest::class;
+    protected string $storeRequest = StoreInvoiceRequest::class;
+    protected string $updateRequest = UpdateInvoiceRequest::class;
 
     /**
      * Enable Orion search, filter and sort capabilities
+     * @return array<int, string>
      */
-
     public function searchableBy(): array
     {
         return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function filterableBy(): array
     {
         return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function sortableBy(): array
     {
         return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'created_at', 'updated_at'];
@@ -42,10 +49,11 @@ class InvoiceController extends BaseOrionController
 
     /**
      * Authorize all operations for authenticated users
+     * @param array<mixed> $arguments
      */
-    public function authorize(string $ability, $arguments = []): bool
+    public function authorize(string $ability, $arguments = []): Response
     {
-        return auth()->check();
+        return auth()->check() ? Response::allow() : Response::deny('Unauthorized');
     }
 
     /**

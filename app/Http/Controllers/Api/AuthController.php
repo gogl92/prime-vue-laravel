@@ -91,13 +91,15 @@ class AuthController extends Controller
      */
     public function update(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        assert($user instanceof User);
+
         $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $request->user()->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:8|confirmed',
         ]);
-
-        $user = $request->user();
 
         $updateData = $request->only(['name', 'email']);
 
@@ -119,7 +121,11 @@ class AuthController extends Controller
      */
     public function destroy(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+
+        assert($user instanceof User);
+
+        $user->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'Successfully logged out',
@@ -160,7 +166,11 @@ class AuthController extends Controller
      */
     public function logoutAll(Request $request): JsonResponse
     {
-        $request->user()->tokens()->delete();
+        $user = $request->user();
+
+        assert($user instanceof User);
+
+        $user->tokens()->delete();
 
         return response()->json([
             'message' => 'Successfully logged out from all devices',
