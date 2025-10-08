@@ -19,7 +19,37 @@ import globalPt from '@/theme/global-pt';
 import themePreset from '@/theme/noir-preset';
 import orionService from '@/services/orion';
 
-const appName = import.meta.env.VITE_APP_NAME ?? 'Laravel';
+// Chart.js - Register required components
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip as ChartTooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    ArcElement,
+    LineElement,
+    PointElement,
+    RadialLinearScale,
+    Filler,
+} from 'chart.js';
+
+ChartJS.register(
+    Title,
+    ChartTooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    ArcElement,
+    LineElement,
+    PointElement,
+    RadialLinearScale,
+    Filler,
+);
+
+const appName = import.meta.env['VITE_APP_NAME'] ?? 'Laravel';
 
 void createInertiaApp({
     title: (title) => `${title} - ${appName}`,

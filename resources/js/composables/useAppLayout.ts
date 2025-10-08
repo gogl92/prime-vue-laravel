@@ -1,16 +1,12 @@
 import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue';
-import { usePage, useForm } from '@inertiajs/vue3';
-import { LayoutGrid, House, Info, Settings, LogOut, ExternalLink, FileSearch, FolderGit2 } from 'lucide-vue-next';
+import { useForm } from '@inertiajs/vue3';
+import { LayoutGrid, House, Settings, LogOut, FileText } from 'lucide-vue-next';
 import { type MenuItem } from '@/types';
 import orionService from '@/services/orion';
 
 export function useAppLayout() {
-    const page = usePage();
     const currentRoute = computed(() => {
         // Access page.url to trigger re-computation on navigation.
-        /* eslint-disable @typescript-eslint/no-unused-vars */
-        const url = page.url;
-        /* eslint-enable @typescript-eslint/no-unused-vars */
         return route().current();
     });
 
@@ -29,34 +25,10 @@ export function useAppLayout() {
             active: currentRoute.value == 'dashboard',
         },
         {
-            label: 'Resources',
-            lucideIcon: Info,
-            items: [
-                {
-                    label: 'Laravel Docs',
-                    url: 'https://laravel.com/docs/master',
-                    target: '_blank',
-                    lucideIcon: ExternalLink,
-                },
-                {
-                    label: 'PrimeVue Docs',
-                    url: 'https://primevue.org/',
-                    target: '_blank',
-                    lucideIcon: ExternalLink,
-                },
-                {
-                    label: 'Starter Kit Docs',
-                    url: 'https://connorabbas.github.io/laravel-primevue-starter-kit-docs/',
-                    target: '_blank',
-                    lucideIcon: FileSearch,
-                },
-                {
-                    label: 'Starter Kit Repo',
-                    url: 'https://github.com/connorabbas/laravel-primevue-starter-kit',
-                    target: '_blank',
-                    lucideIcon: FolderGit2,
-                },
-            ],
+            label: 'Invoices',
+            lucideIcon: FileText,
+            route: route('invoices.example'),
+            active: currentRoute.value == 'invoices.example',
         },
     ]);
 
