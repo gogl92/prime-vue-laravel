@@ -1,6 +1,7 @@
 <template>
     <AppLayout title="Invoices Example - Orion API">
-        <template #header>
+        <div class="space-y-6">
+            <!-- Page Header -->
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl font-bold text-surface-900 dark:text-surface-0">
                     Invoices Example - Orion API
@@ -10,11 +11,9 @@
                     icon="pi pi-plus"
                     @click="showCreateDialog = true"
                     severity="success"
+                    class="p-button-success"
                 />
             </div>
-        </template>
-
-        <div class="space-y-6">
             <!-- Filters -->
             <Card>
                 <template #title>Filters</template>
@@ -62,6 +61,7 @@
                                 text
                                 @click="loadInvoices"
                                 :loading="loading"
+                                class="p-button-sm"
                             />
                         </div>
                     </div>
@@ -132,6 +132,7 @@
                                         size="small"
                                         @click="editInvoice(data)"
                                         v-tooltip="'Edit'"
+                                        class="p-button-sm"
                                     />
                                     <Button
                                         icon="pi pi-trash"
@@ -140,6 +141,7 @@
                                         size="small"
                                         @click="confirmDelete(data)"
                                         v-tooltip="'Delete'"
+                                        class="p-button-sm"
                                     />
                                 </div>
                             </template>
@@ -292,10 +294,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import AppLayout from '@/layouts/AppLayout.vue'
-import orionService from '@/services/orion'
 import { Invoice } from '@/models/Invoice'
 import { debounce } from 'lodash-es'
 
@@ -308,6 +309,9 @@ import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
 import Dialog from 'primevue/dialog'
 import Tag from 'primevue/tag'
+
+import { FilterOperator } from '@tailflow/laravel-orion/lib/drivers/default/enums/filterOperator'
+import { SortDirection } from '@tailflow/laravel-orion/lib/drivers/default/enums/sortDirection'
 
 // Toast
 const toast = useToast()
@@ -322,7 +326,7 @@ const totalRecords = ref(0)
 // Pagination
 const pagination = reactive({
     page: 1,
-    rows: 20
+    rows: 10
 })
 
 // Sorting
@@ -390,24 +394,71 @@ const loadInvoices = async () => {
 
         // Filter by city
         if (filters.city) {
-            // exact match filter
-            query = query.where('city', filters.city)
+            query = query.filter('city', FilterOperator.Equal, filters.city)
         }
 
         // Filter by country
         if (filters.country) {
-            query = query.where('country', filters.country)
+            query = query.filter('country', FilterOperator.Equal, filters.country)
         }
 
         // Sorting
         if (sortField.value) {
-            query = query.orderBy(sortField.value, sortOrder.value === 1 ? 'asc' : 'desc')
+            query = query.sortBy(sortField.value, sortOrder.value === 1 ? SortDirection.Asc : SortDirection.Desc)
+        }
+
+        // Execute the query with pagination
+        // get() and search() methods accept limit and page as parameters
+        let response
+        if (filters.search || filters.city || filters.country) {
+            response = await query.search(pagination.rows, pagination.page)
+        } else {
+            response = await query.get(pagination.rows, pagination.page)
         }
 
         // Get the results
-        const response = await query.get()
         invoices.value = response
-        totalRecords.value = response.length
+
+        // Debug: Check response structure
+        console.log('Response structure:', response)
+        console.log('Response $response:', response.$response)
+
+        // Check if Orion provides pagination metadata in the response
+        // Orion returns pagination info in response.$response.meta
+        if (response.$response && response.$response.meta && response.$response.meta.total) {
+            // Use Orion's pagination metadata
+            totalRecords.value = response.$response.meta.total
+            console.log('Using Orion total:', response.$response.meta.total)
+        } else {
+            // Fallback: get total count only when filtering
+            if (filters.search || filters.city || filters.country) {
+                // When filtering, we need accurate count
+                let countQuery = Invoice.$query()
+                if (filters.search) {
+                    countQuery = countQuery.lookFor(filters.search)
+                }
+                if (filters.city) {
+                    countQuery = countQuery.filter('city', FilterOperator.Equal, filters.city)
+                }
+                if (filters.country) {
+                    countQuery = countQuery.filter('country', FilterOperator.Equal, filters.country)
+                }
+
+                // Get count without pagination
+                const allResults = await countQuery.get()
+                totalRecords.value = allResults.length
+            } else {
+                // For unfiltered results, estimate based on current response
+                // If current page is full, there might be more records
+                if (response.length === pagination.rows) {
+                    // Estimate: assume there are more records
+                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length + 1
+                } else {
+                    // Current page is not full, this is likely the last page
+                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length
+                }
+            }
+        }
     } catch (error) {
         console.error('Error loading invoices:', error)
         toast.add({
@@ -422,7 +473,10 @@ const loadInvoices = async () => {
 }
 
 const onPageChange = (event: any) => {
-    pagination.page = event.page + 1
+    // For lazy loading, PrimeVue passes different event structure
+    // event.first: index of first record
+    // event.rows: number of rows per page
+    pagination.page = Math.floor(event.first / event.rows) + 1
     pagination.rows = event.rows
     loadInvoices()
 }
@@ -495,7 +549,7 @@ const saveInvoice = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Invoice created successfully',
+                detail: 'Invoice ' + newInvoice.$attributes.id + ' created successfully',
                 life: 3000
             })
         }

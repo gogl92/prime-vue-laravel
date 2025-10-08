@@ -23,17 +23,21 @@ class InvoiceController extends BaseOrionController {
     /**
      * Enable Orion search, filter and sort capabilities
      */
-    protected $searchableBy = [
-        'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'
-    ];
 
-    protected $filterableBy = [
-        'city', 'country', 'created_at'
-    ];
+    public function searchableBy(): array
+    {
+       return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+    }
 
-    protected $sortableBy = [
-        'id', 'name', 'email', 'created_at', 'updated_at'
-    ];
+    public function filterableBy(): array
+    {
+       return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+    }
+
+    public function sortableBy(): array
+    {
+       return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'created_at', 'updated_at'];
+    }
 
     /**
      * Authorize all operations for authenticated users
@@ -81,5 +85,15 @@ class InvoiceController extends BaseOrionController {
     public function authorizeDestroy(): bool
     {
         return auth()->check();
+    }
+
+    /**
+    * Default pagination limit.
+    *
+    * @return int
+    */
+    public function limit() : int
+    {
+        return 10;
     }
 }
