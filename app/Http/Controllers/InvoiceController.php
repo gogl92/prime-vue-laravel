@@ -5,12 +5,35 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Http\Requests\StoreInvoiceRequest;
+use App\Http\Requests\UpdateInvoiceRequest;
 
 class InvoiceController extends BaseOrionController {
     /**
      * Fully-qualified model class name
      */
     protected $model = Invoice::class;
+
+    /**
+     * Request classes for validation
+     */
+    protected $storeRequest = StoreInvoiceRequest::class;
+    protected $updateRequest = UpdateInvoiceRequest::class;
+
+    /**
+     * Enable Orion search, filter and sort capabilities
+     */
+    protected $searchableBy = [
+        'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'
+    ];
+
+    protected $filterableBy = [
+        'city', 'country', 'created_at'
+    ];
+
+    protected $sortableBy = [
+        'id', 'name', 'email', 'created_at', 'updated_at'
+    ];
 
     /**
      * Authorize all operations for authenticated users
