@@ -12,7 +12,7 @@ import ToastService from 'primevue/toastservice';
 
 import { useSiteColorMode } from '@/composables/useSiteColorMode';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME ?? 'Laravel';
 
 createServer((page) =>
     createInertiaApp({
@@ -49,13 +49,13 @@ createServer((page) =>
                 ...page.props.ziggy,
                 location: new URL(page.props.ziggy.location),
             };
-            const boundRoute: typeof ziggyRoute = ((name?: any, params?: any, absolute?: boolean) => {
+            const boundRoute: typeof ziggyRoute = ((name?: string | number | undefined, params?: unknown, absolute?: boolean) => {
                 return ziggyRoute(name, params, absolute, ziggyConfig);
             }) as typeof ziggyRoute;
             app.config.globalProperties.route = boundRoute;
             app.config.globalProperties.$route = boundRoute;
             if (typeof globalThis !== 'undefined') {
-                (globalThis as any).route = boundRoute;
+                (globalThis as Record<string, unknown>).route = boundRoute;
             }
 
             app.use(plugin)

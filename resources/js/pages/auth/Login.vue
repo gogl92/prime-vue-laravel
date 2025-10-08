@@ -127,7 +127,7 @@ onMounted(() => {
                             v-model="loginForm.remember"
                             class="mr-2"
                             input-id="remember"
-                            :binary="true"
+                            binary
                         />
                         <label for="remember">Remember me</label>
                     </div>

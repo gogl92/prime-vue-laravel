@@ -11,7 +11,7 @@ class OrionService {
 
     private setupAuth() {
         // Get token from localStorage or cookie
-        const token = localStorage.getItem('auth_token') || this.getCookie('auth_token');
+        const token = localStorage.getItem('auth_token') ?? this.getCookie('auth_token');
         if (token) {
             Orion.setToken(token);
         }
@@ -20,7 +20,7 @@ class OrionService {
     private getCookie(name: string): string | null {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+        if (parts.length === 2) return parts.pop()?.split(';').shift() ?? null;
         return null;
     }
 

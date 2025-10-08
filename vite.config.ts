@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     // https://vite.dev/config/#using-environment-variables-in-config
     const env = loadEnv(mode, process.cwd(), '');
     const devPort = env.VITE_APP_PORT ? Number(env.VITE_APP_PORT) : 5173;
-    const hostDomain = env.VITE_HOST_DOMAIN || 'localhost';
+    const hostDomain = env.VITE_HOST_DOMAIN ?? 'localhost';
 
     return {
         plugins: [

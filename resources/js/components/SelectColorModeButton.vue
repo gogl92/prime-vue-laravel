@@ -9,8 +9,8 @@ const props = withDefaults(defineProps<{
     showLabel: true,
 });
 
-const colorMode = inject<UseColorModeReturn>('colorMode')!;
-const selectedColorMode = ref(colorMode?.value || 'auto');
+const colorMode = inject<UseColorModeReturn>('colorMode');
+const selectedColorMode = ref(colorMode?.value ?? 'auto');
 
 const options = [
     { label: 'Light', value: 'light', icon: Sun },
@@ -18,7 +18,11 @@ const options = [
     { label: 'System', value: 'auto', icon: Monitor },
 ];
 
-watchEffect(() => colorMode.value = selectedColorMode.value);
+watchEffect(() => {
+    if (colorMode) {
+        colorMode.value = selectedColorMode.value;
+    }
+});
 </script>
 
 <template>

@@ -16,7 +16,6 @@ export function useAuthToken() {
 
                 // Clear the token from session after storing it
                 // This prevents the token from being exposed in subsequent requests
-                console.log('Auth token stored successfully');
             }
         },
         { immediate: true },

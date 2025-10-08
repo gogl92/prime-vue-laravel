@@ -11,7 +11,10 @@ interface ExtendedMenubarProps extends Omit<MenubarProps, 'model'> {
 }
 const componentProps = withDefaults(
     defineProps<ExtendedMenubarProps>(),
-    { breakpoint: '1024px' },
+    {
+        model: undefined,
+        breakpoint: '1024px',
+    },
 );
 
 type MenubarType = InstanceType<typeof Menubar>;

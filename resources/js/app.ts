@@ -19,9 +19,9 @@ import globalPt from '@/theme/global-pt';
 import themePreset from '@/theme/noir-preset';
 import orionService from '@/services/orion';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME ?? 'Laravel';
 
-createInertiaApp({
+void createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>
         resolvePageComponent(
@@ -30,7 +30,7 @@ createInertiaApp({
         ),
     setup({ el, App, props, plugin }) {
         // Initialize Orion service
-        orionService;
+        void orionService;
 
         // Site light/dark mode
         const colorMode = useSiteColorMode({ emitAuto: true });

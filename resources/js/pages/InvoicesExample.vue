@@ -82,7 +82,7 @@ const countryOptions = ref([
 // Debounced search
 const debouncedSearch = debounce(() => {
     pagination.page = 1;
-    loadInvoices();
+    void loadInvoices();
 }, 500);
 
 // Methods
@@ -125,15 +125,11 @@ const loadInvoices = async () => {
         // Get the results
         invoices.value = response;
 
-        // Debug: Check response structure
-        console.log('Response structure:', response);
-
         // Check if Orion provides pagination metadata in the response
         // Orion returns pagination info in response.$response.meta
         if (response.$response?.meta?.total) {
             // Use Orion's pagination metadata
             totalRecords.value = response.$response.meta.total;
-            console.log('Using Orion total:', response.$response.meta.total);
         } else {
             // Fallback: get total count only when filtering
             if (filters.search || filters.city || filters.country) {
@@ -177,20 +173,20 @@ const loadInvoices = async () => {
     }
 };
 
-const onPageChange = (event: any) => {
+const onPageChange = (event: { first: number; rows: number }) => {
     // For lazy loading, PrimeVue passes different event structure
     // event.first: index of first record
     // event.rows: number of rows per page
     pagination.page = Math.floor(event.first / event.rows) + 1;
     pagination.rows = event.rows;
-    loadInvoices();
+    void loadInvoices();
 };
 
-const onSort = (event: any) => {
+const onSort = (event: { sortField: string | undefined; sortOrder: number }) => {
     sortField.value = event.sortField;
     sortOrder.value = event.sortOrder;
     pagination.page = 1; // Reset to first page when sorting
-    loadInvoices();
+    void loadInvoices();
 };
 
 const editInvoice = (invoice: Invoice) => {
@@ -220,7 +216,7 @@ const deleteInvoice = async () => {
 
         showDeleteDialog.value = false;
         invoiceToDelete.value = null;
-        loadInvoices();
+        void loadInvoices();
     } catch (error) {
         console.error('Error deleting invoice:', error);
         toast.add({
@@ -261,18 +257,19 @@ const saveInvoice = async () => {
         }
 
         closeDialog();
-        loadInvoices();
-    } catch (error: any) {
+        void loadInvoices();
+    } catch (error: unknown) {
         console.error('Error saving invoice:', error);
 
-        if (error.response?.data?.errors) {
-            Object.assign(errors, error.response.data.errors);
+        const errorObj = error as { response?: { data?: { errors?: Record<string, string>; message?: string } } };
+        if (errorObj.response?.data?.errors) {
+            Object.assign(errors, errorObj.response.data.errors);
         }
 
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: error.response?.data?.message || 'Failed to save invoice',
+            detail: errorObj.response?.data?.message ?? 'Failed to save invoice',
             life: 3000,
         });
     } finally {
@@ -312,7 +309,7 @@ const formatDate = (dateString: string) => {
 
 // Lifecycle
 onMounted(() => {
-    loadInvoices();
+    void loadInvoices();
 });
 </script>
 
@@ -390,11 +387,11 @@ onMounted(() => {
                     <DataTable
                         :value="invoices"
                         :loading="loading"
-                        :paginator="true"
+                        paginator
                         :rows="pagination.rows"
                         :first="(pagination.page - 1) * pagination.rows"
                         :total-records="totalRecords"
-                        :lazy="true"
+                        lazy
                         :sort-field="sortField"
                         :sort-order="sortOrder"
                         paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -407,7 +404,7 @@ onMounted(() => {
                         <Column
                             field="id"
                             header="ID"
-                            :sortable="true"
+                            sortable
                             style="width: 80px"
                         >
                             <template #body="{ data }">
@@ -421,7 +418,7 @@ onMounted(() => {
                         <Column
                             field="name"
                             header="Name"
-                            :sortable="true"
+                            sortable
                         >
                             <template #body="{ data }">
                                 <div class="font-medium">
@@ -436,7 +433,7 @@ onMounted(() => {
                         <Column
                             field="phone"
                             header="Phone"
-                            :sortable="true"
+                            sortable
                         >
                             <template #body="{ data }">
                                 <div class="flex items-center gap-2">
@@ -449,7 +446,7 @@ onMounted(() => {
                         <Column
                             field="city"
                             header="Location"
-                            :sortable="true"
+                            sortable
                         >
                             <template #body="{ data }">
                                 <div>
@@ -466,7 +463,7 @@ onMounted(() => {
                         <Column
                             field="created_at"
                             header="Created"
-                            :sortable="true"
+                            sortable
                         >
                             <template #body="{ data }">
                                 <div class="text-sm">
@@ -511,7 +508,7 @@ onMounted(() => {
         <Dialog
             v-model:visible="showCreateDialog"
             :header="editingInvoice ? 'Edit Invoice' : 'Create Invoice'"
-            :modal="true"
+            modal
             :style="{ width: '600px' }"
             append-to="body"
         >
@@ -646,7 +643,7 @@ onMounted(() => {
         <Dialog
             v-model:visible="showDeleteDialog"
             header="Confirm Delete"
-            :modal="true"
+            modal
             :style="{ width: '400px' }"
             append-to="body"
         >

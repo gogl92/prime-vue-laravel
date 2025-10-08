@@ -13,8 +13,11 @@ const props = withDefaults(defineProps<{
     buttonSize?: 'small' | 'large' | undefined,
     fixedPosition?: 'left' | 'right',
 }>(), {
+    buttonLabel: undefined,
     buttonSeverity: 'secondary',
     buttonVariant: 'default',
+    buttonSize: undefined,
+    fixedPosition: undefined,
 });
 
 const appendToId = computed(() => {

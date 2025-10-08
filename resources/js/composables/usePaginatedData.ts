@@ -12,7 +12,7 @@ interface QueryParams {
     rows?: string;
     sortField?: string;
     sortOrder?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 interface PaginationState {
     page: number;
@@ -48,8 +48,8 @@ export function usePaginatedData(
     });
 
     const filteredOrSorted = computed(() => {
-        const paramsFilters = page.props.queryParams?.filters || {};
-        const sortField = page.props.queryParams?.sortField || null;
+        const paramsFilters = page.props.queryParams?.filters ?? {};
+        const sortField = page.props.queryParams?.sortField ?? null;
         const isFiltering = Object.values(paramsFilters).some(
             (filter) => filter.value !== null && filter.value !== '',
         );
@@ -77,7 +77,7 @@ export function usePaginatedData(
             router.visit(window.location.pathname, {
                 method: 'get',
                 data: {
-                    filters: filters.value as any,
+                    filters: filters.value as PrimeVueDataFilters,
                     ...pagination.value,
                     sortField: sorting.value.field,
                     sortOrder: sorting.value.order,
@@ -188,7 +188,7 @@ export function usePaginatedData(
             ].includes(filter.matchMode)) {
                 filters.value[key].value = new Date(filter.value as string);
             } else if (filter.matchMode === FilterMatchMode.BETWEEN) {
-                filter.value.forEach((value: any, index: number) => {
+                filter.value.forEach((value: unknown, index: number) => {
                     if (typeof value === 'string') {
                         filter.value[index] = new Date(value);
                     }
@@ -210,7 +210,7 @@ export function usePaginatedData(
                     // Unique array values
                     const unique = [...new Set(filter.value)];
                     filter.value = unique;
-                    filter.value.forEach((value: any, index: number) => {
+                    filter.value.forEach((value: unknown, index: number) => {
                         if (typeof value === 'string' && !isNaN(Number(value))) {
                             filter.value[index] = Number(value);
                         }
@@ -221,7 +221,7 @@ export function usePaginatedData(
     }
 
     function parseUrlParams(): void {
-        const queryParams = page.props.queryParams || {};
+        const queryParams = page.props.queryParams ?? {};
         filters.value = {
             ...structuredClone(toRaw(initialFilters)),
             ...queryParams.filters,

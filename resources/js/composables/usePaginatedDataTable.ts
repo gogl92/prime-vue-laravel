@@ -54,7 +54,7 @@ export function usePaginatedDataTable(
         filters.value = newFilters;
         parseEventFilterValues();
 
-        fetchData({
+        void fetchData({
             onFinish: () => {
                 scrollToTop();
             },
@@ -64,9 +64,9 @@ export function usePaginatedDataTable(
     function sort(event: DataTableSortEvent): void {
         pagination.value.page = 1;
         sorting.value.field = event.sortField ? String(event.sortField) : '';
-        sorting.value.order = event.sortOrder || 1;
+        sorting.value.order = event.sortOrder ?? 1;
 
-        fetchData({
+        void fetchData({
             onFinish: () => {
                 scrollToTop();
             },
