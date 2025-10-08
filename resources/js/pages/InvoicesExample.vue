@@ -72,6 +72,7 @@
                         :loading="loading"
                         :paginator="true"
                         :rows="pagination.rows"
+                        :first="(pagination.page - 1) * pagination.rows"
                         :totalRecords="totalRecords"
                         :lazy="true"
                         @page="onPageChange"
@@ -330,8 +331,8 @@ const pagination = reactive({
 })
 
 // Sorting
-const sortField = ref('id')
-const sortOrder = ref(1) // 1 for asc, -1 for desc
+const sortField = ref<string | undefined>(undefined)
+const sortOrder = ref<number>(1) // 1 for asc, -1 for desc
 
 // Filters
 const filters = reactive({
@@ -409,8 +410,9 @@ const loadInvoices = async () => {
 
         // Execute the query with pagination
         // get() and search() methods accept limit and page as parameters
+        // Use search() when filtering OR sorting is applied, otherwise use get()
         let response
-        if (filters.search || filters.city || filters.country) {
+        if (filters.search || filters.city || filters.country || sortField.value) {
             response = await query.search(pagination.rows, pagination.page)
         } else {
             response = await query.get(pagination.rows, pagination.page)
@@ -484,6 +486,7 @@ const onPageChange = (event: any) => {
 const onSort = (event: any) => {
     sortField.value = event.sortField
     sortOrder.value = event.sortOrder
+    pagination.page = 1 // Reset to first page when sorting
     loadInvoices()
 }
 
