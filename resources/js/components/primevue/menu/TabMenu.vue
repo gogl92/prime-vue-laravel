@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { useTemplateRef, computed } from 'vue'
-import { usePage, Link as InertiaLink } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
-import Tabs from 'primevue/tabs'
-import TabList, { type TabListProps } from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import type { MenuItem } from '@/types'
-import { ptViewMerge } from '@/utils'
+import { useTemplateRef, computed } from 'vue';
+import { usePage, Link as InertiaLink } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
+import Tabs from 'primevue/tabs';
+import TabList, { type TabListProps } from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import type { MenuItem } from '@/types';
+import { ptViewMerge } from '@/utils';
 
 interface ExtendedTabListProps extends Omit<TabListProps, 'items'> {
     items?: MenuItem[] | undefined;
 }
-const componentProps = defineProps<ExtendedTabListProps>()
+const componentProps = defineProps<ExtendedTabListProps>();
 
-const page = usePage()
+const page = usePage();
 const currentRoute = computed(() => {
     // Access page.url to trigger re-computation on navigation.
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    const url = page.url
+    const url = page.url;
     /* eslint-enable @typescript-eslint/no-unused-vars */
-    return route().current()
-})
+    return route().current();
+});
 
 type TabsType = InstanceType<typeof Tabs>;
-const childRef = useTemplateRef<TabsType>('child-ref')
-defineExpose({ $el: childRef })
+const childRef = useTemplateRef<TabsType>('child-ref');
+defineExpose({ $el: childRef });
 </script>
 
 <template>
@@ -39,14 +39,15 @@ defineExpose({ $el: childRef })
                 v-for="item in componentProps.items"
                 :key="item.route"
                 :href="item.route ?? ''"
-                :class="['no-underline', { 'p-tab-active': item.active }]"
+                class="no-underline"
+                :class="[{ 'p-tab-active': item.active }]"
                 custom
             >
                 <Tab
                     v-if="item.route"
                     :value="item.route"
+                    class="flex items-center gap-2 hover:text-color"
                     :class="[
-                        'flex items-center gap-2 hover:text-color',
                         item.active ? 'p-tab-active' : 'text-muted-color',
                         item.class
                     ]"

@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useForm, Head as InertiaHead } from '@inertiajs/vue3'
-import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue'
+import { computed } from 'vue';
+import { useForm, Head as InertiaHead } from '@inertiajs/vue3';
+import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 
 const props = defineProps<{
     status?: string
-}>()
+}>();
 
-const sendVerificationForm = useForm({})
+const sendVerificationForm = useForm({});
 const submit = () => {
-    sendVerificationForm.post(route('verification.send'))
-}
-const logoutForm = useForm({})
+    sendVerificationForm.post(route('verification.send'));
+};
+const logoutForm = useForm({});
 const logout = () => {
-    logoutForm.post(route('logout'))
-}
+    logoutForm.post(route('logout'));
+};
 
-const verificationLinkSent = computed(() => props.status === 'verification-link-sent')
+const verificationLinkSent = computed(() => props.status === 'verification-link-sent');
 </script>
 
 <template>

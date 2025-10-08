@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { useForm, Head as InertiaHead } from '@inertiajs/vue3'
-import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue'
+import { useForm, Head as InertiaHead } from '@inertiajs/vue3';
+import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 
 const form = useForm({
     password: '',
-})
+});
 
 const submit = () => {
     form.post(route('password.confirm'), {
         onFinish: () => {
-            form.reset()
+            form.reset();
         },
-    })
-}
+    });
+};
 </script>
 
 <template>
@@ -40,8 +40,8 @@ const submit = () => {
                         :invalid="Boolean(form.errors?.password)"
                         :feedback="false"
                         autocomplete="current-password"
-                        inputId="password"
-                        toggleMask
+                        input-id="password"
+                        toggle-mask
                         required
                         fluid
                     />

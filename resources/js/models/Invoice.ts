@@ -1,4 +1,4 @@
-import { Model } from "@tailflow/laravel-orion/lib/model"
+import { Model } from '@tailflow/laravel-orion/lib/model';
 
 export class Invoice extends Model<{
     id?: number
@@ -14,6 +14,6 @@ export class Invoice extends Model<{
     updated_at?: string
 }> {
     public $resource(): string {
-        return 'invoices'
+        return 'invoices';
     }
 }

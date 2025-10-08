@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-import Password from 'primevue/password'
+import { useTemplateRef } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import Password from 'primevue/password';
 
-const modalOpen = defineModel<boolean>({ default: false })
+const modalOpen = defineModel<boolean>({ default: false });
 
 type PasswordInputType = InstanceType<typeof Password> & { $el: HTMLElement };
-const passwordInput = useTemplateRef<PasswordInputType>('password-input')
+const passwordInput = useTemplateRef<PasswordInputType>('password-input');
 
 const form = useForm({
     password: '',
-})
+});
 
 const deleteUser = () => {
     form.delete(route('profile.destroy'), {
@@ -18,13 +18,13 @@ const deleteUser = () => {
         onSuccess: () => (modalOpen.value = false),
         onError: () => {
             if (passwordInput.value && passwordInput.value?.$el) {
-                const passwordInputElement = passwordInput.value.$el.querySelector('input')
-                passwordInputElement?.focus()
+                const passwordInputElement = passwordInput.value.$el.querySelector('input');
+                passwordInputElement?.focus();
             }
         },
         onFinish: () => form.reset(),
-    })
-}
+    });
+};
 </script>
 
 <template>
@@ -34,7 +34,7 @@ const deleteUser = () => {
         position="center"
         header="Are you sure you want to delete your account?"
         :draggable="false"
-        dismissableMask
+        dismissable-mask
         modal
     >
         <div class="mb-6">
@@ -52,8 +52,8 @@ const deleteUser = () => {
                 :invalid="Boolean(form.errors?.password)"
                 :feedback="false"
                 autocomplete="current-password"
-                inputId="password"
-                toggleMask
+                input-id="password"
+                toggle-mask
                 autofocus
                 required
                 fluid

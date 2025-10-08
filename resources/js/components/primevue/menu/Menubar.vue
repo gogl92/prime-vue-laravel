@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
-import { Link as InertiaLink } from '@inertiajs/vue3'
-import Menubar, { type MenubarProps } from 'primevue/menubar'
-import { ChevronDown, ChevronRight } from 'lucide-vue-next'
-import type { MenuItem } from '@/types'
-import { ptViewMerge } from '@/utils'
+import { useTemplateRef } from 'vue';
+import { Link as InertiaLink } from '@inertiajs/vue3';
+import Menubar, { type MenubarProps } from 'primevue/menubar';
+import { ChevronDown, ChevronRight } from 'lucide-vue-next';
+import type { MenuItem } from '@/types';
+import { ptViewMerge } from '@/utils';
 
 interface ExtendedMenubarProps extends Omit<MenubarProps, 'model'> {
     model?: MenuItem[] | undefined;
 }
 const componentProps = withDefaults(
     defineProps<ExtendedMenubarProps>(),
-    { breakpoint: '1024px' }
-)
+    { breakpoint: '1024px' },
+);
 
 type MenubarType = InstanceType<typeof Menubar>;
-const childRef = useTemplateRef<MenubarType>('child-ref')
+const childRef = useTemplateRef<MenubarType>('child-ref');
 
-defineExpose({ $el: childRef })
+defineExpose({ $el: childRef });
 </script>
 
 <template>
@@ -40,19 +40,22 @@ defineExpose({ $el: childRef })
                 v-if="item.visible !== false && item.route"
                 :href="item.route"
                 :target="item.target"
-                :class="['p-menubar-item-link', { 'font-bold! text-muted-color': item.active }, item.class]"
+                class="p-menubar-item-link"
+                :class="[{ 'font-bold! text-muted-color': item.active }, item.class]"
                 :style="item.style"
                 :aria-disabled="item.disabled === true"
                 custom
             >
                 <i
                     v-if="item.icon"
-                    :class="['p-menubar-item-icon', item.icon]"
+                    class="p-menubar-item-icon"
+                    :class="[item.icon]"
                 />
                 <component
                     :is="item.lucideIcon"
                     v-else-if="item.lucideIcon"
-                    :class="['p-menubar-item-icon', item.lucideIconClass]"
+                    class="p-menubar-item-icon"
+                    :class="[item.lucideIconClass]"
                 />
                 <span class="p-menubar-item-label">{{ item.label }}</span>
             </InertiaLink>
@@ -67,12 +70,14 @@ defineExpose({ $el: childRef })
             >
                 <i
                     v-if="item.icon"
-                    :class="['p-menubar-item-icon', item.icon]"
+                    class="p-menubar-item-icon"
+                    :class="[item.icon]"
                 />
                 <component
                     :is="item.lucideIcon"
                     v-else-if="item.lucideIcon"
-                    :class="['p-menubar-item-icon', item.lucideIconClass]"
+                    class="p-menubar-item-icon"
+                    :class="[item.lucideIconClass]"
                 />
                 <span class="p-menubar-item-label">{{ item.label }}</span>
                 <template v-if="hasSubmenu">

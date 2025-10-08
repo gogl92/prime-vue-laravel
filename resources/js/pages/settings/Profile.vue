@@ -1,34 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useForm, usePage, Head as InertiaHead } from '@inertiajs/vue3'
-import { useToast } from 'primevue/usetoast'
-import AppLayout from '@/layouts/AppLayout.vue'
-import SettingsLayout from '@/layouts/UserSettingsLayout.vue'
-import DeleteUserModal from '@/components/DeleteUserModal.vue'
+import { ref } from 'vue';
+import { useForm, usePage, Head as InertiaHead } from '@inertiajs/vue3';
+import { useToast } from 'primevue/usetoast';
+import AppLayout from '@/layouts/AppLayout.vue';
+import SettingsLayout from '@/layouts/UserSettingsLayout.vue';
+import DeleteUserModal from '@/components/DeleteUserModal.vue';
 
 defineProps<{
     mustVerifyEmail: boolean,
     status?: string,
-}>()
+}>();
 
 const breadcrumbs = [
     { label: 'Dashboard', route: route('dashboard') },
     { label: 'Profile settings' },
-]
+];
 
-const deleteUserModalOpen = ref(false)
+const deleteUserModalOpen = ref(false);
 
-const user = usePage().props.auth.user
-const toast = useToast()
+const user = usePage().props.auth.user;
+const toast = useToast();
 const updateProfileForm = useForm({
     name: user.name,
     email: user.email,
-})
+});
 
-const sendVerificationForm = useForm({})
+const sendVerificationForm = useForm({});
 const sendEmailVerification = () => {
-    sendVerificationForm.post(route('verification.send'))
-}
+    sendVerificationForm.post(route('verification.send'));
+};
 
 const showSuccessToast = () => {
     toast.add({
@@ -36,16 +36,16 @@ const showSuccessToast = () => {
         summary: 'Saved',
         detail: 'Profile information has been updated',
         life: 3000,
-    })
-}
+    });
+};
 const updateProfileInformation = () => {
     updateProfileForm.patch(route('profile.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            showSuccessToast()
+            showSuccessToast();
         },
-    })
-}
+    });
+};
 </script>
 
 <template>

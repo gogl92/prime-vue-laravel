@@ -1,34 +1,34 @@
 <script setup lang="ts">
-import { useTemplateRef, onMounted } from 'vue'
-import { useForm, Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3'
-import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue'
-import InputText from 'primevue/inputtext'
+import { useTemplateRef, onMounted } from 'vue';
+import { useForm, Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
+import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
+import InputText from 'primevue/inputtext';
 
 const props = defineProps<{
     canResetPassword: boolean,
     status?: string,
-}>()
+}>();
 
 type InputTextType = InstanceType<typeof InputText> & { $el: HTMLElement };
-const emailInput = useTemplateRef<InputTextType>('email-input')
+const emailInput = useTemplateRef<InputTextType>('email-input');
 
 const loginForm = useForm({
     email: '',
     password: '',
     remember: false,
-})
+});
 
 const submit = () => {
     loginForm.post(route('login'), {
         onFinish: () => loginForm.reset('password'),
-    })
-}
+    });
+};
 
 onMounted(() => {
     if (emailInput.value) {
-        emailInput.value.$el.focus()
+        emailInput.value.$el.focus();
     }
-})
+});
 </script>
 
 <template>
@@ -105,8 +105,8 @@ onMounted(() => {
                     :invalid="Boolean(loginForm.errors?.password)"
                     :feedback="false"
                     autocomplete="current-password"
-                    inputId="password"
-                    toggleMask
+                    input-id="password"
+                    toggle-mask
                     required
                     fluid
                 />
@@ -126,7 +126,7 @@ onMounted(() => {
                         <Checkbox
                             v-model="loginForm.remember"
                             class="mr-2"
-                            inputId="remember"
+                            input-id="remember"
                             :binary="true"
                         />
                         <label for="remember">Remember me</label>

@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { useTemplateRef, onMounted } from 'vue'
-import { useForm, Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3'
-import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue'
-import InputText from 'primevue/inputtext'
+import { useTemplateRef, onMounted } from 'vue';
+import { useForm, Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
+import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
+import InputText from 'primevue/inputtext';
 
 const props = defineProps<{
     status?: string
-}>()
+}>();
 
 type InputTextType = InstanceType<typeof InputText> & { $el: HTMLElement };
-const emailInput = useTemplateRef<InputTextType>('email-input')
+const emailInput = useTemplateRef<InputTextType>('email-input');
 
 const forgotPasswordForm = useForm({
     email: '',
-})
+});
 
 const submit = () => {
-    forgotPasswordForm.post(route('password.email'))
-}
+    forgotPasswordForm.post(route('password.email'));
+};
 
 onMounted(() => {
     if (emailInput.value) {
-        emailInput.value.$el.focus()
+        emailInput.value.$el.focus();
     }
-})
+});
 </script>
 
 <template>

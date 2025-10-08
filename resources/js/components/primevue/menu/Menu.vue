@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
-import { Link as InertiaLink } from '@inertiajs/vue3'
-import Menu, { type MenuProps } from 'primevue/menu'
-import type { MenuItem } from '@/types'
-import { ptViewMerge } from '@/utils'
+import { useTemplateRef } from 'vue';
+import { Link as InertiaLink } from '@inertiajs/vue3';
+import Menu, { type MenuProps } from 'primevue/menu';
+import type { MenuItem } from '@/types';
+import { ptViewMerge } from '@/utils';
 
 interface ExtendedMenuProps extends Omit<MenuProps, 'model'> {
     model?: MenuItem[] | undefined;
 }
-const componentProps = defineProps<ExtendedMenuProps>()
+const componentProps = defineProps<ExtendedMenuProps>();
 
 type MenuType = InstanceType<typeof Menu>;
-const childRef = useTemplateRef<MenuType>('child-ref')
+const childRef = useTemplateRef<MenuType>('child-ref');
 
 defineExpose({
     $el: childRef,
-    toggle: (event: Event) => childRef.value?.toggle(event)
-})
+    toggle: (event: Event) => childRef.value?.toggle(event),
+});
 </script>
 
 <template>
@@ -39,19 +39,22 @@ defineExpose({
                 v-if="item.visible !== false && item.route"
                 :href="item.route"
                 :target="item.target"
-                :class="['p-menu-item-link', item.class]"
+                class="p-menu-item-link"
+                :class="[item.class]"
                 :style="item.style"
                 :aria-disabled="item.disabled === true"
                 custom
             >
                 <i
                     v-if="item.icon"
-                    :class="['p-menu-item-icon', item.icon]"
+                    class="p-menu-item-icon"
+                    :class="[item.icon]"
                 />
                 <component
                     :is="item.lucideIcon"
                     v-else-if="item.lucideIcon"
-                    :class="['p-menu-item-icon', item.lucideIconClass]"
+                    class="p-menu-item-icon"
+                    :class="[item.lucideIconClass]"
                 />
                 <span class="p-menu-item-label">{{ item.label }}</span>
             </InertiaLink>
@@ -66,12 +69,14 @@ defineExpose({
             >
                 <i
                     v-if="item.icon"
-                    :class="['p-menu-item-icon', item.icon]"
+                    class="p-menu-item-icon"
+                    :class="[item.icon]"
                 />
                 <component
                     :is="item.lucideIcon"
                     v-else-if="item.lucideIcon"
-                    :class="['p-menu-item-icon', item.lucideIconClass]"
+                    class="p-menu-item-icon"
+                    :class="[item.lucideIconClass]"
                 />
                 <span class="p-menu-item-label">{{ item.label }}</span>
             </a>

@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3'
-import { ArrowLeft } from 'lucide-vue-next'
-import Container from '@/components/Container.vue'
+import { computed } from 'vue';
+import { Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
+import { ArrowLeft } from 'lucide-vue-next';
+import Container from '@/components/Container.vue';
 
 const props = defineProps<{
     errorTitles: Record<number, string>
     errorDetails: Record<number, string>
     status: number
     homepageRoute: string
-}>()
+}>();
 
 const title = computed(() => {
-    return props.errorTitles[props.status]
-})
+    return props.errorTitles[props.status];
+});
 const details = computed(() => {
-    return props.errorDetails[props.status]
-})
+    return props.errorDetails[props.status];
+});
 </script>
 
 <template>

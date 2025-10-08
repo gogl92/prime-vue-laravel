@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
-import { useForm, Head as InertiaHead } from '@inertiajs/vue3'
-import { useToast } from 'primevue/usetoast'
-import Password from 'primevue/password'
-import AppLayout from '@/layouts/AppLayout.vue'
-import SettingsLayout from '@/layouts/UserSettingsLayout.vue'
+import { useTemplateRef } from 'vue';
+import { useForm, Head as InertiaHead } from '@inertiajs/vue3';
+import { useToast } from 'primevue/usetoast';
+import Password from 'primevue/password';
+import AppLayout from '@/layouts/AppLayout.vue';
+import SettingsLayout from '@/layouts/UserSettingsLayout.vue';
 
 const breadcrumbs = [
     { label: 'Dashboard', route: route('dashboard') },
     { label: 'Password settings' },
-]
+];
 
 type PasswordInputType = InstanceType<typeof Password> & { $el: HTMLElement };
-const currentPasswordInput = useTemplateRef<PasswordInputType>('current-password-input')
-const newPasswordInput = useTemplateRef<PasswordInputType>('new-password-input')
+const currentPasswordInput = useTemplateRef<PasswordInputType>('current-password-input');
+const newPasswordInput = useTemplateRef<PasswordInputType>('new-password-input');
 
-const toast = useToast()
+const toast = useToast();
 const updatePasswordForm = useForm({
     current_password: '',
     password: '',
     password_confirmation: '',
-})
+});
 
 const showSuccessToast = () => {
     toast.add({
@@ -28,33 +28,33 @@ const showSuccessToast = () => {
         summary: 'Saved',
         detail: 'Your password has been updated',
         life: 3000,
-    })
-}
+    });
+};
 const updatePassword = () => {
     updatePasswordForm.put(route('password.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            updatePasswordForm.reset()
-            showSuccessToast()
+            updatePasswordForm.reset();
+            showSuccessToast();
         },
         onError: () => {
             if (updatePasswordForm.errors?.password) {
-                updatePasswordForm.reset('password', 'password_confirmation')
+                updatePasswordForm.reset('password', 'password_confirmation');
                 if (newPasswordInput.value && newPasswordInput.value?.$el) {
-                    const newPasswordInputElement = newPasswordInput.value.$el.querySelector('input')
-                    newPasswordInputElement?.focus()
+                    const newPasswordInputElement = newPasswordInput.value.$el.querySelector('input');
+                    newPasswordInputElement?.focus();
                 }
             }
             if (updatePasswordForm.errors?.current_password) {
-                updatePasswordForm.reset('current_password')
+                updatePasswordForm.reset('current_password');
                 if (currentPasswordInput.value && currentPasswordInput.value?.$el) {
-                    const currentPasswordInputElement = currentPasswordInput.value.$el.querySelector('input')
-                    currentPasswordInputElement?.focus()
+                    const currentPasswordInputElement = currentPasswordInput.value.$el.querySelector('input');
+                    currentPasswordInputElement?.focus();
                 }
             }
         },
-    })
-}
+    });
+};
 </script>
 
 <template>
@@ -85,8 +85,8 @@ const updatePassword = () => {
                                 :invalid="Boolean(updatePasswordForm.errors?.current_password)"
                                 :feedback="false"
                                 autocomplete="current-password"
-                                inputId="current-password"
-                                toggleMask
+                                input-id="current-password"
+                                toggle-mask
                                 required
                                 fluid
                             />
@@ -106,8 +106,8 @@ const updatePassword = () => {
                                 v-model="updatePasswordForm.password"
                                 :invalid="Boolean(updatePasswordForm.errors?.password)"
                                 autocomplete="new-password"
-                                inputId="password"
-                                toggleMask
+                                input-id="password"
+                                toggle-mask
                                 required
                                 fluid
                             />
@@ -127,8 +127,8 @@ const updatePassword = () => {
                                 :invalid="Boolean(updatePasswordForm.errors?.password_confirmation)"
                                 :feedback="false"
                                 autocomplete="confirm-password"
-                                inputId="password-confirmation"
-                                toggleMask
+                                input-id="password-confirmation"
+                                toggle-mask
                                 required
                                 fluid
                             />

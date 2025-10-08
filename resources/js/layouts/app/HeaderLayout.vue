@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3'
-import { useAppLayout } from '@/composables/useAppLayout'
-import { ChevronsUpDown, Menu as MenuIcon } from 'lucide-vue-next'
-import ClientOnly from '@/components/ClientOnly.vue'
-import Container from '@/components/Container.vue'
-import PopupMenuButton from '@/components/PopupMenuButton.vue'
-import NavLogoLink from '@/components/NavLogoLink.vue'
-import FlashMessages from '@/components/FlashMessages.vue'
-import Menubar from '@/components/primevue/menu/Menubar.vue'
-import PanelMenu from '@/components/primevue/menu/PanelMenu.vue'
-import Breadcrumb from '@/components/primevue/menu/Breadcrumb.vue'
-import { MenuItem } from '@/types'
+import { usePage } from '@inertiajs/vue3';
+import { useAppLayout } from '@/composables/useAppLayout';
+import { ChevronsUpDown, Menu as MenuIcon } from 'lucide-vue-next';
+import ClientOnly from '@/components/ClientOnly.vue';
+import Container from '@/components/Container.vue';
+import PopupMenuButton from '@/components/PopupMenuButton.vue';
+import NavLogoLink from '@/components/NavLogoLink.vue';
+import FlashMessages from '@/components/FlashMessages.vue';
+import Menubar from '@/components/primevue/menu/Menubar.vue';
+import PanelMenu from '@/components/primevue/menu/PanelMenu.vue';
+import Breadcrumb from '@/components/primevue/menu/Breadcrumb.vue';
+import { type MenuItem } from '@/types';
 
 const props = withDefaults(defineProps<{
     breadcrumbs?: MenuItem[],
 }>(), {
     breadcrumbs: () => [],
-})
+});
 
-const page = usePage()
+const page = usePage();
 const {
     currentRoute,
     mobileMenuOpen,
     menuItems,
     userMenuItems,
-} = useAppLayout()
+} = useAppLayout();
 </script>
 
 <template>
@@ -56,7 +56,7 @@ const {
                     </template>
                 </Drawer>
                 <ScrollTop
-                    :buttonProps="{ class: 'fixed! right-4! bottom-4! md:right-8! md:bottom-8! z-[1000]!', rounded: true, raised: true }"
+                    :button-props="{ class: 'fixed! right-4! bottom-4! md:right-8! md:bottom-8! z-[1000]!', rounded: true, raised: true }"
                 />
             </Teleport>
         </ClientOnly>

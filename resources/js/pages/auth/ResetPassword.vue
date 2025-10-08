@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { useTemplateRef, onMounted } from 'vue'
-import { useForm, Head as InertiaHead } from '@inertiajs/vue3'
-import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue'
-import InputText from 'primevue/inputtext'
+import { useTemplateRef, onMounted } from 'vue';
+import { useForm, Head as InertiaHead } from '@inertiajs/vue3';
+import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
+import InputText from 'primevue/inputtext';
 
 const props = defineProps<{
     email: string,
     token: string,
-}>()
+}>();
 
 type InputTextType = InstanceType<typeof InputText> & { $el: HTMLElement };
-const emailInput = useTemplateRef<InputTextType>('email-input')
+const emailInput = useTemplateRef<InputTextType>('email-input');
 
 const resetPwForm = useForm({
     token: props.token,
     email: props.email,
     password: '',
     password_confirmation: '',
-})
+});
 
 const submit = () => {
     resetPwForm.post(route('password.store'), {
         onFinish: () => resetPwForm.reset('password', 'password_confirmation'),
-    })
-}
+    });
+};
 
 onMounted(() => {
     if (emailInput.value) {
-        emailInput.value.$el.focus()
+        emailInput.value.$el.focus();
     }
-})
+});
 </script>
 
 <template>
@@ -80,8 +80,8 @@ onMounted(() => {
                     v-model="resetPwForm.password"
                     :invalid="Boolean(resetPwForm.errors?.password)"
                     autocomplete="new-password"
-                    inputId="password"
-                    toggleMask
+                    input-id="password"
+                    toggle-mask
                     required
                     fluid
                 />
@@ -102,8 +102,8 @@ onMounted(() => {
                     :invalid="Boolean(resetPwForm.errors?.password_confirmation)"
                     :feedback="false"
                     autocomplete="new-password"
-                    inputId="password-confirmation"
-                    toggleMask
+                    input-id="password-confirmation"
+                    toggle-mask
                     required
                     fluid
                 />

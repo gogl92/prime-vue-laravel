@@ -1,3 +1,321 @@
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue';
+import { useToast } from 'primevue/usetoast';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Invoice } from '@/models/Invoice';
+import { debounce } from 'lodash-es';
+
+// Components
+import Card from 'primevue/card';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Dropdown from 'primevue/dropdown';
+import Dialog from 'primevue/dialog';
+import Tag from 'primevue/tag';
+
+import { FilterOperator } from '@tailflow/laravel-orion/lib/drivers/default/enums/filterOperator';
+import { SortDirection } from '@tailflow/laravel-orion/lib/drivers/default/enums/sortDirection';
+
+// Toast
+const toast = useToast();
+
+// State
+const loading = ref(false);
+const saving = ref(false);
+const deleting = ref(false);
+const invoices = ref<Invoice[]>([]);
+const totalRecords = ref(0);
+
+// Pagination
+const pagination = reactive({
+    page: 1,
+    rows: 10,
+});
+
+// Sorting
+const sortField = ref<string | undefined>(undefined);
+const sortOrder = ref<number>(1); // 1 for asc, -1 for desc
+
+// Filters
+const filters = reactive({
+    search: '',
+    city: '',
+    country: '',
+});
+
+// Dialogs
+const showCreateDialog = ref(false);
+const showDeleteDialog = ref(false);
+const editingInvoice = ref<Invoice | null>(null);
+const invoiceToDelete = ref<Invoice | null>(null);
+
+// Form
+const form = reactive({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    country: '',
+});
+
+const errors = reactive<Record<string, string>>({});
+
+// Country options
+const countryOptions = ref([
+    'United States',
+    'Canada',
+    'United Kingdom',
+    'Germany',
+    'France',
+    'Australia',
+    'Japan',
+    'Brazil',
+    'India',
+    'China',
+]);
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+    pagination.page = 1;
+    loadInvoices();
+}, 500);
+
+// Methods
+const loadInvoices = async () => {
+    try {
+        loading.value = true;
+
+        let query = Invoice.$query();
+
+        // Add search if provided
+        if (filters.search) {
+            query = query.lookFor(filters.search);
+        }
+
+        // Filter by city
+        if (filters.city) {
+            query = query.filter('city', FilterOperator.Equal, filters.city);
+        }
+
+        // Filter by country
+        if (filters.country) {
+            query = query.filter('country', FilterOperator.Equal, filters.country);
+        }
+
+        // Sorting
+        if (sortField.value) {
+            query = query.sortBy(sortField.value, sortOrder.value === 1 ? SortDirection.Asc : SortDirection.Desc);
+        }
+
+        // Execute the query with pagination
+        // get() and search() methods accept limit and page as parameters
+        // Use search() when filtering OR sorting is applied, otherwise use get()
+        let response;
+        if (filters.search || filters.city || filters.country || sortField.value) {
+            response = await query.search(pagination.rows, pagination.page);
+        } else {
+            response = await query.get(pagination.rows, pagination.page);
+        }
+
+        // Get the results
+        invoices.value = response;
+
+        // Debug: Check response structure
+        console.log('Response structure:', response);
+
+        // Check if Orion provides pagination metadata in the response
+        // Orion returns pagination info in response.$response.meta
+        if (response.$response?.meta?.total) {
+            // Use Orion's pagination metadata
+            totalRecords.value = response.$response.meta.total;
+            console.log('Using Orion total:', response.$response.meta.total);
+        } else {
+            // Fallback: get total count only when filtering
+            if (filters.search || filters.city || filters.country) {
+                // When filtering, we need accurate count
+                let countQuery = Invoice.$query();
+                if (filters.search) {
+                    countQuery = countQuery.lookFor(filters.search);
+                }
+                if (filters.city) {
+                    countQuery = countQuery.filter('city', FilterOperator.Equal, filters.city);
+                }
+                if (filters.country) {
+                    countQuery = countQuery.filter('country', FilterOperator.Equal, filters.country);
+                }
+
+                // Get count without pagination
+                const allResults = await countQuery.get();
+                totalRecords.value = allResults.length;
+            } else {
+                // For unfiltered results, estimate based on current response
+                // If current page is full, there might be more records
+                if (response.length === pagination.rows) {
+                    // Estimate: assume there are more records
+                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length + 1;
+                } else {
+                    // Current page is not full, this is likely the last page
+                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error loading invoices:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load invoices',
+            life: 3000,
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+const onPageChange = (event: any) => {
+    // For lazy loading, PrimeVue passes different event structure
+    // event.first: index of first record
+    // event.rows: number of rows per page
+    pagination.page = Math.floor(event.first / event.rows) + 1;
+    pagination.rows = event.rows;
+    loadInvoices();
+};
+
+const onSort = (event: any) => {
+    sortField.value = event.sortField;
+    sortOrder.value = event.sortOrder;
+    pagination.page = 1; // Reset to first page when sorting
+    loadInvoices();
+};
+
+const editInvoice = (invoice: Invoice) => {
+    editingInvoice.value = invoice;
+    Object.assign(form, invoice.$attributes);
+    showCreateDialog.value = true;
+};
+
+const confirmDelete = (invoice: Invoice) => {
+    invoiceToDelete.value = invoice;
+    showDeleteDialog.value = true;
+};
+
+const deleteInvoice = async () => {
+    if (!invoiceToDelete.value) return;
+
+    try {
+        deleting.value = true;
+        await invoiceToDelete.value.$destroy();
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Invoice deleted successfully',
+            life: 3000,
+        });
+
+        showDeleteDialog.value = false;
+        invoiceToDelete.value = null;
+        loadInvoices();
+    } catch (error) {
+        console.error('Error deleting invoice:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to delete invoice',
+            life: 3000,
+        });
+    } finally {
+        deleting.value = false;
+    }
+};
+
+const saveInvoice = async () => {
+    try {
+        saving.value = true;
+        clearErrors();
+
+        if (editingInvoice.value) {
+            // Update existing invoice
+            Object.assign(editingInvoice.value.$attributes, form);
+            await editingInvoice.value.$save();
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Invoice updated successfully',
+                life: 3000,
+            });
+        } else {
+            // Create new invoice
+            const newInvoice = await Invoice.$query().store(form);
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Invoice ' + newInvoice.$attributes.id + ' created successfully',
+                life: 3000,
+            });
+        }
+
+        closeDialog();
+        loadInvoices();
+    } catch (error: any) {
+        console.error('Error saving invoice:', error);
+
+        if (error.response?.data?.errors) {
+            Object.assign(errors, error.response.data.errors);
+        }
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.response?.data?.message || 'Failed to save invoice',
+            life: 3000,
+        });
+    } finally {
+        saving.value = false;
+    }
+};
+
+const closeDialog = () => {
+    showCreateDialog.value = false;
+    editingInvoice.value = null;
+    clearForm();
+    clearErrors();
+};
+
+const clearForm = () => {
+    Object.assign(form, {
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        zip: '',
+        country: '',
+    });
+};
+
+const clearErrors = () => {
+    Object.keys(errors).forEach(key => {
+        delete errors[key as keyof typeof errors];
+    });
+};
+
+const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+};
+
+// Lifecycle
+onMounted(() => {
+    loadInvoices();
+});
+</script>
+
 <template>
     <AppLayout title="Invoices Example - Orion API">
         <div class="space-y-6">
@@ -9,14 +327,16 @@
                 <Button
                     label="Add Invoice"
                     icon="pi pi-plus"
-                    @click="showCreateDialog = true"
                     severity="success"
                     class="p-button-success"
+                    @click="showCreateDialog = true"
                 />
             </div>
             <!-- Filters -->
             <Card>
-                <template #title>Filters</template>
+                <template #title>
+                    Filters
+                </template>
                 <template #content>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
@@ -41,7 +361,7 @@
                                 v-model="filters.country"
                                 :options="countryOptions"
                                 placeholder="Select country"
-                                showClear
+                                show-clear
                                 @change="loadInvoices"
                             />
                         </div>
@@ -59,9 +379,9 @@
                                 icon="pi pi-refresh"
                                 severity="secondary"
                                 text
-                                @click="loadInvoices"
                                 :loading="loading"
                                 class="p-button-sm"
+                                @click="loadInvoices"
                             />
                         </div>
                     </div>
@@ -73,49 +393,81 @@
                         :paginator="true"
                         :rows="pagination.rows"
                         :first="(pagination.page - 1) * pagination.rows"
-                        :totalRecords="totalRecords"
+                        :total-records="totalRecords"
                         :lazy="true"
+                        :sort-field="sortField"
+                        :sort-order="sortOrder"
+                        paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        :rows-per-page-options="[10, 20, 50]"
+                        current-page-report-template="Showing {first} to {last} of {totalRecords} entries"
+                        responsive-layout="scroll"
                         @page="onPageChange"
                         @sort="onSort"
-                        :sortField="sortField"
-                        :sortOrder="sortOrder"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        :rowsPerPageOptions="[10, 20, 50]"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                        responsiveLayout="scroll"
                     >
-                        <Column field="id" header="ID" :sortable="true" style="width: 80px">
+                        <Column
+                            field="id"
+                            header="ID"
+                            :sortable="true"
+                            style="width: 80px"
+                        >
                             <template #body="{ data }">
-                                <Tag :value="data.$attributes.id" severity="info" />
+                                <Tag
+                                    :value="data.$attributes.id"
+                                    severity="info"
+                                />
                             </template>
                         </Column>
 
-                        <Column field="name" header="Name" :sortable="true">
+                        <Column
+                            field="name"
+                            header="Name"
+                            :sortable="true"
+                        >
                             <template #body="{ data }">
-                                <div class="font-medium">{{ data.$attributes.name }}</div>
-                                <div class="text-sm text-surface-500">{{ data.$attributes.email }}</div>
+                                <div class="font-medium">
+                                    {{ data.$attributes.name }}
+                                </div>
+                                <div class="text-sm text-surface-500">
+                                    {{ data.$attributes.email }}
+                                </div>
                             </template>
                         </Column>
 
-                        <Column field="phone" header="Phone" :sortable="true">
+                        <Column
+                            field="phone"
+                            header="Phone"
+                            :sortable="true"
+                        >
                             <template #body="{ data }">
                                 <div class="flex items-center gap-2">
-                                    <i class="pi pi-phone text-surface-500"></i>
+                                    <i class="pi pi-phone text-surface-500" />
                                     {{ data.$attributes.phone }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="city" header="Location" :sortable="true">
+                        <Column
+                            field="city"
+                            header="Location"
+                            :sortable="true"
+                        >
                             <template #body="{ data }">
                                 <div>
-                                    <div class="font-medium">{{ data.$attributes.city }}, {{ data.$attributes.state }}</div>
-                                    <div class="text-sm text-surface-500">{{ data.$attributes.country }} {{ data.$attributes.zip }}</div>
+                                    <div class="font-medium">
+                                        {{ data.$attributes.city }}, {{ data.$attributes.state }}
+                                    </div>
+                                    <div class="text-sm text-surface-500">
+                                        {{ data.$attributes.country }} {{ data.$attributes.zip }}
+                                    </div>
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="created_at" header="Created" :sortable="true">
+                        <Column
+                            field="created_at"
+                            header="Created"
+                            :sortable="true"
+                        >
                             <template #body="{ data }">
                                 <div class="text-sm">
                                     {{ formatDate(data.$attributes.created_at) }}
@@ -123,26 +475,29 @@
                             </template>
                         </Column>
 
-                        <Column header="Actions" style="width: 150px">
+                        <Column
+                            header="Actions"
+                            style="width: 150px"
+                        >
                             <template #body="{ data }">
                                 <div class="flex gap-2">
                                     <Button
+                                        v-tooltip="'Edit'"
                                         icon="pi pi-pencil"
                                         severity="warning"
                                         text
                                         size="small"
-                                        @click="editInvoice(data)"
-                                        v-tooltip="'Edit'"
                                         class="p-button-sm"
+                                        @click="editInvoice(data)"
                                     />
                                     <Button
+                                        v-tooltip="'Delete'"
                                         icon="pi pi-trash"
                                         severity="danger"
                                         text
                                         size="small"
-                                        @click="confirmDelete(data)"
-                                        v-tooltip="'Delete'"
                                         class="p-button-sm"
+                                        @click="confirmDelete(data)"
                                     />
                                 </div>
                             </template>
@@ -158,9 +513,12 @@
             :header="editingInvoice ? 'Edit Invoice' : 'Create Invoice'"
             :modal="true"
             :style="{ width: '600px' }"
-            appendTo="body"
+            append-to="body"
         >
-            <form @submit.prevent="saveInvoice" class="space-y-4">
+            <form
+                class="space-y-4"
+                @submit.prevent="saveInvoice"
+            >
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Name *</label>
@@ -169,7 +527,10 @@
                             placeholder="Enter name"
                             :class="{ 'p-invalid': errors.name }"
                         />
-                        <small v-if="errors.name" class="text-red-500">{{ errors.name }}</small>
+                        <small
+                            v-if="errors.name"
+                            class="text-red-500"
+                        >{{ errors.name }}</small>
                     </div>
 
                     <div>
@@ -180,7 +541,10 @@
                             placeholder="Enter email"
                             :class="{ 'p-invalid': errors.email }"
                         />
-                        <small v-if="errors.email" class="text-red-500">{{ errors.email }}</small>
+                        <small
+                            v-if="errors.email"
+                            class="text-red-500"
+                        >{{ errors.email }}</small>
                     </div>
 
                     <div>
@@ -190,7 +554,10 @@
                             placeholder="Enter phone"
                             :class="{ 'p-invalid': errors.phone }"
                         />
-                        <small v-if="errors.phone" class="text-red-500">{{ errors.phone }}</small>
+                        <small
+                            v-if="errors.phone"
+                            class="text-red-500"
+                        >{{ errors.phone }}</small>
                     </div>
 
                     <div>
@@ -200,7 +567,10 @@
                             placeholder="Enter address"
                             :class="{ 'p-invalid': errors.address }"
                         />
-                        <small v-if="errors.address" class="text-red-500">{{ errors.address }}</small>
+                        <small
+                            v-if="errors.address"
+                            class="text-red-500"
+                        >{{ errors.address }}</small>
                     </div>
 
                     <div>
@@ -210,7 +580,10 @@
                             placeholder="Enter city"
                             :class="{ 'p-invalid': errors.city }"
                         />
-                        <small v-if="errors.city" class="text-red-500">{{ errors.city }}</small>
+                        <small
+                            v-if="errors.city"
+                            class="text-red-500"
+                        >{{ errors.city }}</small>
                     </div>
 
                     <div>
@@ -220,7 +593,10 @@
                             placeholder="Enter state"
                             :class="{ 'p-invalid': errors.state }"
                         />
-                        <small v-if="errors.state" class="text-red-500">{{ errors.state }}</small>
+                        <small
+                            v-if="errors.state"
+                            class="text-red-500"
+                        >{{ errors.state }}</small>
                     </div>
 
                     <div>
@@ -230,7 +606,10 @@
                             placeholder="Enter ZIP code"
                             :class="{ 'p-invalid': errors.zip }"
                         />
-                        <small v-if="errors.zip" class="text-red-500">{{ errors.zip }}</small>
+                        <small
+                            v-if="errors.zip"
+                            class="text-red-500"
+                        >{{ errors.zip }}</small>
                     </div>
 
                     <div>
@@ -241,7 +620,10 @@
                             placeholder="Select country"
                             :class="{ 'p-invalid': errors.country }"
                         />
-                        <small v-if="errors.country" class="text-red-500">{{ errors.country }}</small>
+                        <small
+                            v-if="errors.country"
+                            class="text-red-500"
+                        >{{ errors.country }}</small>
                     </div>
                 </div>
 
@@ -266,15 +648,22 @@
             header="Confirm Delete"
             :modal="true"
             :style="{ width: '400px' }"
-            appendTo="body"
+            append-to="body"
         >
             <div class="flex items-center gap-3 mb-4">
-                <i class="pi pi-exclamation-triangle text-orange-500 text-2xl"></i>
+                <i class="pi pi-exclamation-triangle text-orange-500 text-2xl" />
                 <span>Are you sure you want to delete this invoice?</span>
             </div>
-            <div v-if="invoiceToDelete" class="bg-surface-100 dark:bg-surface-800 p-3 rounded">
-                <div class="font-medium">{{ invoiceToDelete.$attributes.name }}</div>
-                <div class="text-sm text-surface-500">{{ invoiceToDelete.$attributes.email }}</div>
+            <div
+                v-if="invoiceToDelete"
+                class="bg-surface-100 dark:bg-surface-800 p-3 rounded"
+            >
+                <div class="font-medium">
+                    {{ invoiceToDelete.$attributes.name }}
+                </div>
+                <div class="text-sm text-surface-500">
+                    {{ invoiceToDelete.$attributes.email }}
+                </div>
             </div>
 
             <template #footer>
@@ -286,329 +675,10 @@
                 <Button
                     label="Delete"
                     severity="danger"
-                    @click="deleteInvoice"
                     :loading="deleting"
+                    @click="deleteInvoice"
                 />
             </template>
         </Dialog>
     </AppLayout>
 </template>
-
-<script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useToast } from 'primevue/usetoast'
-import AppLayout from '@/layouts/AppLayout.vue'
-import { Invoice } from '@/models/Invoice'
-import { debounce } from 'lodash-es'
-
-// Components
-import Card from 'primevue/card'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import Dropdown from 'primevue/dropdown'
-import Dialog from 'primevue/dialog'
-import Tag from 'primevue/tag'
-
-import { FilterOperator } from '@tailflow/laravel-orion/lib/drivers/default/enums/filterOperator'
-import { SortDirection } from '@tailflow/laravel-orion/lib/drivers/default/enums/sortDirection'
-
-// Toast
-const toast = useToast()
-
-// State
-const loading = ref(false)
-const saving = ref(false)
-const deleting = ref(false)
-const invoices = ref<Invoice[]>([])
-const totalRecords = ref(0)
-
-// Pagination
-const pagination = reactive({
-    page: 1,
-    rows: 10
-})
-
-// Sorting
-const sortField = ref<string | undefined>(undefined)
-const sortOrder = ref<number>(1) // 1 for asc, -1 for desc
-
-// Filters
-const filters = reactive({
-    search: '',
-    city: '',
-    country: ''
-})
-
-// Dialogs
-const showCreateDialog = ref(false)
-const showDeleteDialog = ref(false)
-const editingInvoice = ref<Invoice | null>(null)
-const invoiceToDelete = ref<Invoice | null>(null)
-
-// Form
-const form = reactive({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: ''
-})
-
-const errors = reactive<Record<string, string>>({})
-
-// Country options
-const countryOptions = ref([
-    'United States',
-    'Canada',
-    'United Kingdom',
-    'Germany',
-    'France',
-    'Australia',
-    'Japan',
-    'Brazil',
-    'India',
-    'China'
-])
-
-// Debounced search
-const debouncedSearch = debounce(() => {
-    pagination.page = 1
-    loadInvoices()
-}, 500)
-
-// Methods
-const loadInvoices = async () => {
-    try {
-        loading.value = true
-
-        let query = Invoice.$query()
-
-        // Add search if provided
-        if (filters.search) {
-            query = query.lookFor(filters.search)
-        }
-
-        // Filter by city
-        if (filters.city) {
-            query = query.filter('city', FilterOperator.Equal, filters.city)
-        }
-
-        // Filter by country
-        if (filters.country) {
-            query = query.filter('country', FilterOperator.Equal, filters.country)
-        }
-
-        // Sorting
-        if (sortField.value) {
-            query = query.sortBy(sortField.value, sortOrder.value === 1 ? SortDirection.Asc : SortDirection.Desc)
-        }
-
-        // Execute the query with pagination
-        // get() and search() methods accept limit and page as parameters
-        // Use search() when filtering OR sorting is applied, otherwise use get()
-        let response
-        if (filters.search || filters.city || filters.country || sortField.value) {
-            response = await query.search(pagination.rows, pagination.page)
-        } else {
-            response = await query.get(pagination.rows, pagination.page)
-        }
-
-        // Get the results
-        invoices.value = response
-
-        // Debug: Check response structure
-        console.log('Response structure:', response)
-        console.log('Response $response:', response.$response)
-
-        // Check if Orion provides pagination metadata in the response
-        // Orion returns pagination info in response.$response.meta
-        if (response.$response && response.$response.meta && response.$response.meta.total) {
-            // Use Orion's pagination metadata
-            totalRecords.value = response.$response.meta.total
-            console.log('Using Orion total:', response.$response.meta.total)
-        } else {
-            // Fallback: get total count only when filtering
-            if (filters.search || filters.city || filters.country) {
-                // When filtering, we need accurate count
-                let countQuery = Invoice.$query()
-                if (filters.search) {
-                    countQuery = countQuery.lookFor(filters.search)
-                }
-                if (filters.city) {
-                    countQuery = countQuery.filter('city', FilterOperator.Equal, filters.city)
-                }
-                if (filters.country) {
-                    countQuery = countQuery.filter('country', FilterOperator.Equal, filters.country)
-                }
-
-                // Get count without pagination
-                const allResults = await countQuery.get()
-                totalRecords.value = allResults.length
-            } else {
-                // For unfiltered results, estimate based on current response
-                // If current page is full, there might be more records
-                if (response.length === pagination.rows) {
-                    // Estimate: assume there are more records
-                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length + 1
-                } else {
-                    // Current page is not full, this is likely the last page
-                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error loading invoices:', error)
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to load invoices',
-            life: 3000
-        })
-    } finally {
-        loading.value = false
-    }
-}
-
-const onPageChange = (event: any) => {
-    // For lazy loading, PrimeVue passes different event structure
-    // event.first: index of first record
-    // event.rows: number of rows per page
-    pagination.page = Math.floor(event.first / event.rows) + 1
-    pagination.rows = event.rows
-    loadInvoices()
-}
-
-const onSort = (event: any) => {
-    sortField.value = event.sortField
-    sortOrder.value = event.sortOrder
-    pagination.page = 1 // Reset to first page when sorting
-    loadInvoices()
-}
-
-const editInvoice = (invoice: Invoice) => {
-    editingInvoice.value = invoice
-    Object.assign(form, invoice.$attributes)
-    showCreateDialog.value = true
-}
-
-const confirmDelete = (invoice: Invoice) => {
-    invoiceToDelete.value = invoice
-    showDeleteDialog.value = true
-}
-
-const deleteInvoice = async () => {
-    if (!invoiceToDelete.value) return
-
-    try {
-        deleting.value = true
-        await invoiceToDelete.value.$destroy()
-
-        toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Invoice deleted successfully',
-            life: 3000
-        })
-
-        showDeleteDialog.value = false
-        invoiceToDelete.value = null
-        loadInvoices()
-    } catch (error) {
-        console.error('Error deleting invoice:', error)
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to delete invoice',
-            life: 3000
-        })
-    } finally {
-        deleting.value = false
-    }
-}
-
-const saveInvoice = async () => {
-    try {
-        saving.value = true
-        clearErrors()
-
-        if (editingInvoice.value) {
-            // Update existing invoice
-            Object.assign(editingInvoice.value.$attributes, form)
-            await editingInvoice.value.$save()
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Invoice updated successfully',
-                life: 3000
-            })
-        } else {
-            // Create new invoice
-            const newInvoice = await Invoice.$query().store(form)
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Invoice ' + newInvoice.$attributes.id + ' created successfully',
-                life: 3000
-            })
-        }
-
-        closeDialog()
-        loadInvoices()
-    } catch (error: any) {
-        console.error('Error saving invoice:', error)
-
-        if (error.response?.data?.errors) {
-            Object.assign(errors, error.response.data.errors)
-        }
-
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: error.response?.data?.message || 'Failed to save invoice',
-            life: 3000
-        })
-    } finally {
-        saving.value = false
-    }
-}
-
-const closeDialog = () => {
-    showCreateDialog.value = false
-    editingInvoice.value = null
-    clearForm()
-    clearErrors()
-}
-
-const clearForm = () => {
-    Object.assign(form, {
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: ''
-    })
-}
-
-const clearErrors = () => {
-    Object.keys(errors).forEach(key => {
-        delete errors[key as keyof typeof errors]
-    })
-}
-
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
-}
-
-// Lifecycle
-onMounted(() => {
-    loadInvoices()
-})
-</script>

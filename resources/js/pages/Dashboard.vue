@@ -15,13 +15,25 @@ const value = ref(0);
     <AppLayout :breadcrumbs>        
         <Card>
             <template #content>
-                    <div class="card flex flex-col items-center gap-2">
-                        <Knob v-model="value" :size="150" readonly />
-                        <div class="flex gap-2">
-                            <Button icon="pi pi-plus" @click="value++" :disabled="value >= 100" />
-                            <Button icon="pi pi-minus" @click="value--" :disabled="value <= 0" />
-                        </div>
+                <div class="card flex flex-col items-center gap-2">
+                    <Knob
+                        v-model="value"
+                        :size="150"
+                        readonly
+                    />
+                    <div class="flex gap-2">
+                        <Button
+                            icon="pi pi-plus"
+                            :disabled="value >= 100"
+                            @click="value++"
+                        />
+                        <Button
+                            icon="pi pi-minus"
+                            :disabled="value <= 0"
+                            @click="value--"
+                        />
                     </div>
+                </div>
             </template>
         </Card>
     </AppLayout>
