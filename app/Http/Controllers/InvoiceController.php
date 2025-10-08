@@ -8,7 +8,8 @@ use App\Models\Invoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 
-class InvoiceController extends BaseOrionController {
+class InvoiceController extends BaseOrionController
+{
     /**
      * Fully-qualified model class name
      */
@@ -26,17 +27,17 @@ class InvoiceController extends BaseOrionController {
 
     public function searchableBy(): array
     {
-       return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
     }
 
     public function filterableBy(): array
     {
-       return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
     }
 
     public function sortableBy(): array
     {
-       return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'created_at', 'updated_at'];
+        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'created_at', 'updated_at'];
     }
 
     /**
@@ -92,7 +93,7 @@ class InvoiceController extends BaseOrionController {
     *
     * @return int
     */
-    public function limit() : int
+    public function limit(): int
     {
         return 10;
     }
