@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { ChevronsUpDown, Menu as MenuIcon } from 'lucide-vue-next';
 import { useAppLayout } from '@/composables/useAppLayout';
@@ -23,6 +24,36 @@ const {
     menuItems,
     userMenuItems,
 } = useAppLayout();
+
+// Mobile detection - initialize immediately
+const isMobile = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+onMounted(() => {
+    const updateMobileState = () => {
+        isMobile.value = window.innerWidth < 1024;
+        console.log('Mobile state updated:', isMobile.value, 'Sidebar open:', sidebarOpen.value);
+
+        // Force close sidebar on mobile
+        if (isMobile.value) {
+            sidebarOpen.value = false;
+        }
+    };
+
+    // Update immediately on mount
+    updateMobileState();
+    window.addEventListener('resize', updateMobileState);
+
+    onUnmounted(() => {
+        window.removeEventListener('resize', updateMobileState);
+    });
+});
+
+// Watch for theme changes and ensure sidebar is closed on mobile
+watch(() => page.props.auth, () => {
+    if (isMobile.value) {
+        sidebarOpen.value = false;
+    }
+}, { deep: true });
 </script>
 
 <template>
@@ -82,7 +113,7 @@ const {
         <div class="flex-1 pt-[60px]">
             <!-- Mobile/Desktop Sidebar (Collapsible) -->
             <aside
-                class="w-[18rem] fixed overflow-y-auto overflow-x-hidden dynamic-bg border-r dynamic-border transition-transform duration-300 top-[60px] bottom-0 lg:block"
+                class="w-[18rem] fixed overflow-y-auto overflow-x-hidden dynamic-bg border-r dynamic-border transition-transform duration-300 top-[60px] bottom-0 lg:block z-30"
                 :class="[
                     // Mobile: always slides from left, desktop: slides from left when toggled
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -111,10 +142,10 @@ const {
                 </div>
             </aside>
 
-            <!-- Mobile overlay when sidebar is open -->
+            <!-- Mobile overlay when sidebar is open - only show on mobile when sidebar is actually open -->
             <div
-                v-if="sidebarOpen"
-                class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                v-if="sidebarOpen && isMobile"
+                class="fixed inset-0 bg-black bg-opacity-50 z-20"
                 @click="sidebarOpen = false"
             />
 
