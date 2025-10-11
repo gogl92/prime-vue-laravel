@@ -20,5 +20,8 @@ class DatabaseSeeder extends Seeder
 
         // Seed products and attach them to invoices
         $this->call(ProductSeeder::class);
+
+        // Seed payments for invoices
+        $this->call(PaymentSeeder::class);
     }
 }

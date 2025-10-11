@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
@@ -32,5 +33,13 @@ class Invoice extends Model
         return $this->belongsToMany(Product::class)
             ->withPivot(['quantity', 'price'])
             ->withTimestamps();
+    }
+
+    /**
+     * Get the payments for the invoice.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 }

@@ -4,23 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
-use App\Http\Requests\StoreInvoiceRequest;
-use App\Http\Requests\UpdateInvoiceRequest;
+use App\Models\Payment;
 use Illuminate\Auth\Access\Response;
 
-class InvoiceController extends BaseOrionController
+class InvoicePaymentsController extends BaseOrionController
 {
     /**
      * Fully-qualified model class name
      */
-    protected $model = Invoice::class;
-
-    /**
-     * Request classes for validation
-     */
-    protected string $storeRequest = StoreInvoiceRequest::class;
-    protected string $updateRequest = UpdateInvoiceRequest::class;
+    protected $model = Payment::class;
 
     /**
      * Enable Orion search, filter and sort capabilities
@@ -28,7 +20,7 @@ class InvoiceController extends BaseOrionController
      */
     public function searchableBy(): array
     {
-        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+        return ['id', 'transaction_id', 'payment_method', 'status', 'invoice_id'];
     }
 
     /**
@@ -36,7 +28,7 @@ class InvoiceController extends BaseOrionController
      */
     public function filterableBy(): array
     {
-        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+        return ['id', 'amount', 'payment_method', 'status', 'transaction_id', 'paid_at', 'invoice_id'];
     }
 
     /**
@@ -44,7 +36,16 @@ class InvoiceController extends BaseOrionController
      */
     public function sortableBy(): array
     {
-        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'created_at', 'updated_at'];
+        return ['id', 'amount', 'payment_method', 'status', 'paid_at', 'created_at', 'updated_at', 'invoice_id'];
+    }
+
+    /**
+     * Enable including relations
+     * @return array<int, string>
+     */
+    public function includes(): array
+    {
+        return ['invoice'];
     }
 
     /**
@@ -53,6 +54,7 @@ class InvoiceController extends BaseOrionController
      */
     public function authorize(string $ability, $arguments = []): Response
     {
+        // @phpstan-ignore-next-line
         return auth()->check() ? Response::allow() : Response::deny('Unauthorized');
     }
 
@@ -61,6 +63,7 @@ class InvoiceController extends BaseOrionController
      */
     public function authorizeIndex(): bool
     {
+        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -69,6 +72,7 @@ class InvoiceController extends BaseOrionController
      */
     public function authorizeStore(): bool
     {
+        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -77,6 +81,7 @@ class InvoiceController extends BaseOrionController
      */
     public function authorizeShow(): bool
     {
+        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -85,6 +90,7 @@ class InvoiceController extends BaseOrionController
      */
     public function authorizeUpdate(): bool
     {
+        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -93,29 +99,8 @@ class InvoiceController extends BaseOrionController
      */
     public function authorizeDestroy(): bool
     {
+        // @phpstan-ignore-next-line
         return auth()->check();
     }
-
-    /**
-     * The relations that will be included in the response.
-     *
-     * @return array<string>
-     */
-    public function includes(): array
-    {
-        return [
-            'products',
-            'payments',
-        ];
-    }
-
-    /**
-    * Default pagination limit.
-    *
-    * @return int
-    */
-    public function limit(): int
-    {
-        return 10;
-    }
 }
+

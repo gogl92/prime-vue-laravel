@@ -7,6 +7,8 @@ use Orion\Facades\Orion;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InvoiceProductsController;
+use App\Http\Controllers\InvoicePaymentsController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Api\AuthController;
 
 // Public authentication routes
@@ -33,5 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Resource routes
     Orion::resource('invoices', InvoiceController::class);
     Orion::resource('products', ProductController::class);
+    Orion::resource('payments', PaymentController::class);
     Orion::belongsToManyResource('invoices', 'products', InvoiceProductsController::class);
+    Orion::hasManyResource('invoices', 'payments', InvoicePaymentsController::class);
 });

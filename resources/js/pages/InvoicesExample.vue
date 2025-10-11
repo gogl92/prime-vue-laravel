@@ -4,6 +4,7 @@ import { useToast } from 'primevue/usetoast';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Invoice } from '@/models/Invoice';
 import { Product } from '@/models/Product';
+import { Payment } from '@/models/Payment';
 import { debounce } from 'lodash-es';
 
 // Components
@@ -33,6 +34,8 @@ const totalRecords = ref(0);
 const expandedRows = ref<Invoice[]>([]);
 const invoiceProducts = ref<Record<number, Product[]>>({});
 const loadingProducts = ref<Record<number, boolean>>({});
+const invoicePayments = ref<Record<number, Payment[]>>({});
+const loadingPayments = ref<Record<number, boolean>>({});
 
 // Pagination
 const pagination = reactive({
@@ -96,7 +99,7 @@ const loadInvoices = async () => {
     try {
         loading.value = true;
 
-        let query = Invoice.$query().with(['products']); // Temporarily remove .with(['products']) to test
+        let query = Invoice.$query().with(['products', 'payments']); // Temporarily remove .with(['products']) to test
 
         // Add search if provided
         if (filters.search) {
@@ -335,6 +338,33 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
 };
 
+const formatDateTime = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString();
+};
+
+const getStatusSeverity = (status: string) => {
+    const severityMap: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined> = {
+        completed: 'success',
+        pending: 'warn',
+        failed: 'danger',
+        refunded: 'info',
+    };
+    return severityMap[status] ?? 'secondary';
+};
+
+const getPaymentMethodIcon = (method: string) => {
+    const iconMap: Record<string, string> = {
+        credit_card: 'pi-credit-card',
+        debit_card: 'pi-credit-card',
+        paypal: 'pi-paypal',
+        bank_transfer: 'pi-building-columns',
+        cash: 'pi-money-bill',
+        check: 'pi-file',
+    };
+    return iconMap[method] ?? 'pi-wallet';
+};
+
 const onRowExpand = async (event: { data: Invoice }) => {
     const invoiceId = event.data.$attributes.id;
 
@@ -380,10 +410,77 @@ const onRowExpand = async (event: { data: Invoice }) => {
     }
 };
 
+const onTabChange = async (event: { index: number; originalEvent: Event }, invoiceData: Invoice) => {
+    const invoiceId = invoiceData.$attributes.id;
+
+    console.log('Tab changed to index:', event.index, 'for invoice:', invoiceId);
+    console.log('Invoice data:', invoiceData);
+    console.log('Invoice relations:', invoiceData.$relations);
+
+    // If Payments tab is selected (index 1)
+    if (event.index === 1) {
+        console.log('Loading payments for invoice:', invoiceId);
+        await loadPayments(invoiceId, { data: invoiceData });
+    }
+};
+
 const onRowCollapse = (_event: { data: Invoice }) => {
     // Optionally clear products when row collapses to save memory
     // const invoiceId = event.data.$attributes.id;
     // delete invoiceProducts.value[invoiceId];
+};
+
+const loadPayments = async (invoiceId: number, event?: { data: Invoice }) => {
+    console.log('loadPayments called for invoice:', invoiceId);
+    console.log('Event data:', event);
+
+    // Check if payments are already loaded
+    if (invoicePayments.value[invoiceId]) {
+        console.log('Payments already loaded for invoice:', invoiceId);
+        return;
+    }
+
+    try {
+        loadingPayments.value[invoiceId] = true;
+
+        // First check if payments are already included in the invoice data
+        if (event?.data?.$relations?.['payments']) {
+            const loadedPayments = event.data.$relations['payments'];
+            console.log('Found payments in relations:', loadedPayments);
+            if (Array.isArray(loadedPayments) && loadedPayments.length > 0) {
+                invoicePayments.value[invoiceId] = loadedPayments as Payment[];
+                console.log('Using payments from relations');
+                return;
+            }
+        }
+
+        console.log('Loading payments from API...');
+        // Fallback: Load payments using the Orion hasMany relationship endpoint
+        // The URL pattern will be: /api/invoices/{invoice}/payments
+        const payments = await Payment.$query().get(invoiceId);
+        console.log('Payments loaded from API:', payments);
+        invoicePayments.value[invoiceId] = payments;
+    } catch (error) {
+        console.error('Error loading payments:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load payments',
+            life: 3000,
+        });
+    } finally {
+        loadingPayments.value[invoiceId] = false;
+    }
+};
+
+const getTotalPayments = (invoiceId: number): number => {
+    const payments = invoicePayments.value[invoiceId];
+    if (!payments || payments.length === 0) return 0;
+
+    return payments.reduce((total, payment) => {
+        const amount = payment.$attributes?.amount ?? 0;
+        return total + parseFloat(amount.toString());
+    }, 0);
 };
 
 // Lifecycle
@@ -589,7 +686,7 @@ onMounted(() => {
 
                         <template #expansion="{ data }">
                             <div class="p-4 border-t bg-surface-50 dark:bg-surface-800">
-                                <TabView>
+                                <TabView @tab-change="(event) => onTabChange(event, data)">
                                     <TabPanel
                                         value="products"
                                         header="Products"
@@ -680,9 +777,115 @@ onMounted(() => {
                                         value="payments"
                                         header="Payments"
                                     >
-                                        <div class="text-center p-8 text-surface-500">
-                                            <i class="pi pi-credit-card text-4xl mb-4" />
-                                            <p>Payments functionality will be implemented here.</p>
+                                        <div
+                                            v-if="loadingPayments[data.$attributes.id]"
+                                            class="flex justify-center p-4"
+                                        >
+                                            <i class="pi pi-spin pi-spinner text-2xl" />
+                                        </div>
+                                        <div v-else-if="invoicePayments[data.$attributes.id]?.length">
+                                            <DataTable
+                                                :value="invoicePayments[data.$attributes.id]"
+                                                :table-style="{ minWidth: '50rem' }"
+                                                class="p-datatable-sm"
+                                            >
+                                                <Column
+                                                    field="id"
+                                                    header="#"
+                                                    style="width: 80px"
+                                                >
+                                                    <template #body="{ data: paymentData }">
+                                                        <Tag
+                                                            :value="paymentData.$attributes?.id || paymentData.id"
+                                                            severity="info"
+                                                        />
+                                                    </template>
+                                                </Column>
+                                                <Column
+                                                    header="Amount"
+                                                    sortable
+                                                >
+                                                    <template #body="{ data: paymentData }">
+                                                        <div class="font-semibold text-lg">
+                                                            {{ formatCurrency(paymentData.$attributes?.amount || paymentData.amount) }}
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                                <Column
+                                                    header="Payment Method"
+                                                    sortable
+                                                >
+                                                    <template #body="{ data: paymentData }">
+                                                        <div class="flex items-center gap-2">
+                                                            <i
+                                                                class="pi"
+                                                                :class="getPaymentMethodIcon(paymentData.$attributes?.payment_method || paymentData.payment_method)"
+                                                            />
+                                                            <span class="capitalize">
+                                                                {{ (paymentData.$attributes?.payment_method || paymentData.payment_method).replace('_', ' ') }}
+                                                            </span>
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                                <Column
+                                                    header="Status"
+                                                    sortable
+                                                >
+                                                    <template #body="{ data: paymentData }">
+                                                        <Tag
+                                                            :value="(paymentData.$attributes?.status || paymentData.status).toUpperCase()"
+                                                            :severity="getStatusSeverity(paymentData.$attributes?.status || paymentData.status)"
+                                                        />
+                                                    </template>
+                                                </Column>
+                                                <Column
+                                                    header="Transaction ID"
+                                                    sortable
+                                                >
+                                                    <template #body="{ data: paymentData }">
+                                                        <div class="text-sm font-mono text-surface-600 dark:text-surface-400">
+                                                            {{ paymentData.$attributes?.transaction_id || paymentData.transaction_id || 'N/A' }}
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                                <Column
+                                                    header="Paid At"
+                                                    sortable
+                                                >
+                                                    <template #body="{ data: paymentData }">
+                                                        <div class="text-sm">
+                                                            {{ formatDateTime(paymentData.$attributes?.paid_at || paymentData.paid_at) }}
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                                <Column
+                                                    header="Notes"
+                                                >
+                                                    <template #body="{ data: paymentData }">
+                                                        <div
+                                                            class="max-w-xs truncate text-sm text-surface-600 dark:text-surface-400"
+                                                            :title="paymentData.$attributes?.notes || paymentData.notes"
+                                                        >
+                                                            {{ paymentData.$attributes?.notes || paymentData.notes || '-' }}
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                            </DataTable>
+                                            <div class="mt-4 p-4 bg-surface-100 dark:bg-surface-900 rounded-lg flex justify-between items-center">
+                                                <div class="text-lg font-semibold">
+                                                    Total Payments:
+                                                </div>
+                                                <div class="text-2xl font-bold text-primary">
+                                                    {{ formatCurrency(getTotalPayments(data.$attributes.id)) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div
+                                            v-else
+                                            class="text-center p-8 text-surface-500"
+                                        >
+                                            <i class="pi pi-credit-card text-4xl mb-4 block" />
+                                            <p>No payments found for this invoice.</p>
                                         </div>
                                     </TabPanel>
                                 </TabView>
