@@ -3,7 +3,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Invoice } from '@/models/Invoice';
-import type { Product } from '@/models/Product';
+import { Product } from '@/models/Product';
 import { debounce } from 'lodash-es';
 
 // Components
@@ -364,22 +364,7 @@ const onRowExpand = async (event: { data: Invoice }) => {
         }
 
         // Fallback: Load products using the Orion belongsToMany relationship endpoint
-        const response = await fetch(`/api/invoices/${invoiceId}/products`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-            },
-            credentials: 'same-origin'
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const products = await response.json();
+        const products = await Product.$query().get(invoiceId);
         console.log('Products loaded from API:', products);
         invoiceProducts.value[invoiceId] = products;
     } catch (error) {
