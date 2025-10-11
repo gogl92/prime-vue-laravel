@@ -96,7 +96,7 @@ const loadInvoices = async () => {
     try {
         loading.value = true;
 
-        let query = Invoice.$query(); // Temporarily remove .with(['products']) to test
+        let query = Invoice.$query().with(['products']); // Temporarily remove .with(['products']) to test
 
         // Add search if provided
         if (filters.search) {
@@ -121,33 +121,33 @@ const loadInvoices = async () => {
         // Execute the query with pagination
         // get() and search() methods accept limit and page as parameters
         // Use search() when filtering OR sorting is applied, otherwise use get()
-        let response;
-        if (filters.search || filters.city || filters.country || sortField.value) {
-            response = await query.search(pagination.rows, pagination.page);
-        } else {
-            response = await query.get(pagination.rows, pagination.page);
-        }
+        const response: unknown = filters.search || filters.city || filters.country || sortField.value
+            ? await query.search(pagination.rows, pagination.page)
+            : await query.get(pagination.rows, pagination.page);
 
         // Get the results
-        console.log('Raw response:', response);
-        console.log('Response type:', typeof response);
-        console.log('Is array:', Array.isArray(response));
-        console.log('Response length:', response?.length);
+        // console.error('Raw response:', response);
+        // console.error('Response type:', typeof response);
+        // console.error('Is array:', Array.isArray(response));
+        // console.error('Response length:', response?.length);
 
         // Handle different response structures
+        let actualResponse: Invoice[];
         if (Array.isArray(response)) {
-            invoices.value = response;
-        } else if (response?.data && Array.isArray(response.data)) {
+            invoices.value = response as Invoice[];
+            actualResponse = response as Invoice[];
+        } else if (typeof response === 'object' && response !== null && 'data' in response && Array.isArray((response as { data: unknown }).data)) {
             // If response is wrapped in a data property
-            invoices.value = response.data;
+            const wrappedResponse = response as { data: Invoice[] };
+            invoices.value = wrappedResponse.data;
+            actualResponse = wrappedResponse.data;
         } else {
             console.error('Unexpected response structure:', response);
             invoices.value = [];
+            actualResponse = [];
         }
 
         // Check if Orion provides pagination metadata in the response
-        // Orion returns pagination info in response.$response.meta
-        const actualResponse = Array.isArray(response) ? response : (response?.data || []);
         if (actualResponse[0]?.$response?.data?.meta?.total) {
             // Use Orion's pagination metadata
             totalRecords.value = actualResponse[0].$response.data.meta.total;
@@ -203,9 +203,9 @@ const onPageChange = (event: { first: number; rows: number }) => {
     void loadInvoices();
 };
 
-const onSort = (event: { sortField: string | undefined; sortOrder: number }) => {
-    sortField.value = event.sortField;
-    sortOrder.value = event.sortOrder;
+const onSort = (event: { sortField: string | ((item: unknown) => string) | undefined; sortOrder: number | null | undefined }) => {
+    sortField.value = typeof event.sortField === 'function' ? undefined : event.sortField;
+    sortOrder.value = event.sortOrder ?? 1;
     pagination.page = 1; // Reset to first page when sorting
     void loadInvoices();
 };
@@ -338,16 +338,16 @@ const formatCurrency = (amount: number) => {
 const onRowExpand = async (event: { data: Invoice }) => {
     const invoiceId = event.data.$attributes.id;
 
-    console.log('Row expand triggered for invoice ID:', invoiceId);
+    // console.error('Row expand triggered for invoice ID:', invoiceId);
 
     if (!invoiceId) {
-        console.log('No invoice ID found');
+        // console.error('No invoice ID found');
         return;
     }
 
     // Check if products are already loaded
     if (invoiceProducts.value[invoiceId]) {
-        console.log('Products already loaded for invoice:', invoiceId);
+        // console.error('Products already loaded for invoice:', invoiceId);
         return;
     }
 
@@ -356,16 +356,16 @@ const onRowExpand = async (event: { data: Invoice }) => {
 
         // Check if products are already included in the invoice data
         // Orion stores relations in $relations, not $attributes
-        const loadedProducts = event.data.$relations?.products ?? event.data.$attributes.products;
-        if (loadedProducts && loadedProducts.length > 0) {
-            console.log('Using products from invoice data:', loadedProducts);
-            invoiceProducts.value[invoiceId] = loadedProducts;
+        const loadedProducts = event.data.$relations?.['products'] ?? event.data.$attributes['products'];
+        if (loadedProducts && Array.isArray(loadedProducts) && loadedProducts.length > 0) {
+            // console.error('Using products from invoice data:', loadedProducts);
+            invoiceProducts.value[invoiceId] = loadedProducts as Product[];
             return;
         }
 
         // Fallback: Load products using the Orion belongsToMany relationship endpoint
         const products = await Product.$query().get(invoiceId);
-        console.log('Products loaded from API:', products);
+        // console.error('Products loaded from API:', products);
         invoiceProducts.value[invoiceId] = products;
     } catch (error) {
         console.error('Error loading products:', error);
@@ -464,9 +464,9 @@ onMounted(() => {
                 </template>
                 <template #content>
                     <DataTable
+                        v-model:expanded-rows="expandedRows"
                         :value="invoices"
                         :loading="loading"
-                        v-model:expandedRows="expandedRows"
                         paginator
                         :rows="pagination.rows"
                         :first="(pagination.page - 1) * pagination.rows"
@@ -483,7 +483,10 @@ onMounted(() => {
                         @row-expand="onRowExpand"
                         @row-collapse="onRowCollapse"
                     >
-                        <Column :expander="true" headerStyle="width: 3rem" />
+                        <Column
+                            expander
+                            :header-style="{ width: '3rem' }"
+                        />
 
                         <Column
                             field="id"
@@ -591,54 +594,85 @@ onMounted(() => {
                                         value="products"
                                         header="Products"
                                     >
-                                        <div v-if="loadingProducts[data.$attributes.id]" class="flex justify-center p-4">
-                                            <i class="pi pi-spin pi-spinner text-2xl"></i>
+                                        <div
+                                            v-if="loadingProducts[data.$attributes.id]"
+                                            class="flex justify-center p-4"
+                                        >
+                                            <i class="pi pi-spin pi-spinner text-2xl" />
                                         </div>
                                         <DataTable
                                             v-else-if="invoiceProducts[data.$attributes.id]?.length"
                                             :value="invoiceProducts[data.$attributes.id]"
-                                            tableStyle="min-width: 50rem"
+                                            :table-style="{ minWidth: '50rem' }"
                                             class="p-datatable-sm"
                                         >
-                                            <Column field="id" header="#" style="width: 60px">
+                                            <Column
+                                                field="id"
+                                                header="#"
+                                                style="width: 60px"
+                                            >
                                                 <template #body="{ index }">
                                                     {{ index + 1 }}
                                                 </template>
                                             </Column>
-                                            <Column header="Product Name" sortable>
-                                                <template #body="{ data }">
-                                                    {{ data.$attributes?.name || data.name }}
+                                            <Column
+                                                header="Product Name"
+                                                sortable
+                                            >
+                                                <template #body="{ data: productData }">
+                                                    {{ productData.$attributes?.name || productData.name }}
                                                 </template>
                                             </Column>
-                                            <Column header="Description" sortable>
-                                                <template #body="{ data }">
-                                                    <div class="max-w-xs truncate" :title="data.$attributes?.description || data.description">
-                                                        {{ data.$attributes?.description || data.description }}
+                                            <Column
+                                                header="Description"
+                                                sortable
+                                            >
+                                                <template #body="{ data: productData }">
+                                                    <div
+                                                        class="max-w-xs truncate"
+                                                        :title="productData.$attributes?.description || productData.description"
+                                                    >
+                                                        {{ productData.$attributes?.description || productData.description }}
                                                     </div>
                                                 </template>
                                             </Column>
-                                            <Column header="SKU" sortable>
-                                                <template #body="{ data }">
-                                                    {{ data.$attributes?.sku || data.sku }}
+                                            <Column
+                                                header="SKU"
+                                                sortable
+                                            >
+                                                <template #body="{ data: productData }">
+                                                    {{ productData.$attributes?.sku || productData.sku }}
                                                 </template>
                                             </Column>
-                                            <Column header="Quantity" sortable>
-                                                <template #body="{ data }">
-                                                    {{ data.$attributes?.pivot?.quantity || data.pivot?.quantity || 1 }}
+                                            <Column
+                                                header="Quantity"
+                                                sortable
+                                            >
+                                                <template #body="{ data: productData }">
+                                                    {{ productData.$attributes?.pivot?.quantity || productData.pivot?.quantity || 1 }}
                                                 </template>
                                             </Column>
-                                            <Column header="Unit Price" sortable>
-                                                <template #body="{ data }">
-                                                    {{ formatCurrency(data.$attributes?.pivot?.price || data.pivot?.price || data.$attributes?.price || data.price) }}
+                                            <Column
+                                                header="Unit Price"
+                                                sortable
+                                            >
+                                                <template #body="{ data: productData }">
+                                                    {{ formatCurrency(productData.$attributes?.pivot?.price || productData.pivot?.price || productData.$attributes?.price || productData.price) }}
                                                 </template>
                                             </Column>
-                                            <Column header="Total" sortable>
-                                                <template #body="{ data }">
-                                                    {{ formatCurrency((data.$attributes?.pivot?.quantity || data.pivot?.quantity || 1) * (data.$attributes?.pivot?.price || data.pivot?.price || data.$attributes?.price || data.price)) }}
+                                            <Column
+                                                header="Total"
+                                                sortable
+                                            >
+                                                <template #body="{ data: productData }">
+                                                    {{ formatCurrency((productData.$attributes?.pivot?.quantity || productData.pivot?.quantity || 1) * (productData.$attributes?.pivot?.price || productData.pivot?.price || productData.$attributes?.price || productData.price)) }}
                                                 </template>
                                             </Column>
                                         </DataTable>
-                                        <div v-else class="text-center p-4 text-surface-500">
+                                        <div
+                                            v-else
+                                            class="text-center p-4 text-surface-500"
+                                        >
                                             No products found for this invoice.
                                         </div>
                                     </TabPanel>
@@ -647,7 +681,7 @@ onMounted(() => {
                                         header="Payments"
                                     >
                                         <div class="text-center p-8 text-surface-500">
-                                            <i class="pi pi-credit-card text-4xl mb-4"></i>
+                                            <i class="pi pi-credit-card text-4xl mb-4" />
                                             <p>Payments functionality will be implemented here.</p>
                                         </div>
                                     </TabPanel>
@@ -677,12 +711,12 @@ onMounted(() => {
                         <InputText
                             v-model="form.name"
                             placeholder="Enter name"
-                            :class="{ 'p-invalid': errors.name }"
+                            :class="{ 'p-invalid': errors['name'] }"
                         />
                         <small
-                            v-if="errors.name"
+                            v-if="errors['name']"
                             class="text-red-500"
-                        >{{ errors.name }}</small>
+                        >{{ errors['name'] }}</small>
                     </div>
 
                     <div>
@@ -691,12 +725,12 @@ onMounted(() => {
                             v-model="form.email"
                             type="email"
                             placeholder="Enter email"
-                            :class="{ 'p-invalid': errors.email }"
+                            :class="{ 'p-invalid': errors['email'] }"
                         />
                         <small
-                            v-if="errors.email"
+                            v-if="errors['email']"
                             class="text-red-500"
-                        >{{ errors.email }}</small>
+                        >{{ errors['email'] }}</small>
                     </div>
 
                     <div>
@@ -704,12 +738,12 @@ onMounted(() => {
                         <InputText
                             v-model="form.phone"
                             placeholder="Enter phone"
-                            :class="{ 'p-invalid': errors.phone }"
+                            :class="{ 'p-invalid': errors['phone'] }"
                         />
                         <small
-                            v-if="errors.phone"
+                            v-if="errors['phone']"
                             class="text-red-500"
-                        >{{ errors.phone }}</small>
+                        >{{ errors['phone'] }}</small>
                     </div>
 
                     <div>
@@ -717,12 +751,12 @@ onMounted(() => {
                         <InputText
                             v-model="form.address"
                             placeholder="Enter address"
-                            :class="{ 'p-invalid': errors.address }"
+                            :class="{ 'p-invalid': errors['address'] }"
                         />
                         <small
-                            v-if="errors.address"
+                            v-if="errors['address']"
                             class="text-red-500"
-                        >{{ errors.address }}</small>
+                        >{{ errors['address'] }}</small>
                     </div>
 
                     <div>
@@ -730,12 +764,12 @@ onMounted(() => {
                         <InputText
                             v-model="form.city"
                             placeholder="Enter city"
-                            :class="{ 'p-invalid': errors.city }"
+                            :class="{ 'p-invalid': errors['city'] }"
                         />
                         <small
-                            v-if="errors.city"
+                            v-if="errors['city']"
                             class="text-red-500"
-                        >{{ errors.city }}</small>
+                        >{{ errors['city'] }}</small>
                     </div>
 
                     <div>
@@ -743,12 +777,12 @@ onMounted(() => {
                         <InputText
                             v-model="form.state"
                             placeholder="Enter state"
-                            :class="{ 'p-invalid': errors.state }"
+                            :class="{ 'p-invalid': errors['state'] }"
                         />
                         <small
-                            v-if="errors.state"
+                            v-if="errors['state']"
                             class="text-red-500"
-                        >{{ errors.state }}</small>
+                        >{{ errors['state'] }}</small>
                     </div>
 
                     <div>
@@ -756,12 +790,12 @@ onMounted(() => {
                         <InputText
                             v-model="form.zip"
                             placeholder="Enter ZIP code"
-                            :class="{ 'p-invalid': errors.zip }"
+                            :class="{ 'p-invalid': errors['zip'] }"
                         />
                         <small
-                            v-if="errors.zip"
+                            v-if="errors['zip']"
                             class="text-red-500"
-                        >{{ errors.zip }}</small>
+                        >{{ errors['zip'] }}</small>
                     </div>
 
                     <div>
@@ -770,12 +804,12 @@ onMounted(() => {
                             v-model="form.country"
                             :options="countryOptions"
                             placeholder="Select country"
-                            :class="{ 'p-invalid': errors.country }"
+                            :class="{ 'p-invalid': errors['country'] }"
                         />
                         <small
-                            v-if="errors.country"
+                            v-if="errors['country']"
                             class="text-red-500"
-                        >{{ errors.country }}</small>
+                        >{{ errors['country'] }}</small>
                     </div>
                 </div>
 
