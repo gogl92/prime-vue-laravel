@@ -22,8 +22,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('auth', [AuthController::class, 'index'])->name('auth.index');
     Route::get('auth/{auth}', [AuthController::class, 'show'])->name('auth.show');
     Route::get('auth/{auth}/edit', [AuthController::class, 'edit'])->name('auth.edit');
-    Route::put('auth/{auth}', [AuthController::class, 'update'])->name('auth.update');
-    Route::patch('auth/{auth}', [AuthController::class, 'update'])->name('auth.update');
+    Route::match(['put', 'patch'], 'auth/{auth}', [AuthController::class, 'update'])->name('auth.update');
     Route::delete('auth/{auth}', [AuthController::class, 'destroy'])->name('auth.destroy');
 
     // Additional auth routes

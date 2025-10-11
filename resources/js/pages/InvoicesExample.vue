@@ -30,7 +30,7 @@ const saving = ref(false);
 const deleting = ref(false);
 const invoices = ref<Invoice[]>([]);
 const totalRecords = ref(0);
-const expandedRows = ref<Record<Invoice, boolean>>({});
+const expandedRows = ref<Invoice[]>([]);
 const invoiceProducts = ref<Record<number, Product[]>>({});
 const loadingProducts = ref<Record<number, boolean>>({});
 
@@ -96,7 +96,7 @@ const loadInvoices = async () => {
     try {
         loading.value = true;
 
-        let query = Invoice.$query();
+        let query = Invoice.$query(); // Temporarily remove .with(['products']) to test
 
         // Add search if provided
         if (filters.search) {
@@ -129,13 +129,28 @@ const loadInvoices = async () => {
         }
 
         // Get the results
-        invoices.value = response;
+        console.log('Raw response:', response);
+        console.log('Response type:', typeof response);
+        console.log('Is array:', Array.isArray(response));
+        console.log('Response length:', response?.length);
+
+        // Handle different response structures
+        if (Array.isArray(response)) {
+            invoices.value = response;
+        } else if (response?.data && Array.isArray(response.data)) {
+            // If response is wrapped in a data property
+            invoices.value = response.data;
+        } else {
+            console.error('Unexpected response structure:', response);
+            invoices.value = [];
+        }
 
         // Check if Orion provides pagination metadata in the response
         // Orion returns pagination info in response.$response.meta
-        if (response.$response?.meta?.total) {
+        const actualResponse = Array.isArray(response) ? response : (response?.data || []);
+        if (actualResponse[0]?.$response?.data?.meta?.total) {
             // Use Orion's pagination metadata
-            totalRecords.value = response.$response.meta.total;
+            totalRecords.value = actualResponse[0].$response.data.meta.total;
         } else {
             // Fallback: get total count only when filtering
             if (filters.search || filters.city || filters.country) {
@@ -157,12 +172,12 @@ const loadInvoices = async () => {
             } else {
                 // For unfiltered results, estimate based on current response
                 // If current page is full, there might be more records
-                if (response.length === pagination.rows) {
+                if (invoices.value.length === pagination.rows) {
                     // Estimate: assume there are more records
-                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length + 1;
+                    totalRecords.value = (pagination.page - 1) * pagination.rows + invoices.value.length + 1;
                 } else {
                     // Current page is not full, this is likely the last page
-                    totalRecords.value = (pagination.page - 1) * pagination.rows + response.length;
+                    totalRecords.value = (pagination.page - 1) * pagination.rows + invoices.value.length;
                 }
             }
         }
@@ -340,9 +355,11 @@ const onRowExpand = async (event: { data: Invoice }) => {
         loadingProducts.value[invoiceId] = true;
 
         // Check if products are already included in the invoice data
-        if (event.data.$attributes.products && event.data.$attributes.products.length > 0) {
-            console.log('Using products from invoice data:', event.data.$attributes.products);
-            invoiceProducts.value[invoiceId] = event.data.$attributes.products;
+        // Orion stores relations in $relations, not $attributes
+        const loadedProducts = event.data.$relations?.products ?? event.data.$attributes.products;
+        if (loadedProducts && loadedProducts.length > 0) {
+            console.log('Using products from invoice data:', loadedProducts);
+            invoiceProducts.value[invoiceId] = loadedProducts;
             return;
         }
 
@@ -603,28 +620,36 @@ onMounted(() => {
                                                     {{ index + 1 }}
                                                 </template>
                                             </Column>
-                                            <Column field="name" header="Product Name" sortable></Column>
-                                            <Column field="description" header="Description" sortable>
+                                            <Column header="Product Name" sortable>
                                                 <template #body="{ data }">
-                                                    <div class="max-w-xs truncate" :title="data.$attributes.description">
-                                                        {{ data.$attributes.description }}
+                                                    {{ data.$attributes?.name || data.name }}
+                                                </template>
+                                            </Column>
+                                            <Column header="Description" sortable>
+                                                <template #body="{ data }">
+                                                    <div class="max-w-xs truncate" :title="data.$attributes?.description || data.description">
+                                                        {{ data.$attributes?.description || data.description }}
                                                     </div>
                                                 </template>
                                             </Column>
-                                            <Column field="sku" header="SKU" sortable></Column>
-                                            <Column field="pivot.quantity" header="Quantity" sortable>
+                                            <Column header="SKU" sortable>
                                                 <template #body="{ data }">
-                                                    {{ data.$attributes.pivot?.quantity || 1 }}
+                                                    {{ data.$attributes?.sku || data.sku }}
                                                 </template>
                                             </Column>
-                                            <Column field="pivot.price" header="Unit Price" sortable>
+                                            <Column header="Quantity" sortable>
                                                 <template #body="{ data }">
-                                                    {{ formatCurrency(data.$attributes.pivot?.price || data.$attributes.price) }}
+                                                    {{ data.$attributes?.pivot?.quantity || data.pivot?.quantity || 1 }}
+                                                </template>
+                                            </Column>
+                                            <Column header="Unit Price" sortable>
+                                                <template #body="{ data }">
+                                                    {{ formatCurrency(data.$attributes?.pivot?.price || data.pivot?.price || data.$attributes?.price || data.price) }}
                                                 </template>
                                             </Column>
                                             <Column header="Total" sortable>
                                                 <template #body="{ data }">
-                                                    {{ formatCurrency((data.$attributes.pivot?.quantity || 1) * (data.$attributes.pivot?.price || data.$attributes.price)) }}
+                                                    {{ formatCurrency((data.$attributes?.pivot?.quantity || data.pivot?.quantity || 1) * (data.$attributes?.pivot?.price || data.pivot?.price || data.$attributes?.price || data.price)) }}
                                                 </template>
                                             </Column>
                                         </DataTable>
