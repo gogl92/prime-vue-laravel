@@ -97,6 +97,16 @@ class InvoiceController extends BaseOrionController
     }
 
     /**
+     * The relations that will be included in the response.
+     *
+     * @return array<string>
+     */
+    public function includes(): array
+    {
+        return ['products'];
+    }
+
+    /**
     * Default pagination limit.
     *
     * @return int

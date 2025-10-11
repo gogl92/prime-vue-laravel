@@ -30,7 +30,7 @@ const saving = ref(false);
 const deleting = ref(false);
 const invoices = ref<Invoice[]>([]);
 const totalRecords = ref(0);
-const expandedRows = ref({});
+const expandedRows = ref<Record<Invoice, boolean>>({});
 const invoiceProducts = ref<Record<number, Product[]>>({});
 const loadingProducts = ref<Record<number, boolean>>({});
 
@@ -323,22 +323,47 @@ const formatCurrency = (amount: number) => {
 const onRowExpand = async (event: { data: Invoice }) => {
     const invoiceId = event.data.$attributes.id;
 
-    if (!invoiceId) return;
+    console.log('Row expand triggered for invoice ID:', invoiceId);
+
+    if (!invoiceId) {
+        console.log('No invoice ID found');
+        return;
+    }
 
     // Check if products are already loaded
     if (invoiceProducts.value[invoiceId]) {
+        console.log('Products already loaded for invoice:', invoiceId);
         return;
     }
 
     try {
         loadingProducts.value[invoiceId] = true;
 
-        // Load products for this invoice using Orion relationship
-        // Using the belongsToMany relationship endpoint
-        const products = await Invoice.$query()
-            .related('products')
-            .get(undefined, undefined, { parentId: invoiceId });
+        // Check if products are already included in the invoice data
+        if (event.data.$attributes.products && event.data.$attributes.products.length > 0) {
+            console.log('Using products from invoice data:', event.data.$attributes.products);
+            invoiceProducts.value[invoiceId] = event.data.$attributes.products;
+            return;
+        }
 
+        // Fallback: Load products using the Orion belongsToMany relationship endpoint
+        const response = await fetch(`/api/invoices/${invoiceId}/products`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const products = await response.json();
+        console.log('Products loaded from API:', products);
         invoiceProducts.value[invoiceId] = products;
     } catch (error) {
         console.error('Error loading products:', error);
@@ -456,10 +481,7 @@ onMounted(() => {
                         @row-expand="onRowExpand"
                         @row-collapse="onRowCollapse"
                     >
-                        <Column
-                            :expander="true"
-                            :header-style="'width: 3rem'"
-                        />
+                        <Column :expander="true" headerStyle="width: 3rem" />
 
                         <Column
                             field="id"

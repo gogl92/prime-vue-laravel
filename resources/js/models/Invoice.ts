@@ -12,6 +12,18 @@ export class Invoice extends Model<{
     country: string
     created_at?: string
     updated_at?: string
+    products?: Array<{
+        id: number
+        name: string
+        description?: string
+        price: number
+        quantity: number
+        sku: string
+        pivot: {
+            quantity: number
+            price: number
+        }
+    }>
 }> {
     public $resource(): string {
         return 'invoices';
