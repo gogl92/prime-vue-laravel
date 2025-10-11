@@ -17,5 +17,8 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         Invoice::factory(10)->create();
+
+        // Seed products and attach them to invoices
+        $this->call(ProductSeeder::class);
     }
 }

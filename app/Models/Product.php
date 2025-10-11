@@ -8,28 +8,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Invoice extends Model
+class Product extends Model
 {
-    /** @use HasFactory<\Database\Factories\InvoiceFactory> */
+    /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'email',
-        'phone',
-        'address',
-        'city',
-        'state',
-        'zip',
-        'country',
+        'description',
+        'price',
+        'quantity',
+        'sku',
     ];
 
     /**
-     * Get the products that belong to the invoice.
+     * Get the invoices that belong to the product.
      */
-    public function products(): BelongsToMany
+    public function invoices(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class)
+        return $this->belongsToMany(Invoice::class)
             ->withPivot(['quantity', 'price'])
             ->withTimestamps();
     }

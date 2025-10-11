@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Orion\Facades\Orion;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\InvoiceProductsController;
 use App\Http\Controllers\Api\AuthController;
 
 // Public authentication routes
@@ -31,4 +33,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Resource routes
     Orion::resource('invoices', InvoiceController::class);
+    Orion::resource('products', ProductController::class);
+    Orion::belongsToManyResource('invoices', 'products', InvoiceProductsController::class);
 });

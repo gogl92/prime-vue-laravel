@@ -3,6 +3,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Invoice } from '@/models/Invoice';
+import type { Product } from '@/models/Product';
 import { debounce } from 'lodash-es';
 
 // Components
@@ -14,6 +15,8 @@ import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 
 import { FilterOperator } from '@tailflow/laravel-orion/lib/drivers/default/enums/filterOperator';
 import { SortDirection } from '@tailflow/laravel-orion/lib/drivers/default/enums/sortDirection';
@@ -27,6 +30,9 @@ const saving = ref(false);
 const deleting = ref(false);
 const invoices = ref<Invoice[]>([]);
 const totalRecords = ref(0);
+const expandedRows = ref({});
+const invoiceProducts = ref<Record<number, Product[]>>({});
+const loadingProducts = ref<Record<number, boolean>>({});
 
 // Pagination
 const pagination = reactive({
@@ -307,6 +313,52 @@ const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
 };
 
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(amount);
+};
+
+const onRowExpand = async (event: { data: Invoice }) => {
+    const invoiceId = event.data.$attributes.id;
+
+    if (!invoiceId) return;
+
+    // Check if products are already loaded
+    if (invoiceProducts.value[invoiceId]) {
+        return;
+    }
+
+    try {
+        loadingProducts.value[invoiceId] = true;
+
+        // Load products for this invoice using Orion relationship
+        // Using the belongsToMany relationship endpoint
+        const products = await Invoice.$query()
+            .related('products')
+            .get(undefined, undefined, { parentId: invoiceId });
+
+        invoiceProducts.value[invoiceId] = products;
+    } catch (error) {
+        console.error('Error loading products:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load products',
+            life: 3000,
+        });
+    } finally {
+        loadingProducts.value[invoiceId] = false;
+    }
+};
+
+const onRowCollapse = (_event: { data: Invoice }) => {
+    // Optionally clear products when row collapses to save memory
+    // const invoiceId = event.data.$attributes.id;
+    // delete invoiceProducts.value[invoiceId];
+};
+
 // Lifecycle
 onMounted(() => {
     void loadInvoices();
@@ -387,6 +439,7 @@ onMounted(() => {
                     <DataTable
                         :value="invoices"
                         :loading="loading"
+                        v-model:expandedRows="expandedRows"
                         paginator
                         :rows="pagination.rows"
                         :first="(pagination.page - 1) * pagination.rows"
@@ -400,7 +453,14 @@ onMounted(() => {
                         responsive-layout="scroll"
                         @page="onPageChange"
                         @sort="onSort"
+                        @row-expand="onRowExpand"
+                        @row-collapse="onRowCollapse"
                     >
+                        <Column
+                            :expander="true"
+                            :header-style="'width: 3rem'"
+                        />
+
                         <Column
                             field="id"
                             header="ID"
@@ -499,6 +559,69 @@ onMounted(() => {
                                 </div>
                             </template>
                         </Column>
+
+                        <template #expansion="{ data }">
+                            <div class="p-4 border-t bg-surface-50 dark:bg-surface-800">
+                                <TabView>
+                                    <TabPanel
+                                        value="products"
+                                        header="Products"
+                                    >
+                                        <div v-if="loadingProducts[data.$attributes.id]" class="flex justify-center p-4">
+                                            <i class="pi pi-spin pi-spinner text-2xl"></i>
+                                        </div>
+                                        <DataTable
+                                            v-else-if="invoiceProducts[data.$attributes.id]?.length"
+                                            :value="invoiceProducts[data.$attributes.id]"
+                                            tableStyle="min-width: 50rem"
+                                            class="p-datatable-sm"
+                                        >
+                                            <Column field="id" header="#" style="width: 60px">
+                                                <template #body="{ index }">
+                                                    {{ index + 1 }}
+                                                </template>
+                                            </Column>
+                                            <Column field="name" header="Product Name" sortable></Column>
+                                            <Column field="description" header="Description" sortable>
+                                                <template #body="{ data }">
+                                                    <div class="max-w-xs truncate" :title="data.$attributes.description">
+                                                        {{ data.$attributes.description }}
+                                                    </div>
+                                                </template>
+                                            </Column>
+                                            <Column field="sku" header="SKU" sortable></Column>
+                                            <Column field="pivot.quantity" header="Quantity" sortable>
+                                                <template #body="{ data }">
+                                                    {{ data.$attributes.pivot?.quantity || 1 }}
+                                                </template>
+                                            </Column>
+                                            <Column field="pivot.price" header="Unit Price" sortable>
+                                                <template #body="{ data }">
+                                                    {{ formatCurrency(data.$attributes.pivot?.price || data.$attributes.price) }}
+                                                </template>
+                                            </Column>
+                                            <Column header="Total" sortable>
+                                                <template #body="{ data }">
+                                                    {{ formatCurrency((data.$attributes.pivot?.quantity || 1) * (data.$attributes.pivot?.price || data.$attributes.price)) }}
+                                                </template>
+                                            </Column>
+                                        </DataTable>
+                                        <div v-else class="text-center p-4 text-surface-500">
+                                            No products found for this invoice.
+                                        </div>
+                                    </TabPanel>
+                                    <TabPanel
+                                        value="payments"
+                                        header="Payments"
+                                    >
+                                        <div class="text-center p-8 text-surface-500">
+                                            <i class="pi pi-credit-card text-4xl mb-4"></i>
+                                            <p>Payments functionality will be implemented here.</p>
+                                        </div>
+                                    </TabPanel>
+                                </TabView>
+                            </div>
+                        </template>
                     </DataTable>
                 </template>
             </Card>
