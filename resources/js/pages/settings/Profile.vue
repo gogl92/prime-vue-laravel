@@ -7,11 +7,12 @@ import SettingsLayout from '@/layouts/UserSettingsLayout.vue';
 import DeleteUserModal from '@/components/DeleteUserModal.vue';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 defineProps<{
   mustVerifyEmail: boolean;
   status?: string;
 }>();
+
+const { t } = useI18n();
 
 const breadcrumbs = [
   { label: t('Dashboard'), route: route('dashboard') },

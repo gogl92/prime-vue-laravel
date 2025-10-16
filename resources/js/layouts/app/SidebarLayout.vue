@@ -30,7 +30,6 @@ const isMobile = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : 
 onMounted(() => {
   const updateMobileState = () => {
     isMobile.value = window.innerWidth < 1024;
-    console.log('Mobile state updated:', isMobile.value, 'Sidebar open:', sidebarOpen.value);
 
     // Force close sidebar on mobile
     if (isMobile.value) {

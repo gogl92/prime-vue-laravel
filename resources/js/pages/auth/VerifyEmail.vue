@@ -4,10 +4,11 @@ import { useForm, Head as InertiaHead } from '@inertiajs/vue3';
 import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 const props = defineProps<{
   status?: string;
 }>();
+
+const { t } = useI18n();
 
 const sendVerificationForm = useForm({});
 const submit = () => {

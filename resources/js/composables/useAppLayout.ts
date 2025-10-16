@@ -68,18 +68,15 @@ export function useAppLayout() {
       // Only load saved state on desktop (lg breakpoint and above)
       // On mobile, always start with sidebar closed
       const isDesktop = window.innerWidth >= 1024; // lg breakpoint
-      console.log('AppLayout mounted - isDesktop:', isDesktop, 'window width:', window.innerWidth);
 
       if (isDesktop) {
         const savedState = localStorage.getItem('sidebar-open');
         if (savedState !== null) {
           sidebarOpen.value = JSON.parse(savedState);
-          console.log('Loaded saved sidebar state:', sidebarOpen.value);
         }
       } else {
         // Mobile: always start closed
         sidebarOpen.value = false;
-        console.log('Mobile detected - sidebar set to closed');
       }
 
       // Set up window resize listener

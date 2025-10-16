@@ -5,10 +5,11 @@ import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 import InputText from 'primevue/inputtext';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 const props = defineProps<{
   status?: string;
 }>();
+
+const { t } = useI18n();
 
 type InputTextType = InstanceType<typeof InputText> & { $el: HTMLElement };
 const emailInput = useTemplateRef<InputTextType>('email-input');

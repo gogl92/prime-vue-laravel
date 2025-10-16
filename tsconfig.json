@@ -116,6 +116,8 @@
         "resources/js/**/*.vue",
         "eslint.config.ts",
         "vite.config.ts",
-        "components.d.ts"
+        "components.d.ts",
+        "cypress.config.ts",
+        "cypress/**/*.ts"
     ]
 }

@@ -20,8 +20,8 @@ class UserSeeder extends Seeder
 
         // Create my user (Admin user)
         $admin = User::create([
-            'name' => env('ADMIN_NAME', 'Luis Gonzalez'),
-            'email' => env('ADMIN_EMAIL', 'luisarmando1234@gmail.com'),
+            'name' => config('app.admin_name', 'Admin'),
+            'email' => config('app.admin_email', 'admin@example.com'),
             'password' => Hash::make('12345678'),
         ]);
         $admin->assignRole('super_admin');
@@ -30,13 +30,41 @@ class UserSeeder extends Seeder
         $csvPath = database_path('fixtures/users.csv');
         if (($handle = fopen($csvPath, 'r')) !== false) {
             $header = fgetcsv($handle);
+
+            // Ensure header is valid
+            if ($header === false || empty($header)) {
+                fclose($handle);
+                return;
+            }
+
+            // Convert header values from string|null to string, filtering out nulls
+            $header = array_map(fn($value) => $value ?? '', $header);
+
             while (($row = fgetcsv($handle)) !== false) {
                 // Skip empty rows
                 if (empty(array_filter($row))) {
                     continue;
                 }
 
+                // Ensure row has same length as header
+                if (count($row) !== count($header)) {
+                    continue;
+                }
+
+                // Convert row values from string|null to string, filtering out nulls
+                $row = array_map(fn($value) => $value ?? '', $row);
+
+                /** @var array<string, string> $userData */
                 $userData = array_combine($header, $row);
+
+                // Validate required fields exist and are not empty
+                if (!isset($userData['name'], $userData['email'], $userData['password']) ||
+                    $userData['name'] === '' ||
+                    $userData['email'] === '' ||
+                    $userData['password'] === '') {
+                    continue;
+                }
+
                 $user = User::create([
                     'name' => $userData['name'],
                     'email' => $userData['email'],
@@ -44,7 +72,7 @@ class UserSeeder extends Seeder
                 ]);
 
                 // Assign role from CSV
-                if (isset($userData['role']) && !empty($userData['role'])) {
+                if (isset($userData['role']) && $userData['role'] !== '') {
                     $user->assignRole($userData['role']);
                 }
             }

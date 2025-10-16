@@ -5,13 +5,14 @@ import { ArrowLeft } from 'lucide-vue-next';
 import Container from '@/components/Container.vue';
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 const props = defineProps<{
   errorTitles: Record<number, string>;
   errorDetails: Record<number, string>;
   status: number;
   homepageRoute: string;
 }>();
+
+const { t } = useI18n();
 
 const title = computed(() => {
   return props.errorTitles[props.status];

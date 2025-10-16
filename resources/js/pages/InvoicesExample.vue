@@ -285,7 +285,7 @@ const saveInvoice = async () => {
       });
     } else {
       // Create new invoice
-      const newInvoice = await Invoice.$query().store(form);
+      await Invoice.$query().store(form);
       toast.add({
         severity: 'success',
         summary: t('Success'),
@@ -436,13 +436,8 @@ const onTabChange = async (
 ) => {
   const invoiceId = invoiceData.$attributes.id;
 
-  console.log('Tab changed to index:', event.index, 'for invoice:', invoiceId);
-  console.log('Invoice data:', invoiceData);
-  console.log('Invoice relations:', invoiceData.$relations);
-
   // If Payments tab is selected (index 1)
   if (event.index === 1) {
-    console.log('Loading payments for invoice:', invoiceId);
     await loadPayments(invoiceId, { data: invoiceData });
   }
 };
@@ -454,12 +449,8 @@ const onRowCollapse = (_event: { data: Invoice }) => {
 };
 
 const loadPayments = async (invoiceId: number, event?: { data: Invoice }) => {
-  console.log('loadPayments called for invoice:', invoiceId);
-  console.log('Event data:', event);
-
   // Check if payments are already loaded
   if (invoicePayments.value[invoiceId]) {
-    console.log('Payments already loaded for invoice:', invoiceId);
     return;
   }
 
@@ -469,19 +460,15 @@ const loadPayments = async (invoiceId: number, event?: { data: Invoice }) => {
     // First check if payments are already included in the invoice data
     if (event?.data?.$relations?.['payments']) {
       const loadedPayments = event.data.$relations['payments'];
-      console.log('Found payments in relations:', loadedPayments);
       if (Array.isArray(loadedPayments) && loadedPayments.length > 0) {
         invoicePayments.value[invoiceId] = loadedPayments as Payment[];
-        console.log('Using payments from relations');
         return;
       }
     }
 
-    console.log('Loading payments from API...');
     // Fallback: Load payments using the Orion hasMany relationship endpoint
     // The URL pattern will be: /api/invoices/{invoice}/payments
     const payments = await Payment.$query().get(invoiceId);
-    console.log('Payments loaded from API:', payments);
     invoicePayments.value[invoiceId] = payments;
   } catch (error) {
     console.error('Error loading payments:', error);
@@ -567,7 +554,7 @@ onMounted(() => {
       <Card>
         <template #title>
           <div class="flex items-center justify-between">
-            <span>{{ t('Invoices ({{ totalRecords }} total)', { totalRecords }) }}</span>
+            <span>{{ t('Invoices') }} ({{ totalRecords }} {{ t('total') }})</span>
             <div class="flex items-center gap-2">
               <Button
                 icon="pi pi-refresh"

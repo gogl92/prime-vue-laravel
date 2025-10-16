@@ -28,6 +28,7 @@ import { createI18n } from 'vue-i18n';
 // Alternatively, can be defined in cypress/support/component.d.ts
 // with a <reference path="./component" /> at the top of your spec.
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       mount: typeof mount;
@@ -46,8 +47,8 @@ Cypress.Commands.add('mount', (component, options = {}) => {
   });
 
   // Setup vue instance options
-  options.global = options.global || {};
-  options.global.plugins = options.global.plugins || [];
+  options.global = options.global ?? {};
+  options.global.plugins = options.global.plugins ?? [];
   options.global.plugins.push(PrimeVue);
   options.global.plugins.push(i18n);
 
