@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
             }
 
             // Convert header values from string|null to string, filtering out nulls
-            $header = array_map(fn($value) => $value ?? '', $header);
+            $header = array_map(fn ($value) => $value ?? '', $header);
 
             while (($row = fgetcsv($handle)) !== false) {
                 // Skip empty rows
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
                 }
 
                 // Convert row values from string|null to string, filtering out nulls
-                $row = array_map(fn($value) => $value ?? '', $row);
+                $row = array_map(fn ($value) => $value ?? '', $row);
 
                 /** @var array<string, string> $userData */
                 $userData = array_combine($header, $row);
