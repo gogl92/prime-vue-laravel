@@ -34,4 +34,3 @@ class PaymentSeeder extends Seeder
         $this->command->info('Payments seeded successfully!');
     }
 }
-

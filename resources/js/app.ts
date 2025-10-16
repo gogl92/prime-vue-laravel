@@ -21,104 +21,101 @@ import orionService from '@/services/orion';
 
 // Chart.js - Register required components
 import {
-    Chart as ChartJS,
-    Title,
-    Tooltip as ChartTooltip,
-    Legend,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    ArcElement,
-    LineElement,
-    PointElement,
-    RadialLinearScale,
-    Filler,
+  Chart as ChartJS,
+  Title,
+  Tooltip as ChartTooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Filler,
 } from 'chart.js';
 
 ChartJS.register(
-    Title,
-    ChartTooltip,
-    Legend,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    ArcElement,
-    LineElement,
-    PointElement,
-    RadialLinearScale,
-    Filler,
+  Title,
+  ChartTooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Filler
 );
 
 const appName = import.meta.env['VITE_APP_NAME'] ?? 'Laravel';
 
 void createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
-    resolve: (name) =>
-        resolvePageComponent(
-            `./pages/${name}.vue`,
-            import.meta.glob<DefineComponent>('./pages/**/*.vue'),
-        ),
-    setup({ el, App, props, plugin }) {
-        // Initialize Orion service
-        void orionService;
+  title: title => `${title} - ${appName}`,
+  resolve: name =>
+    resolvePageComponent(
+      `./pages/${name}.vue`,
+      import.meta.glob<DefineComponent>('./pages/**/*.vue')
+    ),
+  setup({ el, App, props, plugin }) {
+    // Initialize Orion service
+    void orionService;
 
-        // Site light/dark mode
-        const colorMode = useSiteColorMode({ emitAuto: true });
+    // Site light/dark mode
+    const colorMode = useSiteColorMode({ emitAuto: true });
 
-        // Root component with Global Toast
-        const Root = {
-            setup() {
-                // Initialize auth token handling
-                useAuthToken();
+    // Root component with Global Toast
+    const Root = {
+      setup() {
+        // Initialize auth token handling
+        useAuthToken();
 
-                // show error toast instead of standard Inertia modal response
-                const toast = useToast();
-                router.on('invalid', (event) => {
-                    const responseBody = event.detail.response?.data;
-                    if (responseBody?.error_summary && responseBody?.error_detail) {
-                        event.preventDefault();
-                        toast.add({
-                            severity: event.detail.response?.status >= 500 ? 'error' : 'warn',
-                            summary: responseBody.error_summary,
-                            detail: responseBody.error_detail,
-                            life: 5000,
-                        });
-                    }
-                });
+        // show error toast instead of standard Inertia modal response
+        const toast = useToast();
+        router.on('invalid', event => {
+          const responseBody = event.detail.response?.data;
+          if (responseBody?.error_summary && responseBody?.error_detail) {
+            event.preventDefault();
+            toast.add({
+              severity: event.detail.response?.status >= 500 ? 'error' : 'warn',
+              summary: responseBody.error_summary,
+              detail: responseBody.error_detail,
+              life: 5000,
+            });
+          }
+        });
 
-                return () => h('div', [
-                    h(App, props),
-                    h(Toast, { position: 'bottom-right' }),
-                ]);
+        return () => h('div', [h(App, props), h(Toast, { position: 'bottom-right' })]);
+      },
+    };
+
+    createApp(Root)
+      .use(plugin)
+      .use(ZiggyVue)
+      .use(PrimeVue, {
+        theme: {
+          preset: themePreset,
+          options: {
+            darkModeSelector: '.dark',
+            cssLayer: {
+              name: 'primevue',
+              order: 'theme, base, primevue, utilities',
             },
-        };
+          },
+        },
+        pt: globalPt,
+      })
+      .use(ToastService)
+      .directive('tooltip', Tooltip)
+      .provide('colorMode', colorMode)
+      .mount(el);
 
-        createApp(Root)
-            .use(plugin)
-            .use(ZiggyVue)
-            .use(PrimeVue, {
-                theme: {
-                    preset: themePreset,
-                    options: {
-                        darkModeSelector: '.dark',
-                        cssLayer: {
-                            name: 'primevue',
-                            order: 'theme, base, primevue, utilities',
-                        },
-                    },
-                },
-                pt: globalPt,
-            })
-            .use(ToastService)
-            .directive('tooltip', Tooltip)
-            .provide('colorMode', colorMode)
-            .mount(el);
-
-        // #app content set to hidden by default
-        // reduces jumpy initial render from SSR content (unstyled PrimeVue components)
-        (el as HTMLElement).style.visibility = 'visible';
-    },
-    progress: {
-        color: 'var(--p-primary-500)',
-    },
+    // #app content set to hidden by default
+    // reduces jumpy initial render from SSR content (unstyled PrimeVue components)
+    (el as HTMLElement).style.visibility = 'visible';
+  },
+  progress: {
+    color: 'var(--p-primary-500)',
+  },
 });

@@ -4,40 +4,36 @@ import type { CookieSetOptions } from 'universal-cookie';
 import { watch } from 'vue';
 
 interface SiteColorModeOptions extends UseColorModeOptions {
-    cookieKey?: string;
-    cookieOpts?: CookieSetOptions;
-    cookieColorMode?: BasicColorSchema;
+  cookieKey?: string;
+  cookieOpts?: CookieSetOptions;
+  cookieColorMode?: BasicColorSchema;
 }
 
 export function useSiteColorMode(opts: SiteColorModeOptions = {}) {
-    const {
-        cookieKey = 'colorScheme',
-        cookieOpts: userOpts,
-        cookieColorMode,
-        ...rest
-    } = opts;
+  const { cookieKey = 'colorScheme', cookieOpts: userOpts, cookieColorMode, ...rest } = opts;
 
-    // a maxAge in seconds (365 days)
-    const defaultOpts: CookieSetOptions = {
-        path: '/',
-        maxAge: 365 * 24 * 60 * 60,
-        sameSite: 'lax',
-    };
+  // a maxAge in seconds (365 days)
+  const defaultOpts: CookieSetOptions = {
+    path: '/',
+    maxAge: 365 * 24 * 60 * 60,
+    sameSite: 'lax',
+  };
 
-    const finalCookieOpts = { ...defaultOpts, ...userOpts };
+  const finalCookieOpts = { ...defaultOpts, ...userOpts };
 
-    const cookies = useCookies([cookieKey]);
-    const initialValue: BasicColorSchema = typeof window === 'undefined'
-        ? (cookieColorMode ?? 'auto')
-        : (cookies.get(cookieKey) as BasicColorSchema) ?? 'auto';
+  const cookies = useCookies([cookieKey]);
+  const initialValue: BasicColorSchema =
+    typeof window === 'undefined'
+      ? (cookieColorMode ?? 'auto')
+      : ((cookies.get(cookieKey) as BasicColorSchema) ?? 'auto');
 
-    const colorMode = useColorMode({ initialValue, ...rest });
+  const colorMode = useColorMode({ initialValue, ...rest });
 
-    if (typeof window !== 'undefined') {
-        watch(colorMode, (mode) => {
-            cookies.set(cookieKey, mode, finalCookieOpts);
-        });
-    }
+  if (typeof window !== 'undefined') {
+    watch(colorMode, mode => {
+      cookies.set(cookieKey, mode, finalCookieOpts);
+    });
+  }
 
-    return colorMode;
+  return colorMode;
 }
