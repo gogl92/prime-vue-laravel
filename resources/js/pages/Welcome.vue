@@ -2,6 +2,7 @@
 import { usePage, Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
 import { LayoutGrid, LogIn, Settings, UserPlus } from 'lucide-vue-next';
 import Container from '@/components/Container.vue';
+import { useI18n } from 'vue-i18n';
 
 defineProps<{
   laravelVersion: string;
@@ -9,6 +10,7 @@ defineProps<{
 }>();
 
 const page = usePage();
+const { t } = useI18n();
 </script>
 
 <template>
@@ -20,21 +22,21 @@ const page = usePage();
         <template #content>
           <div class="text-center md:text-left">
             <span class="block text-6xl font-bold text-red-500 dark:text-red-400 mb-1">
-              Laravel,
+              {{ t('Laravel,') }}
             </span>
             <div class="text-6xl font-bold text-indigo-500 dark:text-indigo-400 mb-1">
-              Inertia.js,
+              {{ t('Inertia.js,') }}
             </div>
             <div class="text-6xl text-green-500 dark:text-green-400 text-emerald font-bold mb-4">
-              & PrimeVue
+              {{ t('& PrimeVue') }}
             </div>
             <p class="mt-0 mb-4 text-muted-color leading-normal">
-              A starter kit using
+              {{ t('A starter kit using') }}
               <Button
                 class="p-0 no-underline"
                 variant="link"
                 as="a"
-                label="Laravel"
+                :label="t('Laravel')"
                 href="https://laravel.com/docs/master"
                 target="_blank"
                 rel="noopener"
@@ -44,7 +46,7 @@ const page = usePage();
                 class="p-0 no-underline"
                 variant="link"
                 as="a"
-                label="Inertia.js"
+                :label="t('Inertia.js')"
                 href="https://inertiajs.com/"
                 target="_blank"
                 rel="noopener"
@@ -54,7 +56,7 @@ const page = usePage();
                 class="p-0 no-underline"
                 variant="link"
                 as="a"
-                label="PrimeVue"
+                :label="t('PrimeVue')"
                 href="https://primevue.org/"
                 target="_blank"
                 rel="noopener"
@@ -63,14 +65,14 @@ const page = usePage();
             </p>
             <template v-if="page.props.auth.user">
               <InertiaLink :href="route('dashboard')">
-                <Button label="Dashboard" class="mr-4">
+                <Button :label="t('Dashboard')" class="mr-4">
                   <template #icon>
                     <LayoutGrid />
                   </template>
                 </Button>
               </InertiaLink>
               <InertiaLink :href="route('profile.edit')">
-                <Button outlined label="Profile Settings" class="mr-4">
+                <Button outlined :label="t('Profile Settings')" class="mr-4">
                   <template #icon>
                     <Settings />
                   </template>
@@ -79,14 +81,14 @@ const page = usePage();
             </template>
             <template v-else>
               <InertiaLink :href="route('login')">
-                <Button label="Login" class="mr-4">
+                <Button :label="t('Login')" class="mr-4">
                   <template #icon>
                     <LogIn />
                   </template>
                 </Button>
               </InertiaLink>
               <InertiaLink :href="route('register')">
-                <Button outlined label="Register" class="mr-4">
+                <Button outlined :label="t('Register')" class="mr-4">
                   <template #icon>
                     <UserPlus />
                   </template>

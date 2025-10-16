@@ -200,4 +200,10 @@ export default {
 
   // Error Page
   'Back to homepage': 'Volver a la página de inicio',
+
+  // Delete User Modal
+  'Are you sure you want to delete your account?':
+    '¿Estás seguro de que deseas eliminar tu cuenta?',
+  'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.':
+    'Una vez que tu cuenta sea eliminada, todos sus recursos y datos serán eliminados permanentemente. Por favor ingresa tu contraseña para confirmar que deseas eliminar permanentemente tu cuenta.',
 };

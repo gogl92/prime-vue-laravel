@@ -6,6 +6,7 @@ import { Invoice } from '@/models/Invoice';
 import { Product } from '@/models/Product';
 import { Payment } from '@/models/Payment';
 import { debounce } from 'lodash-es';
+import { useI18n } from 'vue-i18n';
 
 // Components
 import Card from 'primevue/card';
@@ -22,7 +23,8 @@ import TabPanel from 'primevue/tabpanel';
 import { FilterOperator } from '@tailflow/laravel-orion/lib/drivers/default/enums/filterOperator';
 import { SortDirection } from '@tailflow/laravel-orion/lib/drivers/default/enums/sortDirection';
 
-// Toast
+// Toast & i18n
+const { t } = useI18n();
 const toast = useToast();
 
 // State
@@ -197,8 +199,8 @@ const loadInvoices = async () => {
     console.error('Error loading invoices:', error);
     toast.add({
       severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to load invoices',
+      summary: t('Error'),
+      detail: t('Failed to load invoices'),
       life: 3000,
     });
   } finally {
@@ -245,8 +247,8 @@ const deleteInvoice = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Success',
-      detail: 'Invoice deleted successfully',
+      summary: t('Success'),
+      detail: t('Invoice deleted successfully'),
       life: 3000,
     });
 
@@ -257,8 +259,8 @@ const deleteInvoice = async () => {
     console.error('Error deleting invoice:', error);
     toast.add({
       severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to delete invoice',
+      summary: t('Error'),
+      detail: t('Failed to delete invoice'),
       life: 3000,
     });
   } finally {
@@ -277,8 +279,8 @@ const saveInvoice = async () => {
       await editingInvoice.value.$save();
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Invoice updated successfully',
+        summary: t('Success'),
+        detail: t('Invoice updated successfully'),
         life: 3000,
       });
     } else {
@@ -286,8 +288,8 @@ const saveInvoice = async () => {
       const newInvoice = await Invoice.$query().store(form);
       toast.add({
         severity: 'success',
-        summary: 'Success',
-        detail: 'Invoice ' + newInvoice.$attributes.id + ' created successfully',
+        summary: t('Success'),
+        detail: t('Invoice created successfully'),
         life: 3000,
       });
     }
@@ -306,8 +308,8 @@ const saveInvoice = async () => {
 
     toast.add({
       severity: 'error',
-      summary: 'Error',
-      detail: errorObj.response?.data?.message ?? 'Failed to save invoice',
+      summary: t('Error'),
+      detail: errorObj.response?.data?.message ?? t('Failed to save invoice'),
       life: 3000,
     });
   } finally {
@@ -419,8 +421,8 @@ const onRowExpand = async (event: { data: Invoice }) => {
     console.error('Error loading products:', error);
     toast.add({
       severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to load products',
+      summary: t('Error'),
+      detail: t('Failed to load products'),
       life: 3000,
     });
   } finally {
@@ -485,8 +487,8 @@ const loadPayments = async (invoiceId: number, event?: { data: Invoice }) => {
     console.error('Error loading payments:', error);
     toast.add({
       severity: 'error',
-      summary: 'Error',
-      detail: 'Failed to load payments',
+      summary: t('Error'),
+      detail: t('Failed to load payments'),
       life: 3000,
     });
   } finally {
@@ -511,15 +513,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout title="Invoices Example - Orion API">
+  <AppLayout :title="t('Invoices Example - Orion API')">
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-surface-900 dark:text-surface-0">
-          Invoices Example - Orion API
+          {{ t('Invoices Example - Orion API') }}
         </h1>
         <Button
-          label="Add Invoice"
+          :label="t('Add Invoice')"
           icon="pi pi-plus"
           severity="success"
           class="p-button-success"
@@ -528,31 +530,31 @@ onMounted(() => {
       </div>
       <!-- Filters -->
       <Card>
-        <template #title>Filters</template>
+        <template #title>{{ t('Filters') }}</template>
         <template #content>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-2">Search</label>
+              <label class="block text-sm font-medium mb-2">{{ t('Search') }}</label>
               <InputText
                 v-model="filters.search"
-                placeholder="Search invoices..."
+                :placeholder="t('Search invoices...')"
                 @input="debouncedSearch"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-2">City</label>
+              <label class="block text-sm font-medium mb-2">{{ t('City') }}</label>
               <InputText
                 v-model="filters.city"
-                placeholder="Filter by city..."
+                :placeholder="t('Filter by city...')"
                 @input="debouncedSearch"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-2">Country</label>
+              <label class="block text-sm font-medium mb-2">{{ t('Country') }}</label>
               <Dropdown
                 v-model="filters.country"
                 :options="countryOptions"
-                placeholder="Select country"
+                :placeholder="t('Select country')"
                 show-clear
                 @change="loadInvoices"
               />
@@ -565,7 +567,7 @@ onMounted(() => {
       <Card>
         <template #title>
           <div class="flex items-center justify-between">
-            <span>Invoices ({{ totalRecords }} total)</span>
+            <span>{{ t('Invoices ({{ totalRecords }} total)', { totalRecords }) }}</span>
             <div class="flex items-center gap-2">
               <Button
                 icon="pi pi-refresh"
@@ -601,13 +603,13 @@ onMounted(() => {
           >
             <Column expander :header-style="{ width: '3rem' }" />
 
-            <Column field="id" header="ID" sortable style="width: 80px">
+            <Column field="id" :header="t('ID')" sortable style="width: 80px">
               <template #body="{ data }">
                 <Tag :value="data.$attributes.id" severity="info" />
               </template>
             </Column>
 
-            <Column field="name" header="Name" sortable>
+            <Column field="name" :header="t('Name')" sortable>
               <template #body="{ data }">
                 <div class="font-medium">
                   {{ data.$attributes.name }}
@@ -618,7 +620,7 @@ onMounted(() => {
               </template>
             </Column>
 
-            <Column field="phone" header="Phone" sortable>
+            <Column field="phone" :header="t('Phone')" sortable>
               <template #body="{ data }">
                 <div class="flex items-center gap-2">
                   <i class="pi pi-phone text-surface-500" />
@@ -627,7 +629,7 @@ onMounted(() => {
               </template>
             </Column>
 
-            <Column field="city" header="Location" sortable>
+            <Column field="city" :header="t('Location')" sortable>
               <template #body="{ data }">
                 <div>
                   <div class="font-medium">
@@ -640,7 +642,7 @@ onMounted(() => {
               </template>
             </Column>
 
-            <Column field="created_at" header="Created" sortable>
+            <Column field="created_at" :header="t('Created')" sortable>
               <template #body="{ data }">
                 <div class="text-sm">
                   {{ formatDate(data.$attributes.created_at) }}
@@ -648,11 +650,11 @@ onMounted(() => {
               </template>
             </Column>
 
-            <Column header="Actions" style="width: 150px">
+            <Column :header="t('Actions')" style="width: 150px">
               <template #body="{ data }">
                 <div class="flex gap-2">
                   <Button
-                    v-tooltip="'Edit'"
+                    v-tooltip="t('Edit')"
                     icon="pi pi-pencil"
                     severity="warning"
                     text
@@ -661,7 +663,7 @@ onMounted(() => {
                     @click="editInvoice(data)"
                   />
                   <Button
-                    v-tooltip="'Delete'"
+                    v-tooltip="t('Delete')"
                     icon="pi pi-trash"
                     severity="danger"
                     text
@@ -676,7 +678,7 @@ onMounted(() => {
             <template #expansion="{ data }">
               <div class="p-4 border-t bg-surface-50 dark:bg-surface-800">
                 <TabView @tab-change="event => onTabChange(event, data)">
-                  <TabPanel value="products" header="Products">
+                  <TabPanel value="products" :header="t('Products')">
                     <div
                       v-if="loadingProducts[data.$attributes.id]"
                       class="flex justify-center p-4"
@@ -689,17 +691,17 @@ onMounted(() => {
                       :table-style="{ minWidth: '50rem' }"
                       class="p-datatable-sm"
                     >
-                      <Column field="id" header="#" style="width: 60px">
+                      <Column field="id" :header="t('#')" style="width: 60px">
                         <template #body="{ index }">
                           {{ index + 1 }}
                         </template>
                       </Column>
-                      <Column header="Product Name" sortable>
+                      <Column :header="t('Product Name')" sortable>
                         <template #body="{ data: productData }">
                           {{ productData.$attributes?.name || productData.name }}
                         </template>
                       </Column>
-                      <Column header="Description" sortable>
+                      <Column :header="t('Description')" sortable>
                         <template #body="{ data: productData }">
                           <div
                             class="max-w-xs truncate"
@@ -709,12 +711,12 @@ onMounted(() => {
                           </div>
                         </template>
                       </Column>
-                      <Column header="SKU" sortable>
+                      <Column :header="t('SKU')" sortable>
                         <template #body="{ data: productData }">
                           {{ productData.$attributes?.sku || productData.sku }}
                         </template>
                       </Column>
-                      <Column header="Quantity" sortable>
+                      <Column :header="t('Quantity')" sortable>
                         <template #body="{ data: productData }">
                           {{
                             productData.$attributes?.pivot?.quantity ||
@@ -723,7 +725,7 @@ onMounted(() => {
                           }}
                         </template>
                       </Column>
-                      <Column header="Unit Price" sortable>
+                      <Column :header="t('Unit Price')" sortable>
                         <template #body="{ data: productData }">
                           {{
                             formatCurrency(
@@ -735,7 +737,7 @@ onMounted(() => {
                           }}
                         </template>
                       </Column>
-                      <Column header="Total" sortable>
+                      <Column :header="t('Total')" sortable>
                         <template #body="{ data: productData }">
                           {{
                             formatCurrency(
@@ -752,10 +754,10 @@ onMounted(() => {
                       </Column>
                     </DataTable>
                     <div v-else class="text-center p-4 text-surface-500">
-                      No products found for this invoice.
+                      {{ t('No products found for this invoice.') }}
                     </div>
                   </TabPanel>
-                  <TabPanel value="payments" header="Payments">
+                  <TabPanel value="payments" :header="t('Payments')">
                     <div
                       v-if="loadingPayments[data.$attributes.id]"
                       class="flex justify-center p-4"
@@ -768,7 +770,7 @@ onMounted(() => {
                         :table-style="{ minWidth: '50rem' }"
                         class="p-datatable-sm"
                       >
-                        <Column field="id" header="#" style="width: 80px">
+                        <Column field="id" :header="t('#')" style="width: 80px">
                           <template #body="{ data: paymentData }">
                             <Tag
                               :value="paymentData.$attributes?.id || paymentData.id"
@@ -776,7 +778,7 @@ onMounted(() => {
                             />
                           </template>
                         </Column>
-                        <Column header="Amount" sortable>
+                        <Column :header="t('Amount')" sortable>
                           <template #body="{ data: paymentData }">
                             <div class="font-semibold text-lg">
                               {{
@@ -787,7 +789,7 @@ onMounted(() => {
                             </div>
                           </template>
                         </Column>
-                        <Column header="Payment Method" sortable>
+                        <Column :header="t('Payment Method')" sortable>
                           <template #body="{ data: paymentData }">
                             <div class="flex items-center gap-2">
                               <i
@@ -810,7 +812,7 @@ onMounted(() => {
                             </div>
                           </template>
                         </Column>
-                        <Column header="Status" sortable>
+                        <Column :header="t('Status')" sortable>
                           <template #body="{ data: paymentData }">
                             <Tag
                               :value="
@@ -826,7 +828,7 @@ onMounted(() => {
                             />
                           </template>
                         </Column>
-                        <Column header="Transaction ID" sortable>
+                        <Column :header="t('Transaction ID')" sortable>
                           <template #body="{ data: paymentData }">
                             <div class="text-sm font-mono text-surface-600 dark:text-surface-400">
                               {{
@@ -837,7 +839,7 @@ onMounted(() => {
                             </div>
                           </template>
                         </Column>
-                        <Column header="Paid At" sortable>
+                        <Column :header="t('Paid At')" sortable>
                           <template #body="{ data: paymentData }">
                             <div class="text-sm">
                               {{
@@ -848,7 +850,7 @@ onMounted(() => {
                             </div>
                           </template>
                         </Column>
-                        <Column header="Notes">
+                        <Column :header="t('Notes')">
                           <template #body="{ data: paymentData }">
                             <div
                               class="max-w-xs truncate text-sm text-surface-600 dark:text-surface-400"
@@ -862,7 +864,7 @@ onMounted(() => {
                       <div
                         class="mt-4 p-4 bg-surface-100 dark:bg-surface-900 rounded-lg flex justify-between items-center"
                       >
-                        <div class="text-lg font-semibold">Total Payments:</div>
+                        <div class="text-lg font-semibold">{{ t('Total Payments:') }}</div>
                         <div class="text-2xl font-bold text-primary">
                           {{ formatCurrency(getTotalPayments(data.$attributes.id)) }}
                         </div>
@@ -870,7 +872,7 @@ onMounted(() => {
                     </div>
                     <div v-else class="text-center p-8 text-surface-500">
                       <i class="pi pi-credit-card text-4xl mb-4 block" />
-                      <p>No payments found for this invoice.</p>
+                      <p>{{ t('No payments found for this invoice.') }}</p>
                     </div>
                   </TabPanel>
                 </TabView>
@@ -884,7 +886,7 @@ onMounted(() => {
     <!-- Create/Edit Dialog -->
     <Dialog
       v-model:visible="showCreateDialog"
-      :header="editingInvoice ? 'Edit Invoice' : 'Create Invoice'"
+      :header="editingInvoice ? t('Edit Invoice') : t('Create Invoice')"
       modal
       :style="{ width: '600px' }"
       append-to="body"
@@ -892,82 +894,82 @@ onMounted(() => {
       <form class="space-y-4" @submit.prevent="saveInvoice">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-2">Name *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('Name *') }}</label>
             <InputText
               v-model="form.name"
-              placeholder="Enter name"
+              :placeholder="t('Enter name')"
               :class="{ 'p-invalid': errors['name'] }"
             />
             <small v-if="errors['name']" class="text-red-500">{{ errors['name'] }}</small>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2">Email *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('Email *') }}</label>
             <InputText
               v-model="form.email"
               type="email"
-              placeholder="Enter email"
+              :placeholder="t('Enter email')"
               :class="{ 'p-invalid': errors['email'] }"
             />
             <small v-if="errors['email']" class="text-red-500">{{ errors['email'] }}</small>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2">Phone *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('Phone *') }}</label>
             <InputText
               v-model="form.phone"
-              placeholder="Enter phone"
+              :placeholder="t('Enter phone')"
               :class="{ 'p-invalid': errors['phone'] }"
             />
             <small v-if="errors['phone']" class="text-red-500">{{ errors['phone'] }}</small>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2">Address *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('Address *') }}</label>
             <InputText
               v-model="form.address"
-              placeholder="Enter address"
+              :placeholder="t('Enter address')"
               :class="{ 'p-invalid': errors['address'] }"
             />
             <small v-if="errors['address']" class="text-red-500">{{ errors['address'] }}</small>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2">City *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('City *') }}</label>
             <InputText
               v-model="form.city"
-              placeholder="Enter city"
+              :placeholder="t('Enter city')"
               :class="{ 'p-invalid': errors['city'] }"
             />
             <small v-if="errors['city']" class="text-red-500">{{ errors['city'] }}</small>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2">State *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('State *') }}</label>
             <InputText
               v-model="form.state"
-              placeholder="Enter state"
+              :placeholder="t('Enter state')"
               :class="{ 'p-invalid': errors['state'] }"
             />
             <small v-if="errors['state']" class="text-red-500">{{ errors['state'] }}</small>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2">ZIP Code *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('ZIP Code *') }}</label>
             <InputText
               v-model="form.zip"
-              placeholder="Enter ZIP code"
+              :placeholder="t('Enter ZIP code')"
               :class="{ 'p-invalid': errors['zip'] }"
             />
             <small v-if="errors['zip']" class="text-red-500">{{ errors['zip'] }}</small>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-2">Country *</label>
+            <label class="block text-sm font-medium mb-2">{{ t('Country *') }}</label>
             <Dropdown
               v-model="form.country"
               :options="countryOptions"
-              placeholder="Select country"
+              :placeholder="t('Select country')"
               :class="{ 'p-invalid': errors['country'] }"
             />
             <small v-if="errors['country']" class="text-red-500">{{ errors['country'] }}</small>
@@ -975,8 +977,8 @@ onMounted(() => {
         </div>
 
         <div class="flex justify-end gap-2 pt-4">
-          <Button label="Cancel" severity="secondary" @click="closeDialog" />
-          <Button type="submit" :label="editingInvoice ? 'Update' : 'Create'" :loading="saving" />
+          <Button :label="t('Cancel')" severity="secondary" @click="closeDialog" />
+          <Button type="submit" :label="editingInvoice ? t('Update') : t('Create')" :loading="saving" />
         </div>
       </form>
     </Dialog>
@@ -984,14 +986,14 @@ onMounted(() => {
     <!-- Delete Confirmation Dialog -->
     <Dialog
       v-model:visible="showDeleteDialog"
-      header="Confirm Delete"
+      :header="t('Confirm Delete')"
       modal
       :style="{ width: '400px' }"
       append-to="body"
     >
       <div class="flex items-center gap-3 mb-4">
         <i class="pi pi-exclamation-triangle text-orange-500 text-2xl" />
-        <span>Are you sure you want to delete this invoice?</span>
+        <span>{{ t('Are you sure you want to delete this invoice?') }}</span>
       </div>
       <div v-if="invoiceToDelete" class="bg-surface-100 dark:bg-surface-800 p-3 rounded">
         <div class="font-medium">
@@ -1003,8 +1005,8 @@ onMounted(() => {
       </div>
 
       <template #footer>
-        <Button label="Cancel" severity="secondary" @click="showDeleteDialog = false" />
-        <Button label="Delete" severity="danger" :loading="deleting" @click="deleteInvoice" />
+        <Button :label="t('Cancel')" severity="secondary" @click="showDeleteDialog = false" />
+        <Button :label="t('Delete')" severity="danger" :loading="deleting" @click="deleteInvoice" />
       </template>
     </Dialog>
   </AppLayout>

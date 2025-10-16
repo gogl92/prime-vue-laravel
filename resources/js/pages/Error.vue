@@ -3,7 +3,9 @@ import { computed } from 'vue';
 import { Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 import Container from '@/components/Container.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const props = defineProps<{
   errorTitles: Record<number, string>;
   errorDetails: Record<number, string>;
@@ -38,7 +40,7 @@ const details = computed(() => {
                 {{ details }}
               </p>
               <InertiaLink :href="props.homepageRoute">
-                <Button label="Back to homepage" raised>
+                <Button :label="t('Back to homepage')" raised>
                   <template #icon>
                     <ArrowLeft />
                   </template>

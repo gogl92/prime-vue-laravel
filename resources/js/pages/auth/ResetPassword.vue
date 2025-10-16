@@ -3,7 +3,9 @@ import { useTemplateRef, onMounted } from 'vue';
 import { useForm, Head as InertiaHead } from '@inertiajs/vue3';
 import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 import InputText from 'primevue/inputtext';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const props = defineProps<{
   email: string;
   token: string;
@@ -33,20 +35,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <InertiaHead title="Reset password" />
+  <InertiaHead :title="t('Reset password')" />
 
   <GuestAuthLayout>
     <template #title>
-      <div class="text-center">Reset password</div>
+      <div class="text-center">{{ t('Reset password') }}</div>
     </template>
 
     <template #subtitle>
-      <div class="text-center">Please enter your new password below</div>
+      <div class="text-center">{{ t('Please enter your new password below') }}</div>
     </template>
 
     <form class="space-y-6 sm:space-y-8" @submit.prevent="submit">
       <div class="flex flex-col gap-2">
-        <label for="email">Email address</label>
+        <label for="email">{{ t('Email address') }}</label>
         <InputText
           id="email"
           ref="email-input"
@@ -63,7 +65,7 @@ onMounted(() => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password">New password</label>
+        <label for="password">{{ t('New password') }}</label>
         <Password
           v-model="resetPwForm.password"
           :invalid="Boolean(resetPwForm.errors?.password)"
@@ -79,7 +81,7 @@ onMounted(() => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password-confirmation">Confirm new password</label>
+        <label for="password-confirmation">{{ t('Confirm new password') }}</label>
         <Password
           v-model="resetPwForm.password_confirmation"
           :invalid="Boolean(resetPwForm.errors?.password_confirmation)"
@@ -101,7 +103,7 @@ onMounted(() => {
       </div>
 
       <div>
-        <Button :loading="resetPwForm.processing" type="submit" label="Reset password" fluid />
+        <Button :loading="resetPwForm.processing" type="submit" :label="t('Reset password')" fluid />
       </div>
     </form>
   </GuestAuthLayout>

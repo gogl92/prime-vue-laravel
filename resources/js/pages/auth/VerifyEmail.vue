@@ -2,7 +2,9 @@
 import { computed } from 'vue';
 import { useForm, Head as InertiaHead } from '@inertiajs/vue3';
 import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const props = defineProps<{
   status?: string;
 }>();
@@ -20,22 +22,22 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
 </script>
 
 <template>
-  <InertiaHead title="Email verification" />
+  <InertiaHead :title="t('Verify email')" />
 
   <GuestAuthLayout>
     <template #title>
-      <div class="text-center">Verify email</div>
+      <div class="text-center">{{ t('Verify email') }}</div>
     </template>
 
     <template #subtitle>
       <div class="text-center">
-        Please verify your email address by clicking on the link we just emailed to you.
+        {{ t('Please verify your email address by clicking on the link we just emailed to you.') }}
       </div>
     </template>
 
     <template v-if="verificationLinkSent" #message>
       <Message severity="success" :closable="false" class="shadow-sm">
-        A new verification link has been sent to the email address you provided during registration.
+        {{ t('A new verification link has been sent to the email address you provided during registration.') }}
       </Message>
     </template>
 
@@ -44,7 +46,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
         <Button
           :loading="sendVerificationForm.processing"
           type="submit"
-          label="Resend verification email"
+          :label="t('Resend verification email')"
           fluid
         />
       </form>
@@ -53,7 +55,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
           :loading="logoutForm.processing"
           class="p-0"
           variant="link"
-          label="Log out"
+          :label="t('Log out')"
           @click="logout"
         />
       </div>

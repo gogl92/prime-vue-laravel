@@ -6,8 +6,10 @@ import Card from 'primevue/card';
 import Button from 'primevue/button';
 import Chart from 'primevue/chart';
 import { Invoice } from '@/models/Invoice';
+import { useI18n } from 'vue-i18n';
 
-const breadcrumbs = [{ label: 'Dashboard' }];
+const { t } = useI18n();
+const breadcrumbs = [{ label: t('Dashboard') }];
 const loading = ref<boolean>(false);
 
 // Chart data
@@ -35,7 +37,7 @@ const loadInvoiceStats = async () => {
       labels: countries,
       datasets: [
         {
-          label: 'Invoices by Country',
+          label: t('Invoices by Country'),
           data: counts,
           backgroundColor: [
             'rgba(54, 162, 235, 0.2)',
@@ -68,7 +70,7 @@ const loadInvoiceStats = async () => {
         },
         title: {
           display: true,
-          text: 'Invoice Distribution by Country',
+          text: t('Invoice Distribution by Country'),
         },
       },
       scales: {
@@ -103,9 +105,9 @@ onMounted(() => {
     <Card>
       <template #title>
         <div class="flex justify-between items-center">
-          <span>Invoices Overview</span>
+          <span>{{ t('Invoices Overview') }}</span>
           <Button
-            label="Manage Invoices"
+            :label="t('Manage Invoices')"
             icon="pi pi-arrow-right"
             icon-pos="right"
             @click="goToInvoices"

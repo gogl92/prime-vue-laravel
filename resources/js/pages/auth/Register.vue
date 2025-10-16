@@ -3,7 +3,9 @@ import { useTemplateRef, onMounted } from 'vue';
 import { useForm, Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
 import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 import InputText from 'primevue/inputtext';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const registerForm = useForm({
   name: '',
   email: '',
@@ -28,20 +30,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <InertiaHead title="Register" />
+  <InertiaHead :title="t('Register')" />
 
   <GuestAuthLayout>
     <template #title>
-      <div class="text-center">Create an account</div>
+      <div class="text-center">{{ t('Create an account') }}</div>
     </template>
 
     <template #subtitle>
-      <div class="text-center">Enter your details below to create your account</div>
+      <div class="text-center">{{ t('Enter your details below to create your account') }}</div>
     </template>
 
     <form class="space-y-6 sm:space-y-8" @submit.prevent="submit">
       <div class="flex flex-col gap-2">
-        <label for="name">Name</label>
+        <label for="name">{{ t('Name') }}</label>
         <InputText
           id="name"
           ref="name-input"
@@ -58,7 +60,7 @@ onMounted(() => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="email">Email address</label>
+        <label for="email">{{ t('Email address') }}</label>
         <InputText
           id="email"
           v-model="registerForm.email"
@@ -74,7 +76,7 @@ onMounted(() => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password">Password</label>
+        <label for="password">{{ t('Password') }}</label>
         <Password
           v-model="registerForm.password"
           :invalid="Boolean(registerForm.errors?.password)"
@@ -95,7 +97,7 @@ onMounted(() => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password-confirmation">Confirm password</label>
+        <label for="password-confirmation">{{ t('Confirm password') }}</label>
         <Password
           v-model="registerForm.password_confirmation"
           :invalid="Boolean(registerForm.errors?.password_confirmation)"
@@ -117,13 +119,13 @@ onMounted(() => {
       </div>
 
       <div>
-        <Button type="submit" :loading="registerForm.processing" label="Create account" fluid />
+        <Button type="submit" :loading="registerForm.processing" :label="t('Create account')" fluid />
       </div>
 
       <div class="text-center">
-        <span class="text-muted-color mr-1">Already have an account?</span>
+        <span class="text-muted-color mr-1">{{ t('Already have an account?') }}</span>
         <InertiaLink :href="route('login')">
-          <Button class="p-0" variant="link" label="Log in" />
+          <Button class="p-0" variant="link" :label="t('Log in')" />
         </InertiaLink>
       </div>
     </form>

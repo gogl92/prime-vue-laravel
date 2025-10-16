@@ -3,7 +3,9 @@ import { useTemplateRef, onMounted } from 'vue';
 import { useForm, Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
 import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 import InputText from 'primevue/inputtext';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const props = defineProps<{
   canResetPassword: boolean;
   status?: string;
@@ -32,7 +34,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <InertiaHead title="Log in" />
+  <InertiaHead :title="t('Log in')" />
 
   <GuestAuthLayout>
     <template v-if="props.status" #message>
@@ -42,16 +44,16 @@ onMounted(() => {
     </template>
 
     <template #title>
-      <div class="text-center">Log in to your account</div>
+      <div class="text-center">{{ t('Log in to your account') }}</div>
     </template>
 
     <template #subtitle>
-      <div class="text-center">Enter your email and password below to log in</div>
+      <div class="text-center">{{ t('Enter your email and password below to log in') }}</div>
     </template>
 
     <form class="space-y-6 sm:space-y-8" @submit.prevent="submit">
       <div class="flex flex-col gap-2">
-        <label for="email">Email address</label>
+        <label for="email">{{ t('Email address') }}</label>
         <InputText
           id="email"
           ref="email-input"
@@ -69,9 +71,9 @@ onMounted(() => {
 
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
-          <label for="password">Password</label>
+          <label for="password">{{ t('Password') }}</label>
           <InertiaLink v-if="props.canResetPassword" :href="route('password.request')">
-            <Button class="p-0" variant="link" label="Forgot your password?" />
+            <Button class="p-0" variant="link" :label="t('Forgot your password?')" />
           </InertiaLink>
         </div>
         <Password
@@ -93,19 +95,19 @@ onMounted(() => {
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <Checkbox v-model="loginForm.remember" class="mr-2" input-id="remember" binary />
-            <label for="remember">Remember me</label>
+            <label for="remember">{{ t('Remember me') }}</label>
           </div>
         </div>
       </div>
 
       <div>
-        <Button :loading="loginForm.processing" type="submit" label="Log in" fluid />
+        <Button :loading="loginForm.processing" type="submit" :label="t('Log in')" fluid />
       </div>
 
       <div class="text-center">
-        <span class="text-muted-color mr-1">Don't have an account?</span>
+        <span class="text-muted-color mr-1">{{ t("Don't have an account?") }}</span>
         <InertiaLink :href="route('register')">
-          <Button class="p-0" variant="link" label="Sign up" />
+          <Button class="p-0" variant="link" :label="t('Sign up')" />
         </InertiaLink>
       </div>
     </form>

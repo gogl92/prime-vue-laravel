@@ -5,10 +5,12 @@ import { useToast } from 'primevue/usetoast';
 import Password from 'primevue/password';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/UserSettingsLayout.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const breadcrumbs = [
-  { label: 'Dashboard', route: route('dashboard') },
-  { label: 'Password settings' },
+  { label: t('Dashboard'), route: route('dashboard') },
+  { label: t('Password settings') },
 ];
 
 type PasswordInputType = InstanceType<typeof Password> & { $el: HTMLElement };
@@ -25,8 +27,8 @@ const updatePasswordForm = useForm({
 const showSuccessToast = () => {
   toast.add({
     severity: 'success',
-    summary: 'Saved',
-    detail: 'Your password has been updated',
+    summary: t('Saved'),
+    detail: t('Your password has been updated'),
     life: 3000,
   });
 };
@@ -58,19 +60,19 @@ const updatePassword = () => {
 </script>
 
 <template>
-  <InertiaHead title="Password settings" />
+  <InertiaHead :title="t('Password settings')" />
 
   <AppLayout :breadcrumbs>
     <SettingsLayout>
       <Card pt:body:class="max-w-2xl space-y-3" pt:caption:class="space-y-1">
-        <template #title>Update password</template>
+        <template #title>{{ t('Update password') }}</template>
         <template #subtitle>
-          Ensure your account is using a long, random password to stay secure
+          {{ t('Ensure your account is using a long, random password to stay secure') }}
         </template>
         <template #content>
           <form class="space-y-6" @submit.prevent="updatePassword">
             <div class="flex flex-col gap-2">
-              <label for="current-password">Current password</label>
+              <label for="current-password">{{ t('Current password') }}</label>
               <Password
                 ref="current-password-input"
                 v-model="updatePasswordForm.current_password"
@@ -92,7 +94,7 @@ const updatePassword = () => {
               </Message>
             </div>
             <div class="flex flex-col gap-2">
-              <label for="password">New password</label>
+              <label for="password">{{ t('New password') }}</label>
               <Password
                 ref="new-password-input"
                 v-model="updatePasswordForm.password"
@@ -113,7 +115,7 @@ const updatePassword = () => {
               </Message>
             </div>
             <div class="flex flex-col gap-2">
-              <label for="password-confirmation">Confirm pew password</label>
+              <label for="password-confirmation">{{ t('Confirm pew password') }}</label>
               <Password
                 v-model="updatePasswordForm.password_confirmation"
                 :invalid="Boolean(updatePasswordForm.errors?.password_confirmation)"
@@ -133,7 +135,7 @@ const updatePassword = () => {
                 {{ updatePasswordForm.errors?.password_confirmation }}
               </Message>
             </div>
-            <Button :loading="updatePasswordForm.processing" type="submit" label="Save password" />
+            <Button :loading="updatePasswordForm.processing" type="submit" :label="t('Save password')" />
           </form>
         </template>
       </Card>
