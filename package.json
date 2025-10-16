@@ -7,7 +7,16 @@
         "build:ssr": "vite build && vite build --ssr",
         "lint": "eslint . --fix",
         "format": "prettier --write \"resources/**/*.{js,ts,vue,css,scss,json}\"",
-        "format:check": "prettier --check \"resources/**/*.{js,ts,vue,css,scss,json}\""
+        "format:check": "prettier --check \"resources/**/*.{js,ts,vue,css,scss,json}\"",
+        "cypress:open": "cypress open",
+        "cypress:run": "cypress run",
+        "cypress:open:e2e": "cypress open --e2e",
+        "cypress:open:component": "cypress open --component",
+        "cypress:run:e2e": "cypress run --e2e",
+        "cypress:run:component": "cypress run --component",
+        "test:e2e": "cypress run --e2e",
+        "test:component": "cypress run --component",
+        "test": "cypress run"
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.0.5",
@@ -38,12 +47,15 @@
         "ziggy-js": "^2.5.2"
     },
     "devDependencies": {
+        "@cypress/vue": "^6.0.2",
         "@primevue/auto-import-resolver": "^4.2.5",
+        "@testing-library/cypress": "^10.1.0",
         "@tsconfig/node22": "^22.0.2",
         "@types/node": "^24.5.2",
         "@vitejs/plugin-vue": "^5.0.5",
         "@vue/eslint-config-typescript": "^14.6.0",
         "@vue/tsconfig": "^0.8.1",
+        "cypress": "^15.4.0",
         "eslint": "^9.18.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",

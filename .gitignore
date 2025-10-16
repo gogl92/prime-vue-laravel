@@ -29,3 +29,9 @@ yarn-error.log
 
 components.d.ts
 *.tsbuildinfo
+
+# Cypress
+/cypress/screenshots
+/cypress/videos
+/cypress/downloads
+/cypress.env.json

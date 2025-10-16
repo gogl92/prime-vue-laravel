@@ -16,6 +16,7 @@
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1",
         "propaganistas/laravel-phone": "^6.0",
+        "spatie/laravel-permission": "^6.21",
         "tailflow/laravel-orion": "^2.23",
         "tightenco/ziggy": "^2.5"
     },
