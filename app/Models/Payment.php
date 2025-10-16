@@ -30,6 +30,7 @@ class Payment extends Model
 
     /**
      * Get the invoice that owns the payment.
+     * @return BelongsTo<Invoice, $this>
      */
     public function invoice(): BelongsTo
     {

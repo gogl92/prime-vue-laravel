@@ -35,6 +35,7 @@ class Invoice extends Model
 
     /**
      * Get the products that belong to the invoice.
+     * @return BelongsToMany<Product, $this>
      */
     public function products(): BelongsToMany
     {
@@ -45,6 +46,7 @@ class Invoice extends Model
 
     /**
      * Get the payments for the invoice.
+     * @return HasMany<Payment, $this>
      */
     public function payments(): HasMany
     {

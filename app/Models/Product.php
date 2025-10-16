@@ -23,6 +23,7 @@ class Product extends Model
 
     /**
      * Get the invoices that belong to the product.
+     * @return BelongsToMany<Invoice, $this>
      */
     public function invoices(): BelongsToMany
     {

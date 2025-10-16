@@ -62,7 +62,6 @@ class PaymentController extends BaseOrionController
      */
     public function authorize(string $ability, $arguments = []): Response
     {
-        // @phpstan-ignore-next-line
         return auth()->check() ? Response::allow() : Response::deny('Unauthorized');
     }
 
@@ -71,7 +70,6 @@ class PaymentController extends BaseOrionController
      */
     public function authorizeIndex(): bool
     {
-        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -80,7 +78,6 @@ class PaymentController extends BaseOrionController
      */
     public function authorizeStore(): bool
     {
-        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -89,7 +86,6 @@ class PaymentController extends BaseOrionController
      */
     public function authorizeShow(): bool
     {
-        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -98,7 +94,6 @@ class PaymentController extends BaseOrionController
      */
     public function authorizeUpdate(): bool
     {
-        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
@@ -107,7 +102,6 @@ class PaymentController extends BaseOrionController
      */
     public function authorizeDestroy(): bool
     {
-        // @phpstan-ignore-next-line
         return auth()->check();
     }
 
