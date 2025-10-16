@@ -11,17 +11,19 @@ This is a Laravel 12 + Vue 3 + PrimeVue 4 starter kit built with Inertia.js for 
 ### Starting the Development Environment
 
 ```bash
-composer dev
+sail composer dev
 ```
 This runs concurrently: Laravel dev server (port 8000), queue listener, Pail logs, and Vite dev server (port 5173).
 
 Individual commands if needed:
 ```bash
-php artisan serve              # Laravel server on :8000
-php artisan queue:listen       # Queue worker
-php artisan pail              # Real-time logs
+sail artisan serve             # Laravel server on :8000
+sail artisan queue:listen      # Queue worker
+sail artisan pail             # Real-time logs
 npm run dev                   # Vite dev server with HMR
 ```
+
+**Note**: Always use `sail` or the `sail` alias for PHP, Artisan, and Composer commands to ensure they run inside the Docker container.
 
 ### Building for Production
 
@@ -33,8 +35,8 @@ npm run build:ssr            # Build with SSR support
 ### Testing & Quality
 
 ```bash
-composer test                # Run PHPUnit tests (clears config first)
-composer analyse             # Run PHPstan static analysis (2GB memory)
+sail composer test           # Run PHPUnit tests (clears config first)
+sail composer analyse        # Run PHPstan static analysis (2GB memory)
 npm run lint                 # ESLint with auto-fix
 npm run format               # Format code with Prettier
 npm run format:check         # Check code formatting without making changes
@@ -43,9 +45,9 @@ npm run format:check         # Check code formatting without making changes
 ### Database
 
 ```bash
-php artisan migrate          # Run migrations
-php artisan migrate:fresh    # Fresh migration (drops all tables)
-php artisan db:seed          # Run seeders
+sail artisan migrate         # Run migrations
+sail artisan migrate:fresh   # Fresh migration (drops all tables)
+sail artisan db:seed         # Run seeders
 ```
 
 ## Architecture Overview
@@ -405,6 +407,44 @@ export default {}; // Empty - English text is used as-is
 - Pivot tables: singular model names in alphabetical order (`invoice_product`)
 - Foreign keys: `{model}_id` with `constrained()->cascadeOnDelete()` where appropriate
 - Enum types for status fields (e.g., `payment_method`, `status` in payments)
+
+## Phone Number Validation
+
+**Laravel-Phone** package is installed for international phone number validation and formatting:
+- Package: `propaganistas/laravel-phone`
+- Default countries: US and Mexico (`US`, `MX`)
+
+**Usage in Form Requests**:
+```php
+use Propaganistas\LaravelPhone\Rules\Phone;
+
+public function rules(): array
+{
+    return [
+        'phone' => ['required', 'string', (new Phone())->country(['US', 'MX'])],
+    ];
+}
+```
+
+**Usage in Models** (automatic formatting to E.164):
+```php
+use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
+
+protected function casts(): array
+{
+    return [
+        'phone' => E164PhoneNumberCast::class . ':US,MX',
+    ];
+}
+```
+
+**Benefits**:
+- Validates phone numbers against specific countries
+- Automatically formats to E.164 standard (e.g., `+15551234567`)
+- Handles various input formats (with/without country code, spaces, dashes)
+- Returns PhoneNumber object with formatting methods
+
+**Example**: Invoice model uses phone validation and E.164 casting for US and Mexico numbers
 
 ## Styling Approach
 
