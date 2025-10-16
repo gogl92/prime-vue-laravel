@@ -1,0 +1,9 @@
+name,email,password,role
+Luke Skywalker,luke.skywalker@rebellion.com,password,admin
+Leia Organa,leia.organa@rebellion.com,password,admin
+Han Solo,han.solo@millenniumfalcon.com,password,user
+Chewbacca,chewie@millenniumfalcon.com,password,user
+Obi-Wan Kenobi,obiwan.kenobi@jedi.com,password,admin
+Darth Vader,darth.vader@empire.com,password,user
+Yoda,yoda@jedi.com,password,super_admin
+Rey,rey@jakku.com,password,user
