@@ -1,5 +1,6 @@
 import vue from 'eslint-plugin-vue';
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
     // Global ignores
@@ -72,4 +73,6 @@ export default [
             },
         },
     ),
+    // Prettier config must be last to override conflicting rules
+    eslintConfigPrettier,
 ];

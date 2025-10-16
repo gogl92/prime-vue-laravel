@@ -1,0 +1,34 @@
+# Dependencies
+node_modules
+vendor
+
+# Build outputs
+public/build
+public/hot
+bootstrap/ssr
+storage
+
+# Cache
+.vite
+.phpunit.cache
+
+# Compiled
+*.min.js
+*.min.css
+
+# Auto-generated
+bootstrap/cache
+resources/js/types/generated.d.ts
+ziggy-js
+
+# Laravel/Vite generated
+public/js
+public/css
+public/mix-manifest.json
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
