@@ -148,6 +148,13 @@ resources/js/
 │   └── Payment.ts
 ├── services/
 │   └── orion.ts              # Orion service initialization
+├── i18n/                     # Internationalization
+│   ├── index.ts              # i18n configuration
+│   ├── en.ts                 # English (empty - base language)
+│   ├── es.ts                 # Spanish translations
+│   └── primevue/             # PrimeVue component locales
+│       ├── en.ts             # PrimeVue English locale
+│       └── es.ts             # PrimeVue Spanish locale
 ├── types/                    # TypeScript definitions
 └── theme/                    # PrimeVue theme presets
 ```
@@ -252,6 +259,59 @@ const user = page.props.auth.user
 - Use PrimeVue Toast component in `AppLayout.vue`
 - Triggered by Inertia flash messages
 - Backend: throw `new ErrorToastException('message', 'error')` for user feedback
+
+### Internationalization (i18n)
+
+**Vue I18n** is configured for multi-language support:
+- Configuration: `resources/js/i18n/index.ts`
+- Language files: `resources/js/i18n/en.ts` (base/fallback) and `resources/js/i18n/es.ts`
+- PrimeVue locales: `resources/js/i18n/primevue/en.ts` and `resources/js/i18n/primevue/es.ts`
+- Default locale: `en` (English)
+- Composition API mode enabled (`legacy: false`)
+- PrimeVue locale automatically switches with i18n locale
+
+**Translation Pattern** - Use English text as keys:
+- **DO NOT** create special keys like `auth.login` or `common.submit`
+- **DO** use the English text directly as the translation key
+- The `en.ts` file remains **empty** (English is the fallback)
+- Only add translations to other language files
+
+**Example**:
+```vue
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t, locale } = useI18n()
+</script>
+
+<template>
+  <h1>{{ t('Welcome to the Dashboard') }}</h1>
+  <Button @click="locale = 'es'">{{ t('Switch Language') }}</Button>
+</template>
+```
+
+**Spanish translations** (`resources/js/i18n/es.ts`):
+```typescript
+export default {
+  'Welcome to the Dashboard': 'Bienvenido al Panel',
+  'Switch Language': 'Cambiar idioma',
+};
+```
+
+**English translations** (`resources/js/i18n/en.ts`):
+```typescript
+export default {}; // Empty - English text is used as-is
+```
+
+**PrimeVue Component Translations**:
+- PrimeVue components (Calendar, DataTable, FileUpload, etc.) use separate locale files
+- Located in `resources/js/i18n/primevue/`
+- Include component-specific strings (date names, buttons, aria labels)
+- Automatically applied when i18n locale changes
+
+**Adding new translations**:
+1. Write English text directly in `t()` function: `{{ t('Hello World') }}`
+2. Add translation to `resources/js/i18n/es.ts`: `'Hello World': 'Hola Mundo'`
+3. Do NOT add anything to `en.ts` - keep it empty
 
 ## Key Configuration Files
 

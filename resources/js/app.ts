@@ -4,8 +4,9 @@ import 'primeicons/primeicons.css';
 
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { createApp, type DefineComponent, h } from 'vue';
+import { createApp, type DefineComponent, h, watch } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
+import { usePrimeVue } from 'primevue/config';
 
 import PrimeVue from 'primevue/config';
 import Toast from 'primevue/toast';
@@ -18,6 +19,7 @@ import { useAuthToken } from '@/composables/useAuthToken';
 import globalPt from '@/theme/global-pt';
 import themePreset from '@/theme/noir-preset';
 import orionService from '@/services/orion';
+import i18n, { primeVueLocales } from '@/i18n';
 
 // Chart.js - Register required components
 import {
@@ -71,6 +73,15 @@ void createInertiaApp({
         // Initialize auth token handling
         useAuthToken();
 
+        // Setup PrimeVue locale switching
+        const primeVue = usePrimeVue();
+        watch(
+          () => i18n.global.locale.value,
+          newLocale => {
+            primeVue.config.locale = primeVueLocales[newLocale as keyof typeof primeVueLocales];
+          }
+        );
+
         // show error toast instead of standard Inertia modal response
         const toast = useToast();
         router.on('invalid', event => {
@@ -93,6 +104,7 @@ void createInertiaApp({
     createApp(Root)
       .use(plugin)
       .use(ZiggyVue)
+      .use(i18n)
       .use(PrimeVue, {
         theme: {
           preset: themePreset,
@@ -105,6 +117,7 @@ void createInertiaApp({
           },
         },
         pt: globalPt,
+        locale: primeVueLocales[i18n.global.locale.value as keyof typeof primeVueLocales],
       })
       .use(ToastService)
       .directive('tooltip', Tooltip)
