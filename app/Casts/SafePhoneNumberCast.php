@@ -20,11 +20,11 @@ class SafePhoneNumberCast implements CastsAttributes
     protected array $countries;
 
     /**
-     * @param array<int, string> $countries
+     * @param string ...$countries
      */
-    public function __construct(array $countries = ['US'])
+    public function __construct(string ...$countries)
     {
-        $this->countries = $countries;
+        $this->countries = empty($countries) ? ['MX', 'US'] : $countries;
     }
 
     /**
