@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\SafePhoneNumberCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 
 class Invoice extends Model
 {
@@ -29,7 +29,7 @@ class Invoice extends Model
     protected function casts(): array
     {
         return [
-            'phone' => E164PhoneNumberCast::class . ':US,MX',
+            'phone' => SafePhoneNumberCast::class . ':US,MX',
         ];
     }
 

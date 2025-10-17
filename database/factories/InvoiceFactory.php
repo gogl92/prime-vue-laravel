@@ -16,10 +16,16 @@ class InvoiceFactory extends Factory
      */
     public function definition(): array
     {
+        // Generate US or MX phone numbers to match the SafePhoneNumberCast in Invoice model
+        $isUS = $this->faker->boolean(80); // 80% US, 20% MX
+        $phone = $isUS
+            ? $this->faker->regexify('\+1[2-9][0-9]{9}') // US phone format
+            : $this->faker->regexify('\+52[1-9][0-9]{9}'); // MX phone format
+
         return [
             'name' => $this->faker->name(),
             'email' => $this->faker->email(),
-            'phone' => $this->faker->e164PhoneNumber(),
+            'phone' => $phone,
             'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
             'state' => $this->faker->randomElement(['CA', 'NY', 'TX', 'FL', 'IL', 'PA', 'OH', 'GA', 'NC', 'MI']),
