@@ -50,5 +50,7 @@ return [
         'max_nested_depth' => 1,
     ],
 
+    'authorizationRequired' => false,
+
     'use_validated' => false,
 ];

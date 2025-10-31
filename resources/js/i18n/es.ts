@@ -17,7 +17,6 @@ export default {
   'Enter your details below to create your account':
     'Ingresa tus datos para crear tu cuenta',
   'Name': 'Nombre',
-  'Confirm password': 'Confirmar contraseña',
   'Already have an account?': '¿Ya tienes una cuenta?',
 
   // Authentication - Forgot Password

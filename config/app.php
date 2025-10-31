@@ -123,6 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'admin_name' => env('ADMIN_NAME'),
-    'admin_email' => env('ADMIN_EMAIL'),
+    'admin_name' => env('ADMIN_NAME', 'Admin'),
+    'admin_email' => env('ADMIN_EMAIL', 'admin@example.com'),
 ];

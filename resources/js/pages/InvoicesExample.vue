@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Invoice } from '@/models/Invoice';
 import { Product } from '@/models/Product';
@@ -29,7 +30,6 @@ const toast = useToast();
 
 // State
 const loading = ref(false);
-const saving = ref(false);
 const deleting = ref(false);
 const invoices = ref<Invoice[]>([]);
 const totalRecords = ref(0);
@@ -57,24 +57,9 @@ const filters = reactive({
 });
 
 // Dialogs
-const showCreateDialog = ref(false);
 const showDeleteDialog = ref(false);
-const editingInvoice = ref<Invoice | null>(null);
 const invoiceToDelete = ref<Invoice | null>(null);
 
-// Form
-const form = reactive({
-  name: '',
-  email: '',
-  phone: '',
-  address: '',
-  city: '',
-  state: '',
-  zip: '',
-  country: '',
-});
-
-const errors = reactive<Record<string, string>>({});
 
 // Country options
 const countryOptions = ref([
@@ -101,7 +86,7 @@ const loadInvoices = async () => {
   try {
     loading.value = true;
 
-    let query = Invoice.$query().with(['products', 'payments']); // Temporarily remove .with(['products']) to test
+    let query = Invoice.$query().with(['products', 'payments']);
 
     // Add search if provided
     if (filters.search) {
@@ -227,10 +212,15 @@ const onSort = (event: {
   void loadInvoices();
 };
 
-const editInvoice = (invoice: Invoice) => {
-  editingInvoice.value = invoice;
-  Object.assign(form, invoice.$attributes);
-  showCreateDialog.value = true;
+const editInvoice = (_invoice: Invoice) => {
+  // Navigate to edit page (you can implement this later)
+  // For now, just show a toast message
+  toast.add({
+    severity: 'info',
+    summary: t('Info'),
+    detail: t('Edit functionality will be implemented soon'),
+    life: 3000,
+  });
 };
 
 const confirmDelete = (invoice: Invoice) => {
@@ -268,80 +258,7 @@ const deleteInvoice = async () => {
   }
 };
 
-const saveInvoice = async () => {
-  try {
-    saving.value = true;
-    clearErrors();
 
-    if (editingInvoice.value) {
-      // Update existing invoice
-      Object.assign(editingInvoice.value.$attributes, form);
-      await editingInvoice.value.$save();
-      toast.add({
-        severity: 'success',
-        summary: t('Success'),
-        detail: t('Invoice updated successfully'),
-        life: 3000,
-      });
-    } else {
-      // Create new invoice
-      await Invoice.$query().store(form);
-      toast.add({
-        severity: 'success',
-        summary: t('Success'),
-        detail: t('Invoice created successfully'),
-        life: 3000,
-      });
-    }
-
-    closeDialog();
-    void loadInvoices();
-  } catch (error: unknown) {
-    console.error('Error saving invoice:', error);
-
-    const errorObj = error as {
-      response?: { data?: { errors?: Record<string, string>; message?: string } };
-    };
-    if (errorObj.response?.data?.errors) {
-      Object.assign(errors, errorObj.response.data.errors);
-    }
-
-    toast.add({
-      severity: 'error',
-      summary: t('Error'),
-      detail: errorObj.response?.data?.message ?? t('Failed to save invoice'),
-      life: 3000,
-    });
-  } finally {
-    saving.value = false;
-  }
-};
-
-const closeDialog = () => {
-  showCreateDialog.value = false;
-  editingInvoice.value = null;
-  clearForm();
-  clearErrors();
-};
-
-const clearForm = () => {
-  Object.assign(form, {
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: '',
-  });
-};
-
-const clearErrors = () => {
-  Object.keys(errors).forEach(key => {
-    delete errors[key as keyof typeof errors];
-  });
-};
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString();
@@ -414,7 +331,7 @@ const onRowExpand = async (event: { data: Invoice }) => {
     }
 
     // Fallback: Load products using the Orion belongsToMany relationship endpoint
-    const products = await Product.$query().get(invoiceId);
+    const products = await Product.$query().filter('invoices.id', FilterOperator.Equal, invoiceId).search();
     // console.error('Products loaded from API:', products);
     invoiceProducts.value[invoiceId] = products;
   } catch (error) {
@@ -438,6 +355,7 @@ const onTabChange = async (
 
   // If Payments tab is selected (index 1)
   if (event.index === 1) {
+    if (!invoiceId) return;
     await loadPayments(invoiceId, { data: invoiceData });
   }
 };
@@ -468,7 +386,7 @@ const loadPayments = async (invoiceId: number, event?: { data: Invoice }) => {
 
     // Fallback: Load payments using the Orion hasMany relationship endpoint
     // The URL pattern will be: /api/invoices/{invoice}/payments
-    const payments = await Payment.$query().get(invoiceId);
+    const payments = await Payment.$query().filter('invoice_id', FilterOperator.Equal, invoiceId).search();
     invoicePayments.value[invoiceId] = payments;
   } catch (error) {
     console.error('Error loading payments:', error);
@@ -512,7 +430,7 @@ onMounted(() => {
           icon="pi pi-plus"
           severity="success"
           class="p-button-success"
-          @click="showCreateDialog = true"
+          @click="router.visit('/invoices/create')"
         />
       </div>
       <!-- Filters -->
@@ -869,106 +787,6 @@ onMounted(() => {
         </template>
       </Card>
     </div>
-
-    <!-- Create/Edit Dialog -->
-    <Dialog
-      v-model:visible="showCreateDialog"
-      :header="editingInvoice ? t('Edit Invoice') : t('Create Invoice')"
-      modal
-      :style="{ width: '600px' }"
-      append-to="body"
-    >
-      <form class="space-y-4" @submit.prevent="saveInvoice">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('Name *') }}</label>
-            <InputText
-              v-model="form.name"
-              :placeholder="t('Enter name')"
-              :class="{ 'p-invalid': errors['name'] }"
-            />
-            <small v-if="errors['name']" class="text-red-500">{{ errors['name'] }}</small>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('Email *') }}</label>
-            <InputText
-              v-model="form.email"
-              type="email"
-              :placeholder="t('Enter email')"
-              :class="{ 'p-invalid': errors['email'] }"
-            />
-            <small v-if="errors['email']" class="text-red-500">{{ errors['email'] }}</small>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('Phone *') }}</label>
-            <InputText
-              v-model="form.phone"
-              :placeholder="t('Enter phone')"
-              :class="{ 'p-invalid': errors['phone'] }"
-            />
-            <small v-if="errors['phone']" class="text-red-500">{{ errors['phone'] }}</small>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('Address *') }}</label>
-            <InputText
-              v-model="form.address"
-              :placeholder="t('Enter address')"
-              :class="{ 'p-invalid': errors['address'] }"
-            />
-            <small v-if="errors['address']" class="text-red-500">{{ errors['address'] }}</small>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('City *') }}</label>
-            <InputText
-              v-model="form.city"
-              :placeholder="t('Enter city')"
-              :class="{ 'p-invalid': errors['city'] }"
-            />
-            <small v-if="errors['city']" class="text-red-500">{{ errors['city'] }}</small>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('State *') }}</label>
-            <InputText
-              v-model="form.state"
-              :placeholder="t('Enter state')"
-              :class="{ 'p-invalid': errors['state'] }"
-            />
-            <small v-if="errors['state']" class="text-red-500">{{ errors['state'] }}</small>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('ZIP Code *') }}</label>
-            <InputText
-              v-model="form.zip"
-              :placeholder="t('Enter ZIP code')"
-              :class="{ 'p-invalid': errors['zip'] }"
-            />
-            <small v-if="errors['zip']" class="text-red-500">{{ errors['zip'] }}</small>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2">{{ t('Country *') }}</label>
-            <Dropdown
-              v-model="form.country"
-              :options="countryOptions"
-              :placeholder="t('Select country')"
-              :class="{ 'p-invalid': errors['country'] }"
-            />
-            <small v-if="errors['country']" class="text-red-500">{{ errors['country'] }}</small>
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4">
-          <Button :label="t('Cancel')" severity="secondary" @click="closeDialog" />
-          <Button type="submit" :label="editingInvoice ? t('Update') : t('Create')" :loading="saving" />
-        </div>
-      </form>
-    </Dialog>
 
     <!-- Delete Confirmation Dialog -->
     <Dialog

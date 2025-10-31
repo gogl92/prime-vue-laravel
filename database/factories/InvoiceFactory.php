@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,21 +19,41 @@ class InvoiceFactory extends Factory
      */
     public function definition(): array
     {
-        // Generate US or MX phone numbers to match the SafePhoneNumberCast in Invoice model
-        $isUS = $this->faker->boolean(80); // 80% US, 20% MX
-        $phone = $isUS
-            ? $this->faker->regexify('\+1[2-9][0-9]{9}') // US phone format
-            : $this->faker->regexify('\+52[1-9][0-9]{9}'); // MX phone format
+        $cfdiTypes = ['Factura', 'Nota de Crédito', 'Nota de Débito'];
+        $paymentForms = [
+            'Transferencia electrónica de fondos',
+            'Efectivo',
+            'Cheque',
+            'Tarjeta de crédito',
+            'Tarjeta de débito'
+        ];
+        $paymentMethods = [
+            'Pago en parcialidades o diferido',
+            'Pago en una sola exhibición'
+        ];
+        $cfdiUses = [
+            'Adquisición de mercancias',
+            'Servicios profesionales',
+            'Servicios de hospedaje',
+            'Otros'
+        ];
+        $series = ['F', 'A', 'B', 'C'];
+        $currencies = ['MXN', 'USD', 'EUR'];
 
         return [
-            'name' => $this->faker->name(),
-            'email' => $this->faker->email(),
-            'phone' => $phone,
-            'address' => $this->faker->streetAddress(),
-            'city' => $this->faker->city(),
-            'state' => $this->faker->randomElement(['CA', 'NY', 'TX', 'FL', 'IL', 'PA', 'OH', 'GA', 'NC', 'MI']),
-            'zip' => $this->faker->postcode(),
-            'country' => $this->faker->country(),
+            'client_id' => Client::factory(),
+            'issuer_id' => Client::factory()->issuer(),
+            'cfdi_type' => $this->faker->randomElement($cfdiTypes),
+            'order_number' => $this->faker->unique()->numerify('ORD-#####'),
+            'invoice_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'payment_form' => $this->faker->randomElement($paymentForms),
+            'send_email' => $this->faker->boolean(80), // 80% send email
+            'payment_method' => $this->faker->randomElement($paymentMethods),
+            'cfdi_use' => $this->faker->randomElement($cfdiUses),
+            'series' => $this->faker->randomElement($series),
+            'exchange_rate' => $this->faker->randomFloat(4, 1, 25),
+            'currency' => $this->faker->randomElement($currencies),
+            'comments' => $this->faker->optional(0.3)->paragraph(),
         ];
     }
 }

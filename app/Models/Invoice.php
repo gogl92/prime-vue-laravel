@@ -4,33 +4,59 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Casts\SafePhoneNumberCast;
+use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
-    /** @use HasFactory<\Database\Factories\InvoiceFactory> */
+    /** @use HasFactory<InvoiceFactory> */
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'address',
-        'city',
-        'state',
-        'zip',
-        'country',
+        'client_id',
+        'issuer_id',
+        'cfdi_type',
+        'order_number',
+        'invoice_date',
+        'payment_form',
+        'send_email',
+        'payment_method',
+        'cfdi_use',
+        'series',
+        'exchange_rate',
+        'currency',
+        'comments',
     ];
 
     protected function casts(): array
     {
         return [
-            'phone' => SafePhoneNumberCast::class . ':US,MX',
+            'invoice_date' => 'date',
+            'send_email' => 'boolean',
+            'exchange_rate' => 'decimal:4',
         ];
+    }
+
+    /**
+     * Get the client (customer) for the invoice.
+     * @return BelongsTo<Client, $this>
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id');
+    }
+
+    /**
+     * Get the issuer (company) for the invoice.
+     * @return BelongsTo<Client, $this>
+     */
+    public function issuer(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'issuer_id');
     }
 
     /**

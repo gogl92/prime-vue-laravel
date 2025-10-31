@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Orion\Facades\Orion;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InvoiceProductsController;
@@ -33,6 +34,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Resource routes
+    Orion::resource('clients', ClientController::class);
     Orion::resource('invoices', InvoiceController::class);
     Orion::resource('products', ProductController::class);
     Orion::resource('payments', PaymentController::class);

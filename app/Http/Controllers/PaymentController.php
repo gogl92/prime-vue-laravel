@@ -28,7 +28,7 @@ class PaymentController extends BaseOrionController
      */
     public function searchableBy(): array
     {
-        return ['id', 'transaction_id', 'payment_method', 'status', 'notes'];
+        return ['id', 'invoices.id', 'invoice_id', 'transaction_id', 'payment_method', 'status', 'notes'];
     }
 
     /**
@@ -36,7 +36,7 @@ class PaymentController extends BaseOrionController
      */
     public function filterableBy(): array
     {
-        return ['id', 'invoice_id', 'amount', 'payment_method', 'status', 'transaction_id', 'paid_at'];
+        return ['id', 'invoices.id', 'invoice_id', 'amount', 'payment_method', 'status', 'transaction_id', 'paid_at'];
     }
 
     /**
@@ -44,7 +44,7 @@ class PaymentController extends BaseOrionController
      */
     public function sortableBy(): array
     {
-        return ['id', 'invoice_id', 'amount', 'payment_method', 'status', 'paid_at', 'created_at', 'updated_at'];
+        return ['id', 'invoices.id', 'invoice_id', 'amount', 'payment_method', 'status', 'paid_at', 'created_at', 'updated_at'];
     }
 
     /**

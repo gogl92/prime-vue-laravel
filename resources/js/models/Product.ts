@@ -1,4 +1,6 @@
 import { Model } from '@tailflow/laravel-orion/lib/model';
+import {BelongsToMany} from "@tailflow/laravel-orion/lib/drivers/default/relations/belongsToMany";
+import { Invoice } from './Invoice';
 
 export class Product extends Model<{
   id?: number;
@@ -9,13 +11,18 @@ export class Product extends Model<{
   sku: string;
   created_at?: string;
   updated_at?: string;
-  pivot?: {
+}, {
+    price: number;
+ }, {
+    invoices: Array<Invoice>,
+ }> {
+  public invoices(): BelongsToMany<Invoice,{
     quantity: number;
     price: number;
-    created_at?: string;
-    updated_at?: string;
-  };
-}> {
+  }> {
+    return new BelongsToMany(Invoice, this);
+  }
+
   public $resource(): string {
     return 'products';
   }
