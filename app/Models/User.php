@@ -3,19 +3,19 @@
 namespace App\Models;
 
 //use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Database\Factories\UserFactory;use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- * @use HasFactory<\Database\Factories\UserFactory>
+ * @use HasFactory<UserFactory>
  */
 class User extends Authenticatable //implements MustVerifyEmail
 {
     use HasApiTokens;
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
     use HasRoles;
     use Notifiable;

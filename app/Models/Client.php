@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Casts\SafePhoneNumberCast;
+use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Model
 {
-    /** @use HasFactory<\Database\Factories\ClientFactory> */
+    /** @use HasFactory<ClientFactory> */
     use HasFactory;
 
     protected $fillable = [
