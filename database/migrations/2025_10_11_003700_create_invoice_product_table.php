@@ -17,6 +17,10 @@ return new class () extends Migration {
             $table->integer('quantity');
             $table->decimal('price', 10, 2);
             $table->timestamps();
+            $table->softDeletes();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('deleted_by')->nullable();
 
             // Ensure unique combination of invoice_id and product_id
             $table->unique(['invoice_id', 'product_id']);

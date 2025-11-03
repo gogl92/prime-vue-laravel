@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use OwenIt\Auditing\Contracts\Auditable;
+use RichanFongdasen\EloquentBlameable\BlameableTrait;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Product extends Model
+class Product extends Model implements Auditable
 {
-    /** @use HasFactory<\Database\Factories\ProductFactory> */
+    /** @use HasFactory<ProductFactory> */
     use HasFactory;
+    use BlameableTrait;
+    use AuditableTrait;
 
     protected $fillable = [
         'name',

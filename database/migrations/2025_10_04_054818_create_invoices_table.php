@@ -21,6 +21,10 @@ return new class () extends Migration {
             $table->string('zip');
             $table->string('country');
             $table->timestamps();
+            $table->softDeletes();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('deleted_by')->nullable();
         });
     }
 

@@ -10,11 +10,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
+use RichanFongdasen\EloquentBlameable\BlameableTrait;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Invoice extends Model
+class Invoice extends Model implements Auditable
 {
     /** @use HasFactory<InvoiceFactory> */
     use HasFactory;
+    use BlameableTrait;
+    use AuditableTrait;
 
     protected $fillable = [
         'client_id',

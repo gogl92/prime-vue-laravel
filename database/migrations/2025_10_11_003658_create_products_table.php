@@ -18,6 +18,10 @@ return new class () extends Migration {
             $table->integer('quantity')->default(0);
             $table->string('sku')->unique();
             $table->timestamps();
+            $table->softDeletes();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('deleted_by')->nullable();
         });
     }
 

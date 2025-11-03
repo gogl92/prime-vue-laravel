@@ -9,11 +9,16 @@ use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use RichanFongdasen\EloquentBlameable\BlameableTrait;
 
-class Client extends Model
+class Client extends Model implements Auditable
 {
     /** @use HasFactory<ClientFactory> */
     use HasFactory;
+    use BlameableTrait;
+    use AuditableTrait;
 
     protected $fillable = [
         'name',

@@ -10,18 +10,27 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use RichanFongdasen\EloquentBlameable\BlameableTrait;
+use Rawilk\Settings\Models\HasSettings;
+use Laravel\Cashier\Billable;
 
 /**
  * @use HasFactory<UserFactory>
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, Auditable
 {
     use HasApiTokens;
     /** @use HasFactory<UserFactory> */
     use HasFactory;
     use HasRoles;
+    use Billable;
+    use HasSettings;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use AuditableTrait;
+    use BlameableTrait;
 
     /**
      * The attributes that are mass assignable.
