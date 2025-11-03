@@ -261,21 +261,191 @@ curl -X GET http://localhost/user/two-factor-qr-code \
   -H "Authorization: Bearer {token}"
 ```
 
-## Next Steps (Frontend Integration)
+## Frontend Integration (COMPLETED)
 
-When you're ready to add frontend support:
+### Components Created
 
-1. Create Vue/React components for:
-   - Login form with 2FA challenge
-   - 2FA setup wizard (QR code display, confirmation)
-   - Recovery codes display
-   - 2FA management settings
+#### 1. TwoFactorChallenge.vue
+Location: `resources/js/pages/auth/TwoFactorChallenge.vue`
 
-2. Handle API responses and redirects properly
+**Purpose**: Displays after login when user has 2FA enabled. Allows entering either:
+- 6-digit authentication code from authenticator app
+- Recovery code for emergency access
 
-3. Store and display QR codes securely
+**Features**:
+- Toggle between code and recovery code input
+- PrimeVue InputText components
+- Form validation and error handling
+- Inertia.js integration
 
-4. Implement password confirmation before critical actions
+#### 2. Password.vue (Updated)
+Location: `resources/js/pages/settings/Password.vue`
+
+**New 2FA Features Added**:
+- Enable/Disable two-factor authentication
+- Display QR code for scanning with authenticator apps
+- Show setup key for manual entry
+- Confirm 2FA setup with verification code
+- Display recovery codes after setup
+- Regenerate recovery codes
+- Confirmation dialog before disabling 2FA
+
+**PrimeVue Components Used**:
+- Card - Layout structure
+- Button - Actions (enable, disable, confirm, etc.)
+- InputText - Code inputs
+- Message - Info/error/success messages
+- Password - Password fields
+- ConfirmDialog - Confirmation dialogs
+
+### User Flow
+
+#### Enabling 2FA
+1. User navigates to Settings → Password
+2. Clicks "Enable Two-Factor Authentication"
+3. QR code and setup key are displayed
+4. User scans QR code with Google Authenticator or similar app
+5. User enters 6-digit code to confirm setup
+6. Recovery codes are displayed (user should save these)
+7. 2FA is now active
+
+#### Logging In with 2FA
+1. User enters email and password on login page
+2. If 2FA is enabled, they're redirected to Two-Factor Challenge page
+3. User enters 6-digit code from authenticator app
+4. Upon successful verification, user is logged in
+
+#### Using Recovery Codes
+1. On Two-Factor Challenge page, click "Use a recovery code"
+2. Enter one of the recovery codes
+3. Recovery code is consumed (can only be used once)
+4. User is logged in
+
+#### Disabling 2FA
+1. Navigate to Settings → Password
+2. Click "Disable Two-Factor Authentication"
+3. Confirm in dialog
+4. 2FA is disabled
+
+### Configuration
+
+#### Routes
+Added to `routes/web.php`:
+```php
+Route::middleware('guest')->group(function () {
+    Route::get('/two-factor-challenge', function () {
+        return Inertia::render('auth/TwoFactorChallenge');
+    })->name('two-factor.login');
+});
+```
+
+#### FortifyServiceProvider
+Updated to render Inertia view for 2FA challenge:
+```php
+Fortify::twoFactorChallengeView(function () {
+    return inertia('auth/TwoFactorChallenge');
+});
+```
+
+### Existing Components (Already Compatible)
+
+The following existing auth components already work with Fortify:
+- `Login.vue` - Uses `route('login')` ✅
+- `Register.vue` - Uses `route('register')` ✅
+- `ForgotPassword.vue` - Uses `route('password.email')` ✅
+- `ResetPassword.vue` - Uses `route('password.store')` ✅
+- `VerifyEmail.vue` - Uses `route('verification.send')` ✅
+
+No modifications needed - they use the same routes that Fortify provides!
+
+### Technical Implementation
+
+#### API Calls
+The Password.vue component uses Axios to interact with Fortify endpoints:
+
+**Enable 2FA**:
+```javascript
+await axios.post('/user/two-factor-authentication');
+const qrResponse = await axios.get('/user/two-factor-qr-code');
+const secretResponse = await axios.get('/user/two-factor-secret-key');
+```
+
+**Confirm 2FA**:
+```javascript
+await axios.post('/user/confirmed-two-factor-authentication', {
+  code: confirmationCode.value,
+});
+const response = await axios.get('/user/two-factor-recovery-codes');
+```
+
+**Disable 2FA**:
+```javascript
+await axios.delete('/user/two-factor-authentication');
+```
+
+#### State Management
+Uses Vue 3 Composition API with reactive refs:
+- `twoFactorEnabled` - Computed from user's `two_factor_confirmed_at` timestamp
+- `confirming2FA` - Boolean for setup flow
+- `qrCode` - SVG string of QR code
+- `secretKey` - Plain text secret for manual entry
+- `recoveryCodes` - Array of recovery codes
+- `confirmationCode` - User input for verification
+
+#### User Data
+Accesses user data from Inertia page props:
+```javascript
+const page = usePage();
+const user = computed(() => page.props.auth?.user);
+const twoFactorEnabled = computed(() => user.value?.two_factor_confirmed_at !== null);
+```
+
+### UI/UX Features
+
+1. **Loading States**: All buttons show loading spinners during async operations
+2. **Error Handling**: Display error messages from API in PrimeVue Message components
+3. **Success Toast**: PrimeVue Toast notifications for successful operations
+4. **Confirmation Dialogs**: PrimeVue ConfirmDialog for destructive actions
+5. **Responsive Design**: Tailwind CSS utilities for mobile-friendly layouts
+6. **Dark Mode Support**: PrimeVue theme system with dark mode tokens
+7. **Accessibility**: Proper labels, ARIA attributes, and keyboard navigation
+
+### Styling
+
+All components use PrimeVue's theming system:
+- Surface colors for backgrounds (`bg-surface-50`, `dark:bg-surface-900`)
+- Semantic colors for states (`text-primary`, `text-muted-color`)
+- Consistent spacing with Tailwind utilities
+- Icon integration with PrimeIcons (`pi pi-shield`, `pi pi-info-circle`)
+
+### Testing the Frontend
+
+1. **Enable 2FA**:
+   - Login to application
+   - Navigate to Settings → Password
+   - Click "Enable Two-Factor Authentication"
+   - Scan QR code with Google Authenticator
+   - Enter code to confirm
+   - Save recovery codes
+
+2. **Login with 2FA**:
+   - Logout
+   - Login with email/password
+   - Enter 6-digit code from authenticator app
+   - Should successfully login
+
+3. **Use Recovery Code**:
+   - Logout
+   - Login with email/password
+   - Click "Use a recovery code"
+   - Enter one of your recovery codes
+   - Should successfully login
+
+4. **Disable 2FA**:
+   - Navigate to Settings → Password
+   - Click "Disable Two-Factor Authentication"
+   - Confirm in dialog
+   - 2FA should be disabled
 
 ## References
 

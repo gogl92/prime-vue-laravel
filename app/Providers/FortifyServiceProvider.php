@@ -35,7 +35,6 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-        Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
         // Customize authentication logic
         Fortify::authenticateUsing(function (Request $request) {
@@ -44,6 +43,11 @@ class FortifyServiceProvider extends ServiceProvider
             if ($user && Hash::check($request->password, $user->password)) {
                 return $user;
             }
+        });
+
+        // Two-Factor Authentication Challenge View
+        Fortify::twoFactorChallengeView(function () {
+            return inertia('auth/TwoFactorChallenge');
         });
 
         RateLimiter::for('login', function (Request $request) {

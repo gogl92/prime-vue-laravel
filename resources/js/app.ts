@@ -12,6 +12,7 @@ import PrimeVue from 'primevue/config';
 import Toast from 'primevue/toast';
 import Tooltip from 'primevue/tooltip';
 import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 import { useToast } from 'primevue/usetoast';
 
 import { useSiteColorMode } from '@/composables/useSiteColorMode';
@@ -120,6 +121,7 @@ void createInertiaApp({
         locale: primeVueLocales[i18n.global.locale.value as keyof typeof primeVueLocales],
       })
       .use(ToastService)
+      .use(ConfirmationService)
       .directive('tooltip', Tooltip)
       .provide('colorMode', colorMode)
       .mount(el);
