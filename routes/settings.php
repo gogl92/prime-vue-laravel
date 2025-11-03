@@ -20,4 +20,16 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/Appearance');
     })->name('appearance');
+
+    Route::get('settings/stripe-connect', function () {
+        return Inertia::render('settings/BranchStripeConnect');
+    })->name('stripe.connect');
+
+    Route::get('settings/stripe/return', function () {
+        return Inertia::render('settings/StripeReturn');
+    })->name('stripe.return');
+
+    Route::get('settings/stripe/refresh', function () {
+        return Inertia::render('settings/StripeRefresh');
+    })->name('stripe.refresh');
 });
