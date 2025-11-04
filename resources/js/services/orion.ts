@@ -13,7 +13,10 @@ class OrionService {
     // Get token from localStorage or cookie
     const token = localStorage.getItem('auth_token') ?? this.getCookie('auth_token');
     if (token) {
+      console.log('Setting up Orion auth with token:', token.substring(0, 20) + '...');
       Orion.setToken(token);
+    } else {
+      console.log('No auth token found in localStorage or cookies');
     }
   }
 
@@ -25,8 +28,10 @@ class OrionService {
   }
 
   public setAuthToken(token: string) {
-    Orion.setToken(token);
+    console.log('OrionService.setAuthToken called with:', token.substring(0, 20) + '...');
     localStorage.setItem('auth_token', token);
+    Orion.setToken(token);
+    console.log('Token set in Orion and localStorage');
   }
 
   public clearAuth() {

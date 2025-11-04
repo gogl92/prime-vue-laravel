@@ -21,10 +21,25 @@ export function useAuthToken() {
     { immediate: true }
   );
 
+  const setToken = (token: string) => {
+    localStorage.setItem('auth_token', token);
+    orionService.setAuthToken(token);
+  };
+
+  const getToken = (): string | null => {
+    return localStorage.getItem('auth_token');
+  };
+
+  const removeToken = () => {
+    localStorage.removeItem('auth_token');
+    orionService.clearAuth();
+  };
+
   return {
-    clearAuthToken: () => {
-      localStorage.removeItem('auth_token');
-      orionService.clearAuth();
-    },
+    setToken,
+    getToken,
+    removeToken,
+    // Legacy method name for backward compatibility
+    clearAuthToken: removeToken,
   };
 }

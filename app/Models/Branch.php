@@ -52,5 +52,21 @@ class Branch extends Model implements Auditable
             'is_active' => 'boolean',
         ];
     }
+
+    /**
+     * Check if the branch can accept payments via Stripe Connect.
+     *
+     * @return bool
+     */
+    public function canAcceptPayments(): bool
+    {
+        if (!$this->hasStripeAccount()) {
+            return false;
+        }
+
+        $mapping = $this->stripeAccountMapping;
+
+        return $mapping && $mapping->charges_enabled;
+    }
 }
 

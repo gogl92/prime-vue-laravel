@@ -96,11 +96,18 @@ class StripeController extends Controller
         $hasAccount = $branch->hasStripeAccount();
         $isCompleted = $hasAccount && $branch->hasCompletedOnboarding();
 
+        // Determine if can accept payments
+        $canAcceptPayments = false;
+        if ($hasAccount) {
+            $mapping = $branch->stripeAccountMapping;
+            $canAcceptPayments = $mapping ? (bool) $mapping->charges_enabled : false;
+        }
+
         return response()->json([
             'hasStripeAccount' => $hasAccount,
             'onboardingCompleted' => $isCompleted,
             'stripeAccountId' => $hasAccount ? $branch->stripeAccountId() : null,
-            'canAcceptPayments' => $isCompleted && $branch->canAcceptPayments(),
+            'canAcceptPayments' => $canAcceptPayments,
         ]);
     }
 

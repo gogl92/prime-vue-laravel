@@ -10,6 +10,11 @@ export default {
   'Forgot your password?': '¿Olvidaste tu contraseña?',
   "Don't have an account?": '¿No tienes una cuenta?',
   'Sign up': 'Registrarse',
+  'Login successful': 'Inicio de sesión exitoso',
+  'An error occurred during login. Please try again.':
+    'Ocurrió un error durante el inicio de sesión. Por favor intenta de nuevo.',
+  'Authentication failed. No token received.':
+    'Falló la autenticación. No se recibió token.',
 
   // Authentication - Register
   'Create account': 'Crear cuenta',
