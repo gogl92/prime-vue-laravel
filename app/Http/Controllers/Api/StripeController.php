@@ -98,9 +98,27 @@ class StripeController extends Controller
 
         // Determine if can accept payments
         $canAcceptPayments = false;
+        $businessName = null;
+        $taxId = null;
+
         if ($hasAccount) {
             $mapping = $branch->stripeAccountMapping;
             $canAcceptPayments = $mapping ? (bool) $mapping->charges_enabled : false;
+
+            // Fetch additional details from Stripe API
+            try {
+                $account = $branch->asStripeAccount();
+                $businessName = $account->business_profile->name ?? $account->settings->dashboard->display_name ?? null;
+                $taxId = $account->business_profile->support_address->country === 'MX'
+                    ? ($account->company->tax_id ?? null)
+                    : null;
+            } catch (\Exception $e) {
+                // Log error but don't fail the request
+                logger()->warning('Failed to fetch Stripe account details', [
+                    'branch_id' => $id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return response()->json([
@@ -108,6 +126,8 @@ class StripeController extends Controller
             'onboardingCompleted' => $isCompleted,
             'stripeAccountId' => $hasAccount ? $branch->stripeAccountId() : null,
             'canAcceptPayments' => $canAcceptPayments,
+            'businessName' => $businessName,
+            'taxId' => $taxId,
         ]);
     }
 

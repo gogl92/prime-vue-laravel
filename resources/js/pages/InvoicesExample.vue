@@ -86,7 +86,7 @@ const loadInvoices = async () => {
   try {
     loading.value = true;
 
-    let query = Invoice.$query().with(['products', 'payments']);
+    let query = Invoice.$query().with(['client', 'issuer', 'products', 'payments']);
 
     // Add search if provided
     if (filters.search) {
@@ -95,12 +95,12 @@ const loadInvoices = async () => {
 
     // Filter by city
     if (filters.city) {
-      query = query.filter('city', FilterOperator.Equal, filters.city);
+      query = query.filter('client.city', FilterOperator.Equal, filters.city);
     }
 
     // Filter by country
     if (filters.country) {
-      query = query.filter('country', FilterOperator.Equal, filters.country);
+      query = query.filter('client.country', FilterOperator.Equal, filters.country);
     }
 
     // Sorting
@@ -159,10 +159,10 @@ const loadInvoices = async () => {
           countQuery = countQuery.lookFor(filters.search);
         }
         if (filters.city) {
-          countQuery = countQuery.filter('city', FilterOperator.Equal, filters.city);
+          countQuery = countQuery.filter('client.city', FilterOperator.Equal, filters.city);
         }
         if (filters.country) {
-          countQuery = countQuery.filter('country', FilterOperator.Equal, filters.country);
+          countQuery = countQuery.filter('client.country', FilterOperator.Equal, filters.country);
         }
 
         // Get count without pagination
@@ -514,34 +514,34 @@ onMounted(() => {
               </template>
             </Column>
 
-            <Column field="name" :header="t('Name')" sortable>
+            <Column field="client.name" :header="t('Name')" sortable>
               <template #body="{ data }">
                 <div class="font-medium">
-                  {{ data.$attributes.name }}
+                  {{ data.$attributes.client?.name }}
                 </div>
                 <div class="text-sm text-surface-500">
-                  {{ data.$attributes.email }}
+                  {{ data.$attributes.client?.email }}
                 </div>
               </template>
             </Column>
 
-            <Column field="phone" :header="t('Phone')" sortable>
+            <Column field="client.phone" :header="t('Phone')" sortable>
               <template #body="{ data }">
                 <div class="flex items-center gap-2">
                   <i class="pi pi-phone text-surface-500" />
-                  {{ data.$attributes.phone }}
+                  {{ data.$attributes.client?.phone }}
                 </div>
               </template>
             </Column>
 
-            <Column field="city" :header="t('Location')" sortable>
+            <Column field="client.city" :header="t('Location')" sortable>
               <template #body="{ data }">
                 <div>
                   <div class="font-medium">
-                    {{ data.$attributes.city }}, {{ data.$attributes.state }}
+                    {{ data.$attributes.client?.city }}, {{ data.$attributes.client?.state }}
                   </div>
                   <div class="text-sm text-surface-500">
-                    {{ data.$attributes.country }} {{ data.$attributes.zip }}
+                    {{ data.$attributes.client?.country }} {{ data.$attributes.client?.zip }}
                   </div>
                 </div>
               </template>
@@ -802,10 +802,10 @@ onMounted(() => {
       </div>
       <div v-if="invoiceToDelete" class="bg-surface-100 dark:bg-surface-800 p-3 rounded">
         <div class="font-medium">
-          {{ invoiceToDelete.$attributes.name }}
+          {{ invoiceToDelete.$attributes.client?.name }}
         </div>
         <div class="text-sm text-surface-500">
-          {{ invoiceToDelete.$attributes.email }}
+          {{ invoiceToDelete.$attributes.client?.email }}
         </div>
       </div>
 

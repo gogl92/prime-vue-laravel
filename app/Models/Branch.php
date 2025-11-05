@@ -54,6 +54,30 @@ class Branch extends Model implements Auditable
     }
 
     /**
+     * Append custom attributes to model JSON
+     *
+     * @var array<int, string>
+     */
+    protected $appends = ['is_stripe_connected'];
+
+    /**
+     * Get the is_stripe_connected attribute.
+     * A branch is considered connected when it has a Stripe account and can accept payments.
+     *
+     * @return bool
+     */
+    public function getIsStripeConnectedAttribute(): bool
+    {
+        if (!$this->hasStripeAccount()) {
+            return false;
+        }
+
+        $mapping = $this->stripeAccountMapping;
+
+        return $mapping && $mapping->charges_enabled && $this->hasCompletedOnboarding();
+    }
+
+    /**
      * Check if the branch can accept payments via Stripe Connect.
      *
      * @return bool

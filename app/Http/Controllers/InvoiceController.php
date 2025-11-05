@@ -28,7 +28,7 @@ class InvoiceController extends BaseOrionController
      */
     public function searchableBy(): array
     {
-        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+        return ['id', 'client.name', 'client.email', 'client.phone', 'client.address', 'client.city', 'client.state', 'client.zip', 'client.country'];
     }
 
     /**
@@ -36,7 +36,7 @@ class InvoiceController extends BaseOrionController
      */
     public function filterableBy(): array
     {
-        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+        return ['id', 'client.name', 'client.email', 'client.phone', 'client.address', 'client.city', 'client.state', 'client.zip', 'client.country'];
     }
 
     /**
@@ -44,7 +44,7 @@ class InvoiceController extends BaseOrionController
      */
     public function sortableBy(): array
     {
-        return ['id', 'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'created_at', 'updated_at'];
+        return ['id', 'client.name', 'client.email', 'client.phone', 'client.address', 'client.city', 'client.state', 'client.zip', 'client.country', 'created_at', 'updated_at'];
     }
 
     /**
@@ -104,6 +104,8 @@ class InvoiceController extends BaseOrionController
     public function includes(): array
     {
         return [
+            'client',
+            'issuer',
             'products',
             'payments',
         ];

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Head as InertiaHead } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -11,12 +11,11 @@ import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import Message from 'primevue/message';
 import { useToast } from 'primevue/usetoast';
-import { useAuthToken } from '@/composables/useAuthToken';
 import { Branch } from '@/models/Branch';
+import { Orion } from '@tailflow/laravel-orion/lib/orion';
 
 const { t } = useI18n();
 const toast = useToast();
-const { getToken } = useAuthToken();
 
 const breadcrumbs = [
   { label: t('Settings'), url: '/settings' },
@@ -33,11 +32,10 @@ const onboardingStatus = ref<{
   onboardingCompleted: boolean;
   stripeAccountId: string | null;
   canAcceptPayments: boolean;
+  businessName: string | null;
+  taxId: string | null;
 } | null>(null);
 const statusLoading = ref(false);
-
-// Computed
-const hasSelection = computed(() => selectedBranch.value !== null);
 
 // Load branches
 const loadBranches = async () => {
@@ -62,19 +60,17 @@ const loadBranches = async () => {
 const loadOnboardingStatus = async (branchId: number) => {
   try {
     statusLoading.value = true;
-    const token = getToken();
-    const response = await fetch(`/api/stripe/branches/${branchId}/status`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const httpClient = Orion.makeHttpClient();
+    const response = await httpClient.get(`/api/stripe/branches/${branchId}/status`);
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch status');
-    }
-
-    onboardingStatus.value = await response.json();
+    onboardingStatus.value = response.data as {
+      hasStripeAccount: boolean;
+      onboardingCompleted: boolean;
+      stripeAccountId: string | null;
+      canAcceptPayments: boolean;
+      businessName: string | null;
+      taxId: string | null;
+    };
   } catch (error) {
     console.error('Error loading onboarding status:', error);
     toast.add({
@@ -101,27 +97,18 @@ const generateOnboardingUrl = async () => {
 
   try {
     loading.value = true;
-    const token = getToken();
     const branchId = selectedBranch.value.$attributes.id!;
 
     const returnURL = `${window.location.origin}/settings/stripe/return`;
     const refreshURL = `${window.location.origin}/settings/stripe/refresh`;
 
-    const response = await fetch(`/api/stripe/branches/${branchId}/onboarding`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({ returnURL, refreshURL }),
+    const httpClient = Orion.makeHttpClient();
+    const response = await httpClient.post(`/api/stripe/branches/${branchId}/onboarding`, {
+      returnURL,
+      refreshURL,
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to generate onboarding URL');
-    }
-
-    const data = await response.json();
+    const data = response.data as { url: string };
 
     toast.add({
       severity: 'success',
@@ -150,21 +137,12 @@ const generateOnboardingUrl = async () => {
 // View dashboard
 const viewDashboard = async (branch: Branch) => {
   try {
-    const token = getToken();
     const branchId = branch.$attributes.id!;
 
-    const response = await fetch(`/api/stripe/branches/${branchId}/dashboard`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
+    const httpClient = Orion.makeHttpClient();
+    const response = await httpClient.get(`/api/stripe/branches/${branchId}/dashboard`);
 
-    if (!response.ok) {
-      throw new Error('Failed to get dashboard URL');
-    }
-
-    const data = await response.json();
+    const data = response.data as { url: string };
     window.open(data.url, '_blank');
   } catch (error) {
     console.error('Error getting dashboard URL:', error);
@@ -193,27 +171,18 @@ const resetAccount = async () => {
 
   try {
     loading.value = true;
-    const token = getToken();
     const branchId = selectedBranch.value.$attributes.id!;
 
     const returnURL = `${window.location.origin}/settings/stripe/return`;
     const refreshURL = `${window.location.origin}/settings/stripe/refresh`;
 
-    const response = await fetch(`/api/stripe/branches/${branchId}/reset`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({ returnURL, refreshURL }),
+    const httpClient = Orion.makeHttpClient();
+    const response = await httpClient.post(`/api/stripe/branches/${branchId}/reset`, {
+      returnURL,
+      refreshURL,
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to reset account');
-    }
-
-    const data = await response.json();
+    const data = response.data as { url: string };
 
     toast.add({
       severity: 'success',
@@ -311,14 +280,22 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column field="stripe_id" :header="t('Stripe Status')">
+          <Column field="is_stripe_connected" :header="t('Stripe Status')">
             <template #body="{ data }">
               <Tag
                 :severity="
-                  getStatusSeverity(!!data.$attributes.stripe_id, !!data.$attributes.stripe_id)
+                  getStatusSeverity(
+                    !!data.$attributes.is_stripe_connected,
+                    !!data.$attributes.is_stripe_connected
+                  )
                 "
               >
-                {{ getStatusLabel(!!data.$attributes.stripe_id, !!data.$attributes.stripe_id) }}
+                {{
+                  getStatusLabel(
+                    !!data.$attributes.is_stripe_connected,
+                    !!data.$attributes.is_stripe_connected
+                  )
+                }}
               </Tag>
             </template>
           </Column>
@@ -327,7 +304,7 @@ onMounted(() => {
             <template #body="{ data }">
               <div class="flex gap-2">
                 <Button
-                  v-if="!data.$attributes.stripe_id"
+                  v-if="!data.$attributes.is_stripe_connected"
                   :label="t('Connect')"
                   icon="pi pi-link"
                   size="small"
@@ -343,7 +320,7 @@ onMounted(() => {
                   @click="viewDashboard(data)"
                 />
                 <Button
-                  v-if="data.$attributes.stripe_id"
+                  v-if="data.$attributes.is_stripe_connected"
                   :label="t('Manage')"
                   icon="pi pi-cog"
                   size="small"
@@ -402,6 +379,20 @@ onMounted(() => {
               <div class="text-sm text-gray-500">{{ t('Account ID') }}</div>
               <div class="font-mono text-xs truncate">
                 {{ onboardingStatus.stripeAccountId || '-' }}
+              </div>
+            </div>
+
+            <div v-if="onboardingStatus.businessName" class="p-4 border rounded-lg col-span-2">
+              <div class="text-sm text-gray-500">{{ t('Business Name') }}</div>
+              <div class="font-semibold">
+                {{ onboardingStatus.businessName }}
+              </div>
+            </div>
+
+            <div v-if="onboardingStatus.taxId" class="p-4 border rounded-lg col-span-2">
+              <div class="text-sm text-gray-500">{{ t('Tax ID (RFC)') }}</div>
+              <div class="font-mono">
+                {{ onboardingStatus.taxId }}
               </div>
             </div>
           </div>

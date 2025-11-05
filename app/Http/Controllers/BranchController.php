@@ -103,7 +103,7 @@ class BranchController extends BaseOrionController
      */
     public function includes(): array
     {
-        return [];
+        return ['stripeAccountMapping'];
     }
 }
 
