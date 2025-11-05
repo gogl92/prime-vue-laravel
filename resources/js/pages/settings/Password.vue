@@ -556,8 +556,8 @@ onMounted(() => {
   <Dialog
     v-model:visible="showPasswordConfirmDialog"
     :header="t('Confirm Password')"
-    :modal="true"
-    :closable="true"
+    modal
+    closable
     :style="{ width: '450px' }"
   >
     <div class="space-y-4">

@@ -87,7 +87,10 @@ const loadOnboardingStatus = async (branchId: number) => {
 // Start onboarding
 const startOnboarding = async (branch: Branch) => {
   selectedBranch.value = branch;
-  await loadOnboardingStatus(branch.$attributes.id!);
+  const branchId = branch.$attributes.id;
+  if (branchId) {
+    await loadOnboardingStatus(branchId);
+  }
   showOnboardingDialog.value = true;
 };
 
@@ -97,7 +100,8 @@ const generateOnboardingUrl = async () => {
 
   try {
     loading.value = true;
-    const branchId = selectedBranch.value.$attributes.id!;
+    const branchId = selectedBranch.value.$attributes.id;
+    if (!branchId) return;
 
     const returnURL = `${window.location.origin}/settings/stripe/return`;
     const refreshURL = `${window.location.origin}/settings/stripe/refresh`;
@@ -137,7 +141,8 @@ const generateOnboardingUrl = async () => {
 // View dashboard
 const viewDashboard = async (branch: Branch) => {
   try {
-    const branchId = branch.$attributes.id!;
+    const branchId = branch.$attributes.id;
+    if (!branchId) return;
 
     const httpClient = Orion.makeHttpClient();
     const response = await httpClient.get(`/api/stripe/branches/${branchId}/dashboard`);
@@ -171,7 +176,8 @@ const resetAccount = async () => {
 
   try {
     loading.value = true;
-    const branchId = selectedBranch.value.$attributes.id!;
+    const branchId = selectedBranch.value.$attributes.id;
+    if (!branchId) return;
 
     const returnURL = `${window.location.origin}/settings/stripe/return`;
     const refreshURL = `${window.location.origin}/settings/stripe/refresh`;
@@ -339,7 +345,7 @@ onMounted(() => {
     <Dialog
       v-model:visible="showOnboardingDialog"
       :header="t('Stripe Connect Configuration')"
-      :modal="true"
+      modal
       :style="{ width: '600px' }"
     >
       <div v-if="selectedBranch" class="space-y-4">

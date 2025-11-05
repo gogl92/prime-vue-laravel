@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTemplateRef, onMounted, ref } from 'vue';
-import { Head as InertiaHead, Link as InertiaLink, router } from '@inertiajs/vue3';
+import { Head as InertiaHead, Link as InertiaLink } from '@inertiajs/vue3';
 import GuestAuthLayout from '@/layouts/GuestAuthLayout.vue';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
@@ -10,8 +10,7 @@ import Message from 'primevue/message';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import orionService from '@/services/orion';
-import { route } from 'ziggy-js'; 
-import { loadEnv } from 'vite';
+import { route } from 'ziggy-js';
 
 const props = defineProps<{
   canResetPassword: boolean;
@@ -59,11 +58,9 @@ const submit = async () => {
 
     // Get CSRF token from cookie
     const csrfToken = getCsrfToken();
-    console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
 
     // Step 2: Login with Fortify (creates session)
     const loginUrl = `${window.location.origin}/login`;
-    console.log('Login URL:', loginUrl);
 
     const loginHeaders: HeadersInit = {
       'Content-Type': 'application/json',
@@ -85,11 +82,9 @@ const submit = async () => {
       }),
     });
 
-    console.log('Login response status:', response.status);
-
     // Check if it's a redirect (Fortify redirects on success)
     if (response.redirected || response.status === 302) {
-      console.log('Login successful (redirect detected)');
+      // Login successful (redirect detected)
     } else if (!response.ok) {
       const data = await response.json();
       // Handle validation errors
@@ -119,7 +114,6 @@ const submit = async () => {
     if (tokenResponse.ok) {
       const tokenData = await tokenResponse.json();
       if (tokenData.token) {
-        console.log('Storing API token:', tokenData.token.substring(0, 20) + '...');
         localStorage.setItem('auth_token', tokenData.token);
         orionService.setAuthToken(tokenData.token);
       }
