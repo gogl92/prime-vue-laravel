@@ -106,4 +106,3 @@ class BranchController extends BaseOrionController
         return ['stripeAccountMapping'];
     }
 }
-

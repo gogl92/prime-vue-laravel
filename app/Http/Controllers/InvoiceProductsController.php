@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Models\Invoice;
 use Illuminate\Auth\Access\Response;
 

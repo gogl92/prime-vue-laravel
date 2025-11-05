@@ -24,4 +24,3 @@ class BranchSeeder extends Seeder
         Branch::factory()->count(8)->create();
     }
 }
-

@@ -12,7 +12,8 @@ use App\Interfaces\TimeZoneDriverInterface;
  * Class GoogleTimeZoneDriver
  * @package App\Services\TimeZone\Drivers
  */
-class GoogleTimeZoneDriver implements TimeZoneDriverInterface {
+class GoogleTimeZoneDriver implements TimeZoneDriverInterface
+{
     protected string $apiKey;
 
     protected const string MAPS_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';

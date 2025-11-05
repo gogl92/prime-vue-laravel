@@ -36,4 +36,3 @@ class StoreBranchRequest extends FormRequest
         ];
     }
 }
-

@@ -87,4 +87,3 @@ class SafePhoneNumberCast implements CastsAttributes
         }
     }
 }
-

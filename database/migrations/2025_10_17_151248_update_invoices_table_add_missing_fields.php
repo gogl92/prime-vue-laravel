@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -31,9 +30,9 @@ return new class extends Migration
         });
 
         // Step 2: Migrate existing invoice data to clients table and link them
-        $invoices = \DB::table('invoices')->get();
+        $invoices = DB::table('invoices')->get();
         foreach ($invoices as $invoice) {
-            $clientId = \DB::table('clients')->insertGetId([
+            $clientId = DB::table('clients')->insertGetId([
                 'name' => $invoice->name,
                 'email' => $invoice->email,
                 'phone' => $invoice->phone,
@@ -49,7 +48,7 @@ return new class extends Migration
             ]);
 
             // Update invoice with client_id
-            \DB::table('invoices')->where('id', $invoice->id)->update(['client_id' => $clientId]);
+            DB::table('invoices')->where('id', $invoice->id)->update(['client_id' => $clientId]);
         }
 
         // Step 3: Make client_id required and add foreign key, then remove old columns

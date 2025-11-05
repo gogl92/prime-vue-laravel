@@ -7,7 +7,8 @@ namespace App\Services\Settings;
 use App\Models\User;
 use Rawilk\Settings\Models\Setting;
 
-class SettingsService {
+class SettingsService
+{
     /** @var string Model name */
     protected string $model = User::class;
 
@@ -17,7 +18,8 @@ class SettingsService {
      * @param int|string $modelId The ID of the model.
      * @return array<string, mixed> An associative array of settings.
      */
-    public function index(int|string $modelId): array {
+    public function index(int|string $modelId): array
+    {
         $model = $this->model::findOrFail($modelId);
         $modelClass = $model::class;
 
@@ -52,32 +54,33 @@ class SettingsService {
      *
      * @return array<string, mixed> The stored resource(s) or the value of the setting stored.
      */
-    public function store(int|string $modelId, mixed $setting): mixed {
+    public function store(int|string $modelId, mixed $setting): mixed
+    {
 
-      $model = $this->model::findOrFail($modelId);
+        $model = $this->model::findOrFail($modelId);
 
-      $externalSettings = $model->getExternalSettings();
+        $externalSettings = $model->getExternalSettings();
 
-      if (isset($setting['resources'])) {
-          foreach ($setting["resources"] as $resource) {
-              if (isset($resource['key'], $resource['value'])) {
-                  if ($this->isExternalSetting($resource['key'], $externalSettings)) {
-                      $this->saveExternalSetting($model, $resource, $externalSettings);
-                  }
+        if (isset($setting['resources'])) {
+            foreach ($setting["resources"] as $resource) {
+                if (isset($resource['key'], $resource['value'])) {
+                    if ($this->isExternalSetting($resource['key'], $externalSettings)) {
+                        $this->saveExternalSetting($model, $resource, $externalSettings);
+                    }
 
-                  $model->settings()->set($resource['key'], $resource['value']);
-              }
-          }
-          return $setting["resources"];
-      }
+                    $model->settings()->set($resource['key'], $resource['value']);
+                }
+            }
+            return $setting["resources"];
+        }
 
-      if ($this->isExternalSetting($setting['key'], $externalSettings)) {
-          $this->saveExternalSetting($model, $setting, $externalSettings);
-      }
+        if ($this->isExternalSetting($setting['key'], $externalSettings)) {
+            $this->saveExternalSetting($model, $setting, $externalSettings);
+        }
 
-      $model->settings()->set($setting['key'], $setting['value']);
+        $model->settings()->set($setting['key'], $setting['value']);
 
-      return $model->settings()->get($setting['key']);
+        return $model->settings()->get($setting['key']);
     }
 
     /**
@@ -90,7 +93,8 @@ class SettingsService {
      * @param mixed $value The new value for the setting.
      * @return mixed The updated value of the setting.
      */
-    public function update(int|string $modelId, string $key, mixed $value): mixed {
+    public function update(int|string $modelId, string $key, mixed $value): mixed
+    {
         $model = $this->model::findOrFail($modelId);
         $externalSettings = $this->model::getExternalSettings();
 
@@ -107,7 +111,8 @@ class SettingsService {
      * @param string $key The key of the setting to retrieve.
      * @return mixed The value of the requested setting.
      */
-    public function show(int|string $modelId, string $key): mixed {
+    public function show(int|string $modelId, string $key): mixed
+    {
         $model = $this->model::findOrFail($modelId);
         return $model->settings()->get($key);
     }
@@ -121,7 +126,8 @@ class SettingsService {
      * @param string $key The key of the setting to delete.
      * @return bool|null Returns true if the setting is deleted successfully, null otherwise.
      */
-    public function destroy(int|string $modelId, string $key) {
+    public function destroy(int|string $modelId, string $key)
+    {
         $model = $this->model::findOrFail($modelId);
         return $model->settings()->forget($key);
     }
@@ -133,7 +139,8 @@ class SettingsService {
      * @param array<string, array> $externalSettings The list of exception settings.
      * @return bool True if the key is an exception, false otherwise.
      */
-    private function isExternalSetting(string $key, array $externalSettings): bool {
+    private function isExternalSetting(string $key, array $externalSettings): bool
+    {
         return key_exists($key, $externalSettings);
     }
 
@@ -147,7 +154,8 @@ class SettingsService {
      * @param array<string, array> $externalSettings The list of exception settings.
      * @return void
      */
-    private function saveExternalSetting(mixed $model, mixed $setting, mixed $externalSettings): void {
+    private function saveExternalSetting(mixed $model, mixed $setting, mixed $externalSettings): void
+    {
         $settingModel = $externalSettings[$setting['key']]['model']::findOrFail(
             $model[$externalSettings[$setting['key']]['relation_field_id']]
         );

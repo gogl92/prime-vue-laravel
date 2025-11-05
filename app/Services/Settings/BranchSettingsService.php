@@ -6,7 +6,8 @@ namespace App\Services\Settings;
 
 use App\Models\Branch;
 
-class BranchSettingsService extends SettingsService {
-  /** @var string Model name */
-  protected string $model = Branch::class;
+class BranchSettingsService extends SettingsService
+{
+    /** @var string Model name */
+    protected string $model = Branch::class;
 }

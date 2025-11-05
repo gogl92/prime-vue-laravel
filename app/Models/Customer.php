@@ -82,4 +82,3 @@ class Customer extends Model implements Auditable
         return "{$this->first_name} {$this->last_name}";
     }
 }
-

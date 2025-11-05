@@ -6,7 +6,8 @@ namespace App\Services\Settings;
 
 use App\Models\Company;
 
-class CompanySettingsService extends SettingsService {
-  /** @var string Model name */
-  protected string $model = Company::class;
+class CompanySettingsService extends SettingsService
+{
+    /** @var string Model name */
+    protected string $model = Company::class;
 }

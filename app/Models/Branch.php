@@ -93,4 +93,3 @@ class Branch extends Model implements Auditable
         return $mapping && $mapping->charges_enabled;
     }
 }
-

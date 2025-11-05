@@ -13,7 +13,4 @@ use Orion\Http\Controllers\RelationController as BaseOrionController;
  */
 abstract class BaseOrionRelationalController extends BaseOrionController
 {
-
 }
-
-

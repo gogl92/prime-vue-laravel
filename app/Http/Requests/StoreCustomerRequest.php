@@ -38,4 +38,3 @@ class StoreCustomerRequest extends FormRequest
         ];
     }
 }
-
