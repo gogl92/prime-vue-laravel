@@ -29,6 +29,8 @@
         "@vueuse/core": "^13.0.0",
         "@vueuse/integrations": "^13.2.0",
         "chart.js": "^4.5.0",
+        "clabe-validator": "^3.1.1",
+        "curp": "^1.3.1",
         "globals": "^16.0.0",
         "laravel-vite-plugin": "^1.2.0",
         "lodash-es": "^4.17.21",
