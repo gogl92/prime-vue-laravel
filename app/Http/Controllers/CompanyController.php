@@ -19,12 +19,12 @@ class CompanyController extends BaseOrionController
     /**
      * Store request class
      */
-    protected $storeRequest = StoreCompanyRequest::class;
+    protected string $storeRequest = StoreCompanyRequest::class;
 
     /**
      * Update request class
      */
-    protected $updateRequest = UpdateCompanyRequest::class;
+    protected string $updateRequest = UpdateCompanyRequest::class;
 
     /**
      * Enable Orion search, filter and sort capabilities

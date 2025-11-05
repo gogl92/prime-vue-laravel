@@ -27,6 +27,9 @@ class TimeZoneService
         };
     }
 
+    /**
+     * @return array{lat: float, lng: float}
+     */
     public function getCoordinates(string $street_1, string $street_2, string $city, string $state, string $country, string $zip): array
     {
         return $this->driver->getCoordinates($street_1, $street_2, $city, $state, $country, $zip);

@@ -10,3 +10,6 @@ parameters:
         - database/factories
         - database/seeders
         - routes
+    ignoreErrors:
+        # Ignore errors from Laravel Cashier Connect package (external dependency)
+        - '#Lanos\\CashierConnect\\Models\\StripeAccountMapping#'

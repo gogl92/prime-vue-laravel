@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Lanos\CashierConnect\ConnectCustomer;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditableTrait;
-use Propaganistas\LaravelPhone\Casts\SafePhoneNumberCast;
+use App\Casts\SafePhoneNumberCast;
 use RichanFongdasen\EloquentBlameable\BlameableTrait;
 
 class Customer extends Model implements Auditable

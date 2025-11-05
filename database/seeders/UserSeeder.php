@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
             $header = fgetcsv($handle);
 
             // Ensure header is valid
-            if ($header === false || empty($header)) {
+            if ($header === false || count(array_filter($header)) === 0) {
                 fclose($handle);
                 return;
             }

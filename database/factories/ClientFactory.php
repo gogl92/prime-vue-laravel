@@ -16,17 +16,18 @@ class ClientFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = fake();
         return [
-            'name' => fake()->company(),
-            'email' => fake()->unique()->companyEmail(),
-            'phone' => fake()->phoneNumber(),
-            'address' => fake()->streetAddress(),
-            'city' => fake()->city(),
-            'state' => fake()->state(),
-            'zip' => fake()->postcode(),
-            'country' => fake()->country(),
-            'is_supplier' => fake()->boolean(30), // 30% chance of being a supplier
-            'is_issuer' => fake()->boolean(10),   // 10% chance of being an issuer
+            'name' => $faker->company(),
+            'email' => $faker->unique()->companyEmail(),
+            'phone' => $faker->phoneNumber(),
+            'address' => $faker->streetAddress(),
+            'city' => $faker->city(),
+            'state' => $faker->randomElement(['CA', 'NY', 'TX', 'FL', 'IL']),
+            'zip' => $faker->postcode(),
+            'country' => $faker->country(),
+            'is_supplier' => $faker->boolean(30), // 30% chance of being a supplier
+            'is_issuer' => $faker->boolean(10),   // 10% chance of being an issuer
         ];
     }
 

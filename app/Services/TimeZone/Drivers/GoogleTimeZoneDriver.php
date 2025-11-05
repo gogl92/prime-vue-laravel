@@ -39,8 +39,8 @@ class GoogleTimeZoneDriver implements TimeZoneDriverInterface
         }
 
         return [
-            $data['results'][0]['geometry']['location']['lat'],
-            $data['results'][0]['geometry']['location']['lng'],
+            'lat' => $data['results'][0]['geometry']['location']['lat'],
+            'lng' => $data['results'][0]['geometry']['location']['lng'],
         ];
     }
 

@@ -411,6 +411,8 @@ const getTotalPayments = (invoiceId: number): number => {
   }, 0);
 };
 
+const selectedInvoices = ref<Invoice[]>([]);
+
 // Lifecycle
 onMounted(() => {
   void loadInvoices();
@@ -506,6 +508,11 @@ onMounted(() => {
             @row-expand="onRowExpand"
             @row-collapse="onRowCollapse"
           >
+          
+            <Column>
+              <Checkbox v-model="selectedInvoices" binary />
+            </Column>
+            
             <Column expander :header-style="{ width: '3rem' }" />
 
             <Column field="id" :header="t('ID')" sortable style="width: 80px">
@@ -596,6 +603,9 @@ onMounted(() => {
                       :table-style="{ minWidth: '50rem' }"
                       class="p-datatable-sm"
                     >
+                      <Column>
+                        <Checkbox v-model="selectedInvoices" binary />
+                      </Column>
                       <Column field="id" :header="t('#')" style="width: 60px">
                         <template #body="{ index }">
                           {{ index + 1 }}

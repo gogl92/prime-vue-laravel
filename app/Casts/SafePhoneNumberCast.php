@@ -11,6 +11,8 @@ use Exception;
 /**
  * Safe phone number cast that handles invalid phone numbers gracefully
  * instead of throwing exceptions
+ *
+ * @implements CastsAttributes<PhoneNumber|null, string|null>
  */
 class SafePhoneNumberCast implements CastsAttributes
 {
@@ -24,7 +26,7 @@ class SafePhoneNumberCast implements CastsAttributes
      */
     public function __construct(string ...$countries)
     {
-        $this->countries = empty($countries) ? ['MX', 'US'] : $countries;
+        $this->countries = empty($countries) ? ['MX', 'US'] : array_values($countries);
     }
 
     /**

@@ -16,18 +16,20 @@ class BranchFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = fake();
+        $words = $faker->words(2, true);
         return [
-            'name' => fake()->words(2, true) . ' Branch',
-            'code' => strtoupper(fake()->unique()->bothify('BR-###??')),
-            'email' => fake()->companyEmail(),
-            'phone' => fake()->phoneNumber(),
-            'address' => fake()->streetAddress(),
-            'city' => fake()->city(),
-            'state' => fake()->state(),
-            'zip' => fake()->postcode(),
-            'country' => fake()->country(),
-            'is_active' => fake()->boolean(85), // 85% chance of being active
-            'description' => fake()->optional(0.6)->sentence(),
+            'name' => (is_string($words) ? $words : implode(' ', $words)) . ' Branch',
+            'code' => strtoupper($faker->unique()->bothify('BR-###??')),
+            'email' => $faker->companyEmail(),
+            'phone' => $faker->phoneNumber(),
+            'address' => $faker->streetAddress(),
+            'city' => $faker->city(),
+            'state' => $faker->randomElement(['CA', 'NY', 'TX', 'FL', 'IL']),
+            'zip' => $faker->postcode(),
+            'country' => $faker->country(),
+            'is_active' => $faker->boolean(85), // 85% chance of being active
+            'description' => $faker->optional(0.6)->sentence(),
         ];
     }
 

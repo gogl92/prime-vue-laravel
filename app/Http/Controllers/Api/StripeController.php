@@ -109,7 +109,9 @@ class StripeController extends Controller
             try {
                 $account = $branch->asStripeAccount();
                 $businessName = $account->business_profile->name ?? $account->settings->dashboard->display_name ?? null;
-                $taxId = $account->business_profile->support_address->country === 'MX'
+                $businessProfile = $account->business_profile ?? null;
+                $supportAddress = $businessProfile?->support_address;
+                $taxId = ($supportAddress && isset($supportAddress->country) && $supportAddress->country === 'MX')
                     ? ($account->company->tax_id ?? null)
                     : null;
             } catch (\Exception $e) {

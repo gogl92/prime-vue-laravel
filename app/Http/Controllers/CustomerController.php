@@ -19,12 +19,12 @@ class CustomerController extends BaseOrionController
     /**
      * Store request class
      */
-    protected $storeRequest = StoreCustomerRequest::class;
+    protected string $storeRequest = StoreCustomerRequest::class;
 
     /**
      * Update request class
      */
-    protected $updateRequest = UpdateCustomerRequest::class;
+    protected string $updateRequest = UpdateCustomerRequest::class;
 
     /**
      * Enable Orion search, filter and sort capabilities

@@ -16,19 +16,20 @@ class CustomerFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = fake();
         return [
-            'first_name' => fake()->firstName(),
-            'last_name' => fake()->lastName(),
-            'email' => fake()->unique()->safeEmail(),
-            'phone' => fake()->phoneNumber(),
-            'street_1' => fake()->streetAddress(),
-            'street_2' => fake()->secondaryAddress(),
-            'city' => fake()->city(),
-            'state' => fake()->state(),
-            'zip' => fake()->postcode(),
-            'country' => fake()->randomElement(['United States', 'Mexico']),
-            'notes' => fake()->optional()->sentence(),
-            'is_active' => fake()->boolean(90), // 90% chance of being active
+            'first_name' => $faker->firstName(),
+            'last_name' => $faker->lastName(),
+            'email' => $faker->unique()->safeEmail(),
+            'phone' => $faker->phoneNumber(),
+            'street_1' => $faker->streetAddress(),
+            'street_2' => $faker->optional()->streetAddress(),
+            'city' => $faker->city(),
+            'state' => $faker->randomElement(['CA', 'NY', 'TX', 'FL', 'IL']),
+            'zip' => $faker->postcode(),
+            'country' => $faker->randomElement(['United States', 'Mexico']),
+            'notes' => $faker->optional()->sentence(),
+            'is_active' => $faker->boolean(90), // 90% chance of being active
         ];
     }
 

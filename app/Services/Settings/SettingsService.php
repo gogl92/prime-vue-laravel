@@ -32,7 +32,9 @@ class SettingsService
         $result = [];
         foreach ($modelSettings as $key) {
             preg_match('/^[^:]+/', $key->key, $matches);
-            $result[$matches[0]] = $model->settings()->get($matches[0]);
+            if (isset($matches[0])) {
+                $result[$matches[0]] = $model->settings()->get($matches[0]);
+            }
         }
 
         return $result;
@@ -136,7 +138,7 @@ class SettingsService
      * Checks if a given key is part of the exception settings.
      *
      * @param string $key The key of the setting.
-     * @param array<string, array> $externalSettings The list of exception settings.
+     * @param array<string, mixed> $externalSettings The list of exception settings.
      * @return bool True if the key is an exception, false otherwise.
      */
     private function isExternalSetting(string $key, array $externalSettings): bool
@@ -151,10 +153,10 @@ class SettingsService
      *
      * @param mixed $model The model instance.
      * @param mixed $setting The setting data.
-     * @param array<string, array> $externalSettings The list of exception settings.
+     * @param array<string, mixed> $externalSettings The list of exception settings.
      * @return void
      */
-    private function saveExternalSetting(mixed $model, mixed $setting, mixed $externalSettings): void
+    private function saveExternalSetting(mixed $model, mixed $setting, array $externalSettings): void
     {
         $settingModel = $externalSettings[$setting['key']]['model']::findOrFail(
             $model[$externalSettings[$setting['key']]['relation_field_id']]

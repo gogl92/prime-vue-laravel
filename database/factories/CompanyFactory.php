@@ -16,18 +16,19 @@ class CompanyFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = fake();
         return [
-            'name' => fake()->company(),
-            'street_1' => fake()->streetAddress(),
-            'street_2' => fake()->secondaryAddress(),
-            'city' => fake()->city(),
-            'state' => fake()->state(),
-            'zip' => fake()->postcode(),
-            'country' => fake()->country(),
-            'phone' => fake()->phoneNumber(),
-            'email' => fake()->companyEmail(),
-            'tax_id' => fake()->numerify('##-#######'),
-            'tax_name' => fake()->company() . ' ' . fake()->companySuffix(),
+            'name' => $faker->company(),
+            'street_1' => $faker->streetAddress(),
+            'street_2' => $faker->optional()->streetAddress(),
+            'city' => $faker->city(),
+            'state' => $faker->randomElement(['CA', 'NY', 'TX', 'FL', 'IL']),
+            'zip' => $faker->postcode(),
+            'country' => $faker->country(),
+            'phone' => $faker->phoneNumber(),
+            'email' => $faker->companyEmail(),
+            'tax_id' => $faker->numerify('##-#######'),
+            'tax_name' => $faker->company() . ' ' . $faker->companySuffix(),
         ];
     }
 }

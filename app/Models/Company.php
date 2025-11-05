@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
-use Propaganistas\LaravelPhone\Casts\SafePhoneNumberCast;
+use App\Casts\SafePhoneNumberCast;
 use RichanFongdasen\EloquentBlameable\BlameableTrait;
 use OwenIt\Auditing\Auditable as AuditableTrait;
 

@@ -14,7 +14,12 @@ use OwenIt\Auditing\Auditable as AuditableTrait;
 use RichanFongdasen\EloquentBlameable\BlameableTrait;
 use Laravel\Cashier\Billable as CashierBillable;
 use Lanos\CashierConnect\Billable as ConnectBillable;
+use Lanos\CashierConnect\Models\StripeAccountMapping;
 
+/**
+ * @property-read StripeAccountMapping|null $stripeAccountMapping
+ * @method string stripeAccountDashboardUrl()
+ */
 class Branch extends Model implements Auditable
 {
     /** @use HasFactory<BranchFactory> */
@@ -25,11 +30,11 @@ class Branch extends Model implements Auditable
     use CashierBillable;
     use ConnectBillable;
     /*
-     * public $commission_type = 'fixed';
-     * public $commission_rate = 500; // E.G. $5 application fee
+     * public string $commission_type = 'fixed';
+     * public int $commission_rate = 500; // E.G. $5 application fee
      */
-    public $commission_type = 'percentage';
-    public $commission_rate = 5;
+    public string $commission_type = 'percentage';
+    public int $commission_rate = 5;
 
     protected $fillable = [
         'name',
@@ -56,7 +61,7 @@ class Branch extends Model implements Auditable
     /**
      * Append custom attributes to model JSON
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $appends = ['is_stripe_connected'];
 
