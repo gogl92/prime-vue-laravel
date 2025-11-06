@@ -125,18 +125,28 @@ export default {
   'Filter by city...': 'Filtrar por ciudad...',
   'Country': 'País',
   'Select country': 'Seleccionar país',
-  'Add Invoice': 'Agregar factura',
   'Refresh': 'Actualizar',
+  'selected': 'seleccionados',
 
   // Invoices - Table Headers
-  'ID': 'ID',
-  'Phone': 'Teléfono',
-  'Location': 'Ubicación',
-  'Created': 'Creado',
+  'Invoices': 'Facturas',
+  'total': 'en total',
+  'Folio': 'Folio',
+  'Date': 'Fecha',
+  'Subtotal': 'Subtotal',
+  'Currency': 'Moneda',
+  'Client': 'Cliente',
+  'Status': 'Estátus',
+  'View Invoice': 'Ver factura',
+  'Download XML': 'Descargar XML',
+  'Stamp': 'Timbrar',
+  'Validate': 'Validar',
   'Actions': 'Acciones',
+  'Edit': 'Editar',
+  'Mark as Paid': 'Marcar como pagado',
 
   // Invoices - Dialog
-  'Create Invoice': 'Crear factura',
+  'Create Invoice': 'Generar factura',
   'Edit Invoice': 'Editar factura',
   'Name *': 'Nombre *',
   'Enter name': 'Ingresa nombre',
@@ -175,16 +185,12 @@ export default {
   '#': '#',
   'Amount': 'Monto',
   'Payment Method': 'Método de pago',
-  'Status': 'Estado',
   'Transaction ID': 'ID de transacción',
   'Paid At': 'Pagado el',
   'Notes': 'Notas',
   'No products found for this invoice.': 'No se encontraron productos para esta factura.',
   'No payments found for this invoice.': 'No se encontraron pagos para esta factura.',
   'Total Payments:': 'Pagos totales:',
-
-  // Invoices - Tooltips
-  'Edit': 'Editar',
 
   // Invoices - Pagination
   'Showing {first} to {last} of {totalRecords} entries':
@@ -201,6 +207,18 @@ export default {
   'Failed to save invoice': 'Error al guardar factura',
   'Failed to load products': 'Error al cargar productos',
   'Failed to load payments': 'Error al cargar pagos',
+  'Info': 'Información',
+  'View invoice functionality will be implemented soon':
+    'La funcionalidad de ver factura se implementará pronto',
+  'Download': 'Descargar',
+  'Downloading XML file...': 'Descargando archivo XML...',
+  'No XML file available for this invoice': 'No hay archivo XML disponible para esta factura',
+  'Stamp functionality will be implemented soon':
+    'La funcionalidad de timbrado se implementará pronto',
+  'Mark as paid functionality will be implemented soon':
+    'La funcionalidad de marcar como pagado se implementará pronto',
+  'Validate functionality will be implemented soon':
+    'La funcionalidad de validación se implementará pronto',
 
   // Error Page
   'Back to homepage': 'Volver a la página de inicio',

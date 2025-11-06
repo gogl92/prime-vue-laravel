@@ -25,7 +25,29 @@ class Product extends Model implements Auditable
         'price',
         'quantity',
         'sku',
+        // CFDI fields
+        'clave_prod_serv',
+        'clave_unidad',
+        'unidad',
+        'importe',
+        'descuento',
+        'numero_pedimento',
+        'cuenta_predial',
+        'partes',
+        'complemento',
+        'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'price' => 'decimal:2',
+            'importe' => 'decimal:2',
+            'descuento' => 'decimal:2',
+            'partes' => 'array',
+            'complemento' => 'array',
+        ];
+    }
 
     /**
      * Get the invoices that belong to the product.

@@ -28,7 +28,26 @@ class InvoiceController extends BaseOrionController
      */
     public function searchableBy(): array
     {
-        return ['id', 'client.name', 'client.email', 'client.phone', 'client.address', 'client.city', 'client.state', 'client.zip', 'client.country'];
+        return [
+            'id',
+            'uuid',
+            'series',
+            'sender_name',
+            'sender_rfc',
+            'receipt_rfc',
+            'status',
+            'token',
+            'client.name',
+            'client.email',
+            'client.phone',
+            'client.address',
+            'client.city',
+            'client.state',
+            'client.zip',
+            'client.country',
+            'supplier.name',
+            'issuer.name',
+        ];
     }
 
     /**
@@ -36,7 +55,31 @@ class InvoiceController extends BaseOrionController
      */
     public function filterableBy(): array
     {
-        return ['id', 'client.name', 'client.email', 'client.phone', 'client.address', 'client.city', 'client.state', 'client.zip', 'client.country'];
+        return [
+            'id',
+            'uuid',
+            'series',
+            'date',
+            'status',
+            'currency',
+            'payment_method',
+            'payment_form',
+            'receipt_type',
+            'sender_rfc',
+            'receipt_rfc',
+            'client_id',
+            'supplier_id',
+            'issuer_id',
+            'expenses_type_id',
+            'client.name',
+            'client.email',
+            'client.phone',
+            'client.city',
+            'client.state',
+            'client.country',
+            'supplier.name',
+            'issuer.name',
+        ];
     }
 
     /**
@@ -44,7 +87,29 @@ class InvoiceController extends BaseOrionController
      */
     public function sortableBy(): array
     {
-        return ['id', 'client.name', 'client.email', 'client.phone', 'client.address', 'client.city', 'client.state', 'client.zip', 'client.country', 'created_at', 'updated_at'];
+        return [
+            'id',
+            'uuid',
+            'series',
+            'date',
+            'status',
+            'import',
+            'import_usd',
+            'sub_total',
+            'paid',
+            'currency',
+            'sender_name',
+            'client.name',
+            'client.email',
+            'client.phone',
+            'client.city',
+            'client.state',
+            'client.country',
+            'supplier.name',
+            'issuer.name',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     /**
@@ -106,6 +171,7 @@ class InvoiceController extends BaseOrionController
         return [
             'client',
             'issuer',
+            'supplier',
             'products',
             'payments',
         ];

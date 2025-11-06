@@ -24,9 +24,10 @@ class Invoice extends Model implements Auditable
     protected $fillable = [
         'client_id',
         'issuer_id',
+        'supplier_id',
         'cfdi_type',
         'order_number',
-        'invoice_date',
+        'date',
         'payment_form',
         'send_email',
         'payment_method',
@@ -35,14 +36,41 @@ class Invoice extends Model implements Auditable
         'exchange_rate',
         'currency',
         'comments',
+        // CFDI fields
+        'uuid',
+        'import',
+        'import_usd',
+        'sub_total',
+        'retention_tax',
+        'iva_tax',
+        'paid',
+        'sender_name',
+        'sender_rfc',
+        'receipt_rfc',
+        'receipt_type',
+        'complement_id',
+        'complement_date',
+        'pdf',
+        'xml_path',
+        'cfdi_json',
+        'expenses_type_id',
+        'status',
+        'token',
     ];
 
     protected function casts(): array
     {
         return [
-            'invoice_date' => 'date',
+            'date' => 'date',
+            'complement_date' => 'date',
             'send_email' => 'boolean',
             'exchange_rate' => 'decimal:4',
+            'import' => 'decimal:2',
+            'import_usd' => 'decimal:2',
+            'sub_total' => 'decimal:2',
+            'retention_tax' => 'decimal:2',
+            'iva_tax' => 'decimal:2',
+            'paid' => 'decimal:2',
         ];
     }
 
@@ -62,6 +90,15 @@ class Invoice extends Model implements Auditable
     public function issuer(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'issuer_id');
+    }
+
+    /**
+     * Get the supplier for the invoice.
+     * @return BelongsTo<Client, $this>
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'supplier_id');
     }
 
     /**

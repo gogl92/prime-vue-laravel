@@ -258,7 +258,61 @@ const deleteInvoice = async () => {
   }
 };
 
+const viewInvoice = (_invoice: Invoice) => {
+  toast.add({
+    severity: 'info',
+    summary: t('Info'),
+    detail: t('View invoice functionality will be implemented soon'),
+    life: 3000,
+  });
+};
 
+const downloadXML = (invoice: Invoice) => {
+  if (invoice.$attributes.xml_path) {
+    toast.add({
+      severity: 'info',
+      summary: t('Download'),
+      detail: t('Downloading XML file...'),
+      life: 3000,
+    });
+    // TODO: Implement actual download
+    // window.open(invoice.$attributes.xml_path, '_blank');
+  } else {
+    toast.add({
+      severity: 'warn',
+      summary: t('Warning'),
+      detail: t('No XML file available for this invoice'),
+      life: 3000,
+    });
+  }
+};
+
+const stampInvoice = (_invoice: Invoice) => {
+  toast.add({
+    severity: 'info',
+    summary: t('Stamp'),
+    detail: t('Stamp functionality will be implemented soon'),
+    life: 3000,
+  });
+};
+
+const markAsPaid = (_invoice: Invoice) => {
+  toast.add({
+    severity: 'info',
+    summary: t('Paid'),
+    detail: t('Mark as paid functionality will be implemented soon'),
+    life: 3000,
+  });
+};
+
+const validateInvoice = (_invoice: Invoice) => {
+  toast.add({
+    severity: 'info',
+    summary: t('Validate'),
+    detail: t('Validate functionality will be implemented soon'),
+    life: 3000,
+  });
+};
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString();
@@ -428,7 +482,7 @@ onMounted(() => {
           {{ t('Invoices Example - Orion API') }}
         </h1>
         <Button
-          :label="t('Add Invoice')"
+          :label="t('Create Invoice')"
           icon="pi pi-plus"
           severity="success"
           class="p-button-success"
@@ -474,7 +528,14 @@ onMounted(() => {
       <Card>
         <template #title>
           <div class="flex items-center justify-between">
-            <span>{{ t('Invoices') }} ({{ totalRecords }} {{ t('total') }})</span>
+            <div class="flex items-center gap-3">
+              <span>{{ t('Invoices') }} ({{ totalRecords }} {{ t('total') }})</span>
+              <Tag
+                v-if="selectedInvoices.length > 0"
+                :value="`${selectedInvoices.length} ${t('selected')}`"
+                severity="success"
+              />
+            </div>
             <div class="flex items-center gap-2">
               <Button
                 icon="pi pi-refresh"
@@ -490,6 +551,7 @@ onMounted(() => {
         <template #content>
           <DataTable
             v-model:expanded-rows="expandedRows"
+            v-model:selection="selectedInvoices"
             :value="invoices"
             :loading="loading"
             paginator
@@ -503,66 +565,132 @@ onMounted(() => {
             :rows-per-page-options="[10, 20, 50]"
             current-page-report-template="Showing {first} to {last} of {totalRecords} entries"
             responsive-layout="scroll"
+            data-key="$attributes.id"
             @page="onPageChange"
             @sort="onSort"
             @row-expand="onRowExpand"
             @row-collapse="onRowCollapse"
           >
-          
-            <Column>
-              <Checkbox v-model="selectedInvoices" binary />
-            </Column>
-            
-            <Column expander :header-style="{ width: '3rem' }" />
 
-            <Column field="id" :header="t('ID')" sortable style="width: 80px">
+            <Column selection-mode="multiple" :header-style="{ width: '3rem' }" />
+
+            <Column field="series" :header="t('Folio')" sortable style="width: 120px">
               <template #body="{ data }">
-                <Tag :value="data.$attributes.id" severity="info" />
+                <span class="font-mono font-semibold">{{ data.$attributes.series || '-' }}</span>
               </template>
             </Column>
 
-            <Column field="client.name" :header="t('Name')" sortable>
+            <Column field="date" :header="t('Date')" sortable style="width: 130px">
+              <template #body="{ data }">
+                {{ data.$attributes.date ? formatDate(data.$attributes.date) : '-' }}
+              </template>
+            </Column>
+
+            <Column field="sub_total" :header="t('Subtotal')" sortable style="width: 130px">
+              <template #body="{ data }">
+                {{ data.$attributes.sub_total ? formatCurrency(data.$attributes.sub_total) : '-' }}
+              </template>
+            </Column>
+
+            <Column field="import" :header="t('Total')" sortable style="width: 130px">
+              <template #body="{ data }">
+                <span class="font-semibold">{{ formatCurrency(data.$attributes.import || 0) }}</span>
+              </template>
+            </Column>
+
+            <Column field="currency" :header="t('Currency')" sortable style="width: 100px">
+              <template #body="{ data }">
+                <Tag :value="data.$attributes.currency || 'MXN'" severity="secondary" />
+              </template>
+            </Column>
+
+            <Column field="client.name" :header="t('Client')" sortable style="min-width: 180px">
               <template #body="{ data }">
                 <div class="font-medium">
-                  {{ data.$attributes.client?.name }}
+                  {{ data.$attributes.client?.name || '-' }}
                 </div>
                 <div class="text-sm text-surface-500">
-                  {{ data.$attributes.client?.email }}
+                  {{ data.$attributes.client?.email || '' }}
                 </div>
               </template>
             </Column>
 
-            <Column field="client.phone" :header="t('Phone')" sortable>
+            <Column field="status" :header="t('Status')" sortable style="width: 120px">
               <template #body="{ data }">
-                <div class="flex items-center gap-2">
-                  <i class="pi pi-phone text-surface-500" />
-                  {{ data.$attributes.client?.phone }}
-                </div>
+                <Tag
+                  :value="data.$attributes.status || 'pending'"
+                  :severity="data.$attributes.status === 'completed' ? 'success' : 'warn'"
+                />
               </template>
             </Column>
 
-            <Column field="client.city" :header="t('Location')" sortable>
+            <Column :header="t('View Invoice')" style="width: 80px">
               <template #body="{ data }">
-                <div>
-                  <div class="font-medium">
-                    {{ data.$attributes.client?.city }}, {{ data.$attributes.client?.state }}
-                  </div>
-                  <div class="text-sm text-surface-500">
-                    {{ data.$attributes.client?.country }} {{ data.$attributes.client?.zip }}
-                  </div>
-                </div>
+                <Button
+                  v-tooltip="t('View Invoice')"
+                  icon="pi pi-eye"
+                  severity="info"
+                  text
+                  size="small"
+                  @click="viewInvoice(data)"
+                />
               </template>
             </Column>
 
-            <Column field="created_at" :header="t('Created')" sortable>
+            <Column :header="t('Download XML')" style="width: 80px">
               <template #body="{ data }">
-                <div class="text-sm">
-                  {{ formatDate(data.$attributes.created_at) }}
-                </div>
+                <Button
+                  v-tooltip="t('Download XML')"
+                  icon="pi pi-download"
+                  severity="secondary"
+                  text
+                  size="small"
+                  :disabled="!data.$attributes.xml_path"
+                  @click="downloadXML(data)"
+                />
               </template>
             </Column>
 
-            <Column :header="t('Actions')" style="width: 150px">
+            <Column :header="t('Stamp')" style="width: 80px">
+              <template #body="{ data }">
+                <Button
+                  v-tooltip="t('Stamp')"
+                  icon="pi pi-bell"
+                  severity="success"
+                  text
+                  size="small"
+                  @click="stampInvoice(data)"
+                />
+              </template>
+            </Column>
+
+            <Column :header="t('Paid')" style="width: 80px">
+              <template #body="{ data }">
+                <Button
+                  v-tooltip="t('Mark as Paid')"
+                  icon="pi pi-check-circle"
+                  :severity="data.$attributes.paid > 0 ? 'success' : 'secondary'"
+                  text
+                  size="small"
+                  @click="markAsPaid(data)"
+                />
+              </template>
+            </Column>
+
+            <Column :header="t('Validate')" style="width: 80px">
+              <template #body="{ data }">
+                <Button
+                  v-tooltip="t('Validate')"
+                  icon="pi pi-verified"
+                  severity="help"
+                  text
+                  size="small"
+                  @click="validateInvoice(data)"
+                />
+              </template>
+            </Column>
+
+            <Column :header="t('Actions')" style="width: 100px">
               <template #body="{ data }">
                 <div class="flex gap-2">
                   <Button
@@ -603,9 +731,6 @@ onMounted(() => {
                       :table-style="{ minWidth: '50rem' }"
                       class="p-datatable-sm"
                     >
-                      <Column>
-                        <Checkbox v-model="selectedInvoices" binary />
-                      </Column>
                       <Column field="id" :header="t('#')" style="width: 60px">
                         <template #body="{ index }">
                           {{ index + 1 }}

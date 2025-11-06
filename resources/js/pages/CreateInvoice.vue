@@ -69,8 +69,7 @@ const payments = ref<Array<{
   paid_at: Date | null;
 }>>([]);
 
-// Form options
-const cfdiTypes = ref(['Factura', 'Nota de Crédito', 'Nota de Débito']);
+const cfdiTypes = ref(['Ingreso', 'Egreso', 'Pago', 'Nómina', 'Traslado']);
 const paymentForms = ref([
   'Transferencia electrónica de fondos',
   'Efectivo',

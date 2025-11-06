@@ -9,6 +9,17 @@ export class Product extends Model<{
   price: number;
   quantity: number;
   sku: string;
+  // CFDI fields
+  clave_prod_serv?: string | null;
+  clave_unidad?: string | null;
+  unidad?: string | null;
+  importe?: number | null;
+  descuento?: number;
+  numero_pedimento?: string | null;
+  cuenta_predial?: string | null;
+  partes?: Array<any> | null;
+  complemento?: Array<any> | null;
+  status?: string;
   created_at?: string;
   updated_at?: string;
 }, {

@@ -28,7 +28,17 @@ class ProductController extends BaseOrionController
      */
     public function searchableBy(): array
     {
-        return ['id', 'invoices.id', 'name', 'description', 'sku'];
+        return [
+            'id',
+            'invoices.id',
+            'name',
+            'description',
+            'sku',
+            'clave_prod_serv',
+            'unidad',
+            'numero_pedimento',
+            'cuenta_predial',
+        ];
     }
 
     /**
@@ -36,7 +46,18 @@ class ProductController extends BaseOrionController
      */
     public function filterableBy(): array
     {
-        return ['id', 'invoices.id', 'name', 'description', 'price', 'quantity', 'sku'];
+        return [
+            'id',
+            'invoices.id',
+            'name',
+            'description',
+            'price',
+            'quantity',
+            'sku',
+            'clave_prod_serv',
+            'clave_unidad',
+            'status',
+        ];
     }
 
     /**
@@ -44,7 +65,22 @@ class ProductController extends BaseOrionController
      */
     public function sortableBy(): array
     {
-        return ['id', 'invoices.id', 'name', 'description', 'price', 'quantity', 'sku', 'created_at', 'updated_at'];
+        return [
+            'id',
+            'invoices.id',
+            'name',
+            'description',
+            'price',
+            'quantity',
+            'sku',
+            'clave_prod_serv',
+            'unidad',
+            'importe',
+            'descuento',
+            'status',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     /**
