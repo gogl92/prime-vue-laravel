@@ -12,10 +12,16 @@ return new class () extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('second_last_name')->nullable();
+            $table->string('username')->unique();
+            $table->string('phone')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->foreignId('current_company_id')->nullable()->constrained('companies')->nullOnDelete();
+            $table->foreignId('current_branch_id')->nullable()->constrained('branches')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

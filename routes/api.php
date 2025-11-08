@@ -13,6 +13,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InvoiceProductsController;
 use App\Http\Controllers\InvoicePaymentsController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StripeController;
 // SAT Catalog Controllers
@@ -66,6 +68,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Resource routes
+    Orion::resource('users', UserController::class);
+    Orion::resource('roles', RoleController::class)->only(['index', 'search']);
     Orion::resource('companies', CompanyController::class);
     Orion::resource('branches', BranchController::class);
     Orion::resource('clients', ClientController::class);

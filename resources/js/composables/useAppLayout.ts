@@ -1,6 +1,6 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
-import { LayoutGrid, House, Settings, LogOut, FileText, CreditCard } from 'lucide-vue-next';
+import { LayoutGrid, House, Settings, LogOut, FileText, CreditCard, Users } from 'lucide-vue-next';
 import { type MenuItem } from '@/types';
 import orionService from '@/services/orion';
 
@@ -29,6 +29,12 @@ export function useAppLayout() {
       lucideIcon: FileText,
       route: route('invoices.example'),
       active: currentRoute.value == 'invoices.example',
+    },
+    {
+      label: 'User Management',
+      lucideIcon: Users,
+      route: route('users.management'),
+      active: currentRoute.value == 'users.management',
     },
     {
       label: 'Settings',

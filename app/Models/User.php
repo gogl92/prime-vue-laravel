@@ -38,9 +38,15 @@ class User extends Authenticatable implements MustVerifyEmail, Auditable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'second_last_name',
+        'username',
+        'phone',
         'email',
         'password',
+        'current_company_id',
+        'current_branch_id',
     ];
 
     /**
@@ -66,5 +72,33 @@ class User extends Authenticatable implements MustVerifyEmail, Auditable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the user's current company.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Company, User>
+     */
+    public function currentCompany()
+    {
+        return $this->belongsTo(Company::class, 'current_company_id');
+    }
+
+    /**
+     * Get the user's current branch.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Branch, User>
+     */
+    public function currentBranch()
+    {
+        return $this->belongsTo(Branch::class, 'current_branch_id');
+    }
+
+    /**
+     * Get the user's full name.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name} {$this->second_last_name}");
     }
 }
