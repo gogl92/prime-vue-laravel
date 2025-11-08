@@ -41,7 +41,7 @@ const invoiceForm = reactive({
   issuer_id: null as number | null,
   cfdi_type: 'Factura',
   order_number: '',
-  invoice_date: new Date(),
+  date: new Date(),
   payment_form: 'Transferencia electrónica de fondos',
   send_email: true,
   payment_method: 'Pago en parcialidades o diferido',
@@ -211,16 +211,16 @@ const saveInvoice = async () => {
     }
 
     // Create invoice
-    const invoiceDate = invoiceForm.invoice_date instanceof Date
-      ? invoiceForm.invoice_date.toISOString().split('T')[0]
-      : invoiceForm.invoice_date;
+    const invoiceDate = invoiceForm.date instanceof Date
+      ? invoiceForm.date.toISOString().split('T')[0]
+      : invoiceForm.date;
 
     const invoiceData = {
       client_id: invoiceForm.client_id,
       issuer_id: invoiceForm.issuer_id,
       cfdi_type: invoiceForm.cfdi_type,
       order_number: invoiceForm.order_number,
-      invoice_date: invoiceDate ?? null,
+      date: invoiceDate ?? null,
       payment_form: invoiceForm.payment_form,
       send_email: invoiceForm.send_email,
       payment_method: invoiceForm.payment_method,
@@ -369,7 +369,7 @@ onMounted(() => {
               <div>
                 <label class="block text-sm font-medium mb-2">{{ t('Fecha') }}</label>
                 <Calendar
-                  v-model="invoiceForm.invoice_date"
+                  v-model="invoiceForm.date"
                   date-format="yy-mm-dd"
                   :placeholder="t('Seleccionar fecha')"
                 />

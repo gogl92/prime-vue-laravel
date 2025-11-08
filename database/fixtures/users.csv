@@ -1,9 +1,9 @@
-name,email,password,role
-Luke Skywalker,luke.skywalker@rebellion.com,password,admin
-Leia Organa,leia.organa@rebellion.com,password,admin
-Han Solo,han.solo@millenniumfalcon.com,password,user
-Chewbacca,chewie@millenniumfalcon.com,password,user
-Obi-Wan Kenobi,obiwan.kenobi@jedi.com,password,admin
-Darth Vader,darth.vader@empire.com,password,user
-Yoda,yoda@jedi.com,password,super_admin
-Rey,rey@jakku.com,password,user
+first_name,last_name,second_last_name,username,phone,email,password,current_company_id,current_branch_id
+Luke,Skywalker,,luke.skywalker,+15551234567,luke.skywalker@rebellion.com,password,,
+Leia,Organa,,leia.organa,+15551234568,leia.organa@rebellion.com,password,,
+Han,Solo,,han.solo,+15551234569,han.solo@millenniumfalcon.com,password,,
+Chewbacca,Wookiee,,chewie,+15551234570,chewie@millenniumfalcon.com,password,,
+Obi-Wan,Kenobi,,obiwan.kenobi,+15551234571,obiwan.kenobi@jedi.com,password,,
+Darth,Vader,,darth.vader,+15551234572,darth.vader@empire.com,password,,
+Yoda,Master,,yoda,+15551234573,yoda@jedi.com,password,,
+Rey,Skywalker,,rey,+15551234574,rey@jakku.com,password,,

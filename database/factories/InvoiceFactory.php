@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\Invoice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Invoice>
+ * @extends Factory<Invoice>
  */
 class InvoiceFactory extends Factory
 {
@@ -45,7 +46,7 @@ class InvoiceFactory extends Factory
             'issuer_id' => Client::factory()->issuer(),
             'cfdi_type' => $this->faker->randomElement($cfdiTypes),
             'order_number' => $this->faker->unique()->numerify('ORD-#####'),
-            'invoice_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'date' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'payment_form' => $this->faker->randomElement($paymentForms),
             'send_email' => $this->faker->boolean(80), // 80% send email
             'payment_method' => $this->faker->randomElement($paymentMethods),

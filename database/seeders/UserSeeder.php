@@ -12,15 +12,20 @@ class UserSeeder extends Seeder
     {
         // Create a super admin user
         $superAdmin = User::create([
-            'name' => 'Super Admin',
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
+            'username' => 'superadmin',
             'email' => 'superadmin@example.com',
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $superAdmin->assignRole('super_admin');
 
         // Create my user (Admin user)
         $admin = User::create([
-            'name' => config('app.admin_name', 'Admin'),
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'username' => 'admin',
             'email' => config('app.admin_email', 'admin@example.com'),
             'password' => Hash::make('12345678'),
         ]);

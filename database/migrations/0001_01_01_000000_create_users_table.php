@@ -20,8 +20,8 @@ return new class () extends Migration {
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->foreignId('current_company_id')->nullable()->constrained('companies')->nullOnDelete();
-            $table->foreignId('current_branch_id')->nullable()->constrained('branches')->nullOnDelete();
+            $table->unsignedBigInteger('current_company_id')->nullable();
+            $table->unsignedBigInteger('current_branch_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
