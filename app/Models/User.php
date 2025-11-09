@@ -101,4 +101,13 @@ class User extends Authenticatable implements MustVerifyEmail, Auditable
     {
         return trim("{$this->first_name} {$this->last_name} {$this->second_last_name}");
     }
+
+    /**
+     * Get the user's reference images for facial recognition.
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<UserReferenceImage, $this>
+     */
+    public function referenceImages()
+    {
+        return $this->hasMany(UserReferenceImage::class)->orderBy('order');
+    }
 }

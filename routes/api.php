@@ -17,6 +17,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StripeController;
+use App\Http\Controllers\Api\FacialOnboardingController;
+use App\Http\Controllers\Api\FacialOnboardingStatusController;
+use App\Http\Controllers\Api\FacialVerificationController;
 // SAT Catalog Controllers
 use App\Http\Controllers\SAT\ProductKeyController;
 use App\Http\Controllers\SAT\UnitKeyController;
@@ -58,6 +61,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('logout-all', [AuthController::class, 'logoutAll']);
     });
+
+    // Facial recognition onboarding routes (nested under users)
+    Route::prefix('users/{userId}/onboarding')->group(function () {
+        Route::get('status', [FacialOnboardingStatusController::class, 'index']);
+        Route::get('/', [FacialOnboardingController::class, 'index']);
+        Route::post('/', [FacialOnboardingController::class, 'store']);
+        Route::delete('/', [FacialOnboardingController::class, 'destroy']);
+    });
+
+    // Facial recognition verification route
+    Route::post('users/{userId}/verify', [FacialVerificationController::class, 'store']);
 
     // Stripe Connect onboarding routes
     Route::prefix('stripe/branches/{id}')->group(function () {

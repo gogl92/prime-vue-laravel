@@ -1,4 +1,5 @@
 import { Model } from '@tailflow/laravel-orion/lib/model';
+import { Orion } from '@tailflow/laravel-orion/lib/orion';
 import type { Company } from './Company';
 import type { Branch } from './Branch';
 
@@ -41,5 +42,48 @@ export class User extends Model<
 > {
   public $resource(): string {
     return 'users';
+  }
+
+  /**
+   * Get onboarding status
+   */
+  static async getOnboardingStatus(userId: number): Promise<any> {
+    return await Orion.makeHttpClient().get(`/users/${userId}/onboarding/status`);
+  }
+
+  /**
+   * Get user's reference images
+   */
+  static async getReferenceImages(userId: number): Promise<any> {
+    return await Orion.makeHttpClient().get(`/users/${userId}/onboarding`);
+  }
+
+  /**
+   * Upload reference images
+   */
+  static async uploadReferenceImages(userId: number, formData: FormData): Promise<any> {
+    return await Orion.makeHttpClient().post(`/users/${userId}/onboarding`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
+
+  /**
+   * Delete all reference images
+   */
+  static async deleteReferenceImages(userId: number): Promise<any> {
+    return await Orion.makeHttpClient().delete(`/users/${userId}/onboarding`);
+  }
+
+  /**
+   * Verify face
+   */
+  static async verifyFace(userId: number, formData: FormData): Promise<any> {
+    return await Orion.makeHttpClient().post(`/users/${userId}/verify`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   }
 }

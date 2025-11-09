@@ -18,7 +18,7 @@ return new class () extends Migration {
 
             // Address fields
             $table->string('street_1', 100);
-            $table->string('street_2', 45);
+            $table->string('street_2', 45)->nullable();
             $table->string('city', 100);
             $table->string('state', 60);
             $table->string('zip', 11);

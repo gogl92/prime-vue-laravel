@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { User } from '@/models/User';
-import { Role } from '@/models/Role';
-import { Company } from '@/models/Company';
-import { Branch } from '@/models/Branch';
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
-import UserFormDialog from '@/components/UserFormDialog.vue';
 
 // Components
 import Card from 'primevue/card';
@@ -18,8 +15,6 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
 
 import { SortDirection } from '@tailflow/laravel-orion/lib/drivers/default/enums/sortDirection';
 
@@ -32,9 +27,6 @@ const loading = ref(false);
 const deleting = ref(false);
 const users = ref<User[]>([]);
 const totalRecords = ref(0);
-const roles = ref<Role[]>([]);
-const companies = ref<Company[]>([]);
-const branches = ref<Branch[]>([]);
 
 // Pagination
 const pagination = reactive({
@@ -53,9 +45,7 @@ const filters = reactive({
 
 // Dialogs
 const showDeleteDialog = ref(false);
-const showUserDialog = ref(false);
 const userToDelete = ref<User | null>(null);
-const userToEdit = ref<User | null>(null);
 
 // Debounced search
 const debouncedSearch = debounce(() => {
@@ -89,10 +79,10 @@ const loadUsers = async () => {
         ? await query.search(pagination.rows, pagination.page)
         : await query.get(pagination.rows, pagination.page);
 
-    // Handle different response structures and extract attributes
+    // Handle different response structures
     let actualResponse: User[];
     if (Array.isArray(response)) {
-      users.value = response.map((user: any) => user.$attributes || user);
+      users.value = response as User[];
       actualResponse = response as User[];
     } else if (
       typeof response === 'object' &&
@@ -100,8 +90,8 @@ const loadUsers = async () => {
       'data' in response &&
       Array.isArray((response as { data: unknown }).data)
     ) {
-      const wrappedResponse = response as { data: any[] };
-      users.value = wrappedResponse.data.map((user: any) => user.$attributes || user);
+      const wrappedResponse = response as { data: User[] };
+      users.value = wrappedResponse.data;
       actualResponse = wrappedResponse.data;
     } else {
       console.error('Unexpected response structure:', response);
@@ -139,38 +129,6 @@ const loadUsers = async () => {
   }
 };
 
-const loadRoles = async () => {
-  try {
-    const response = await Role.$query().get();
-    roles.value = Array.isArray(response)
-      ? response.map((role: any) => role.$attributes || role)
-      : [];
-  } catch (error) {
-    console.error('Error loading roles:', error);
-  }
-};
-
-const loadCompanies = async () => {
-  try {
-    const response = await Company.$query().get();
-    companies.value = Array.isArray(response)
-      ? response.map((company: any) => company.$attributes || company)
-      : [];
-  } catch (error) {
-    console.error('Error loading companies:', error);
-  }
-};
-
-const loadBranches = async () => {
-  try {
-    const response = await Branch.$query().get();
-    branches.value = Array.isArray(response)
-      ? response.map((branch: any) => branch.$attributes || branch)
-      : [];
-  } catch (error) {
-    console.error('Error loading branches:', error);
-  }
-};
 
 const onPageChange = (event: { first: number; rows: number }) => {
   pagination.page = Math.floor(event.first / event.rows) + 1;
@@ -189,13 +147,15 @@ const onSort = (event: {
 };
 
 const createUser = () => {
-  userToEdit.value = null;
-  showUserDialog.value = true;
+  router.visit('/users/create');
 };
 
 const editUser = (user: User) => {
-  userToEdit.value = user;
-  showUserDialog.value = true;
+  router.visit(`/users/${user.$attributes.id}/edit`);
+};
+
+const setupFacialRecognition = (user: User) => {
+  router.visit(`/users/${user.$attributes.id}/facial-recognition`);
 };
 
 const confirmDelete = (user: User) => {
@@ -233,11 +193,6 @@ const deleteUser = async () => {
   }
 };
 
-const onUserSaved = () => {
-  showUserDialog.value = false;
-  void loadUsers();
-};
-
 const getRoleSeverity = (roleName: string): string => {
   switch (roleName) {
     case 'super_admin':
@@ -254,68 +209,111 @@ const getRoleSeverity = (roleName: string): string => {
 // Lifecycle
 onMounted(() => {
   void loadUsers();
-  void loadRoles();
-  void loadCompanies();
-  void loadBranches();
 });
 </script>
 
 <template>
   <AppLayout :title="t('User Management')">
-    <div class="container mx-auto px-4 py-8">
+    <div class="space-y-6">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-surface-900 dark:text-surface-0">
+          {{ t('User Management') }}
+        </h1>
+        <Button
+          :label="t('Create User')"
+          icon="pi pi-plus"
+          severity="success"
+          class="p-button-success"
+          @click="createUser"
+        />
+      </div>
+
+      <!-- Filters -->
       <Card>
-        <template #title>
-          <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold">{{ t('User Management') }}</h1>
-            <Button
-              :label="t('Create User')"
-              icon="pi pi-plus"
-              severity="success"
-              @click="createUser"
-            />
-          </div>
-        </template>
+        <template #title>{{ t('Filters') }}</template>
         <template #content>
-          <!-- Search -->
-          <div class="mb-4">
-            <IconField>
-              <InputIcon class="pi pi-search" />
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">{{ t('Search') }}</label>
               <InputText
                 v-model="filters.search"
                 :placeholder="t('Search users...')"
-                class="w-full"
                 @input="debouncedSearch"
               />
-            </IconField>
+            </div>
           </div>
+        </template>
+      </Card>
 
-          <!-- DataTable -->
+      <!-- Data Table -->
+      <Card>
+        <template #title>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span>{{ t('Users') }} ({{ totalRecords }} {{ t('total') }})</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <Button
+                icon="pi pi-refresh"
+                severity="secondary"
+                text
+                :loading="loading"
+                class="p-button-sm"
+                @click="loadUsers"
+              />
+            </div>
+          </div>
+        </template>
+        <template #content>
           <DataTable
             :value="users"
             :loading="loading"
-            :total-records="totalRecords"
+            paginator
             :rows="pagination.rows"
             :first="(pagination.page - 1) * pagination.rows"
+            :total-records="totalRecords"
             lazy
-            paginator
-            data-key="id"
-            striped-rows
-            :rows-per-page-options="[5, 10, 20, 50]"
             :sort-field="sortField"
             :sort-order="sortOrder"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 50]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} entries"
+            responsive-layout="scroll"
+            data-key="$attributes.id"
             @page="onPageChange"
             @sort="onSort"
           >
-            <Column field="username" :header="t('Username')" sortable />
-            <Column field="first_name" :header="t('First Name')" sortable />
-            <Column field="last_name" :header="t('Last Name')" sortable />
-            <Column field="email" :header="t('Email')" sortable />
-            <Column field="phone" :header="t('Phone')" />
-            <Column :header="t('Roles')">
+            <Column field="username" :header="t('Username')" sortable style="min-width: 150px">
+              <template #body="{ data }">
+                {{ data.$attributes.username }}
+              </template>
+            </Column>
+            <Column field="first_name" :header="t('First Name')" sortable style="min-width: 150px">
+              <template #body="{ data }">
+                {{ data.$attributes.first_name }}
+              </template>
+            </Column>
+            <Column field="last_name" :header="t('Last Name')" sortable style="min-width: 150px">
+              <template #body="{ data }">
+                {{ data.$attributes.last_name }}
+              </template>
+            </Column>
+            <Column field="email" :header="t('Email')" sortable style="min-width: 200px">
+              <template #body="{ data }">
+                {{ data.$attributes.email }}
+              </template>
+            </Column>
+            <Column field="phone" :header="t('Phone')" style="min-width: 150px">
+              <template #body="{ data }">
+                {{ data.$attributes.phone || '-' }}
+              </template>
+            </Column>
+            <Column :header="t('Roles')" style="min-width: 150px">
               <template #body="{ data }">
                 <div class="flex gap-1 flex-wrap">
                   <Tag
-                    v-for="role in data.roles"
+                    v-for="role in (data.$attributes.roles || data.$relations?.roles || [])"
                     :key="role.id"
                     :value="role.name"
                     :severity="getRoleSeverity(role.name)"
@@ -323,21 +321,44 @@ onMounted(() => {
                 </div>
               </template>
             </Column>
-            <Column field="currentCompany.name" :header="t('Company')" />
-            <Column field="currentBranch.name" :header="t('Branch')" />
-            <Column :header="t('Actions')" style="min-width: 12rem">
+            <Column :header="t('Company')" style="min-width: 150px">
+              <template #body="{ data }">
+                {{ data.$attributes.currentCompany?.name || data.$relations?.currentCompany?.name || '-' }}
+              </template>
+            </Column>
+            <Column :header="t('Branch')" style="min-width: 150px">
+              <template #body="{ data }">
+                {{ data.$attributes.currentBranch?.name || data.$relations?.currentBranch?.name || '-' }}
+              </template>
+            </Column>
+            <Column :header="t('Actions')" style="width: 150px">
               <template #body="{ data }">
                 <div class="flex gap-2">
                   <Button
-                    icon="pi pi-pencil"
+                    v-tooltip="t('Facial Recognition')"
+                    icon="pi pi-user"
                     severity="info"
+                    text
                     size="small"
+                    class="p-button-sm"
+                    @click="setupFacialRecognition(data)"
+                  />
+                  <Button
+                    v-tooltip="t('Edit')"
+                    icon="pi pi-pencil"
+                    severity="warning"
+                    text
+                    size="small"
+                    class="p-button-sm"
                     @click="editUser(data)"
                   />
                   <Button
+                    v-tooltip="t('Delete')"
                     icon="pi pi-trash"
                     severity="danger"
+                    text
                     size="small"
+                    class="p-button-sm"
                     @click="confirmDelete(data)"
                   />
                 </div>
@@ -346,48 +367,36 @@ onMounted(() => {
           </DataTable>
         </template>
       </Card>
-
-      <!-- Delete Confirmation Dialog -->
-      <Dialog
-        v-model:visible="showDeleteDialog"
-        :header="t('Confirm Delete')"
-        modal
-        closable
-        :style="{ width: '450px' }"
-      >
-        <div class="flex items-center gap-3">
-          <i class="pi pi-exclamation-triangle text-4xl text-red-500"></i>
-          <span v-if="userToDelete">
-            {{ t('Are you sure you want to delete user') }}
-            <b>{{ userToDelete.username }}</b>?
-          </span>
-        </div>
-        <template #footer>
-          <Button
-            :label="t('Cancel')"
-            icon="pi pi-times"
-            severity="secondary"
-            @click="showDeleteDialog = false"
-          />
-          <Button
-            :label="t('Delete')"
-            icon="pi pi-check"
-            severity="danger"
-            :loading="deleting"
-            @click="deleteUser"
-          />
-        </template>
-      </Dialog>
-
-      <!-- User Form Dialog -->
-      <UserFormDialog
-        v-model:visible="showUserDialog"
-        :user="userToEdit"
-        :roles="roles"
-        :companies="companies"
-        :branches="branches"
-        @saved="onUserSaved"
-      />
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <Dialog
+      v-model:visible="showDeleteDialog"
+      :header="t('Confirm Delete')"
+      modal
+      :style="{ width: '400px' }"
+      append-to="body"
+    >
+      <div class="flex items-center gap-3 mb-4">
+        <i class="pi pi-exclamation-triangle text-orange-500 text-2xl" />
+        <span v-if="userToDelete">
+          {{ t('Are you sure you want to delete user') }}
+          <b>{{ userToDelete.$attributes.username }}</b>?
+        </span>
+      </div>
+      <div v-if="userToDelete" class="bg-surface-100 dark:bg-surface-800 p-3 rounded">
+        <div class="font-medium">
+          {{ userToDelete.$attributes.username }} ({{ userToDelete.$attributes.email }})
+        </div>
+        <div class="text-sm text-surface-500">
+          {{ userToDelete.$attributes.first_name }} {{ userToDelete.$attributes.last_name }}
+        </div>
+      </div>
+
+      <template #footer>
+        <Button :label="t('Cancel')" severity="secondary" @click="showDeleteDialog = false" />
+        <Button :label="t('Delete')" severity="danger" :loading="deleting" @click="deleteUser" />
+      </template>
+    </Dialog>
   </AppLayout>
 </template>
