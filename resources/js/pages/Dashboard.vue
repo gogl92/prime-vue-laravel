@@ -20,25 +20,26 @@ const chartOptions = ref();
 const loadInvoiceStats = async () => {
   try {
     loading.value = true;
-    const response = await Invoice.$query().get();
+    const invoices = await Invoice.$query().get();
 
-    // Group invoices by country
-    const countryGroups = response.reduce((acc: Record<string, number>, invoice: Invoice) => {
-      const country = invoice.$attributes.country ?? 'Unknown';
-      acc[country] = (acc[country] ?? 0) + 1;
-      return acc;
-    }, {});
+    // Extract invoice amounts and format labels
+    const invoiceData = invoices
+      .map((invoice: Invoice) => ({
+        amount: invoice.$attributes.import ?? 0,
+        label: invoice.$attributes.sender_name ?? 'N/A' + '$' + (invoice.$attributes.import ?? 0).toFixed(2),
+      }))
+      .sort((a, b) => a.amount - b.amount) // Sort by amount for better visualization
+      .slice(0, 20); // Limit to top 20 invoices for readability
 
-    // Prepare chart data
-    const countries = Object.keys(countryGroups);
-    const counts = Object.values(countryGroups);
+    const labels = invoiceData.map(d => d.label);
+    const amounts = invoiceData.map(d => d.amount);
 
     chartData.value = {
-      labels: countries,
+      labels: labels,
       datasets: [
         {
-          label: t('Invoices by Country'),
-          data: counts,
+          label: t('Amount'),
+          data: amounts,
           backgroundColor: [
             'rgba(54, 162, 235, 0.2)',
             'rgba(255, 99, 132, 0.2)',
@@ -70,14 +71,45 @@ const loadInvoiceStats = async () => {
         },
         title: {
           display: true,
-          text: t('Invoice Distribution by Country'),
+          text: t('Invoice Distribution by Amount'),
         },
+        tooltip: {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          titleColor: '#000',
+          bodyColor: '#000',
+          borderColor: '#ddd',
+          borderWidth: 1,
+          padding: 12,
+          boxPadding: 6,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          callbacks: {
+            label: function(context: any) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
+              }
+              return label;
+            }
+          }
+        }
       },
       scales: {
+        x: {
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+          },
+        },
         y: {
           beginAtZero: true,
           ticks: {
-            stepSize: 1,
+            callback: function(value: any) {
+              return '$' + value.toLocaleString('es-MX');
+            }
           },
         },
       },
@@ -118,8 +150,17 @@ onMounted(() => {
         <div v-if="loading" class="flex justify-center items-center h-[400px]">
           <i class="pi pi-spin pi-spinner text-4xl" />
         </div>
-        <div v-else class="h-[400px]">
-          <Chart type="bar" :data="chartData" :options="chartOptions" class="h-full" />
+        <div v-else-if="chartData && chartOptions" class="h-[400px]">
+          <Chart 
+            type="bar" 
+            :data="chartData" 
+            :options="chartOptions" 
+            :key="JSON.stringify(chartData)"
+            style="height: 400px; width: 100%;"
+          />
+        </div>
+        <div v-else class="flex justify-center items-center h-[400px]">
+          <span class="text-gray-500">{{ t('No data available') }}</span>
         </div>
       </template>
     </Card>

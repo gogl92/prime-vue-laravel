@@ -700,31 +700,33 @@ onMounted(() => {
         </template>
       </Card>
 
-      <!-- Summary -->
-      <Card>
-        <template #content>
-          <div class="flex justify-end">
-            <div class="space-y-2 text-right">
-              <div class="text-lg">
-                <span class="font-semibold">{{ t('Subtotal:') }}</span>
-                <span class="ml-4">{{ formatCurrency(calculateSubtotal()) }}</span>
-              </div>
-              <div class="text-lg">
-                <span class="font-semibold">{{ t('IVA:') }}</span>
-                <span class="ml-4">{{ formatCurrency(calculateTax()) }}</span>
-              </div>
-              <div class="text-2xl font-bold text-primary">
-                <span>{{ t('Total:') }}</span>
-                <span class="ml-4">{{ formatCurrency(calculateTotal()) }}</span>
-              </div>
-              <div v-if="payments.length > 0" class="text-lg">
-                <span class="font-semibold">{{ t('Total Pagos:') }}</span>
-                <span class="ml-4">{{ formatCurrency(calculateTotalPayments()) }}</span>
+      <!-- Summary (Sticky) -->
+      <div class="sticky bottom-0 z-10">
+        <Card class="shadow-lg">
+          <template #content>
+            <div class="flex justify-end">
+              <div class="space-y-2 text-right">
+                <div class="text-lg">
+                  <span class="font-semibold">{{ t('Subtotal:') }}</span>
+                  <span class="ml-4">{{ formatCurrency(calculateSubtotal()) }}</span>
+                </div>
+                <div class="text-lg">
+                  <span class="font-semibold">{{ t('IVA:') }}</span>
+                  <span class="ml-4">{{ formatCurrency(calculateTax()) }}</span>
+                </div>
+                <div class="text-2xl font-bold text-primary">
+                  <span>{{ t('Total:') }}</span>
+                  <span class="ml-4">{{ formatCurrency(calculateTotal()) }}</span>
+                </div>
+                <div v-if="payments.length > 0" class="text-lg">
+                  <span class="font-semibold">{{ t('Total Pagos:') }}</span>
+                  <span class="ml-4">{{ formatCurrency(calculateTotalPayments()) }}</span>
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-      </Card>
+          </template>
+        </Card>
+      </div>
     </div>
   </AppLayout>
 </template>

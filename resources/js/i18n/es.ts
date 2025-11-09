@@ -118,8 +118,10 @@ export default {
   // Dashboard
   'Invoices Overview': 'Resumen de facturas',
   'Manage Invoices': 'Administrar facturas',
-  'Invoices by Country': 'Facturas por país',
-  'Invoice Distribution by Country': 'Distribución de facturas por país',
+  'Invoices by Amount': 'Facturas por importe',
+  'Invoice Distribution by Amount': 'Distribución de facturas por importe',
+  'No data available': 'No hay datos disponibles',
+  'Import': 'Importe',
 
   // Invoices Example
   'Invoices Example - Orion API': 'Ejemplo de facturas - API Orion',
@@ -284,7 +286,6 @@ export default {
   'Confirm Password': 'Confirmar contraseña',
   'Select Roles': 'Seleccionar roles',
   'Select Company': 'Seleccionar empresa',
-  'Select Branch': 'Seleccionar sucursal',
   'Paid': 'Pagado',
 
   // Facial Recognition

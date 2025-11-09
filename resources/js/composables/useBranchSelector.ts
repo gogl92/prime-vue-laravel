@@ -19,15 +19,15 @@ export function useBranchSelector() {
   const currentBranch = computed(() => {
     if (!currentBranchId.value) return null;
     return branches.value.find(branch => {
-      const branchId = (branch as any).id || branch.$attributes.id;
+      const branchId = (branch as any).id ?? branch.$attributes.id;
       return branchId === currentBranchId.value;
-    }) || null;
+    }) ?? null;
   });
 
   // Format branch display name
   const formatBranchName = (branch: any): string => {
-    const name = branch.name || branch.$attributes?.name || '';
-    const code = branch.code || branch.$attributes?.code || null;
+    const name = (branch.name ?? branch.$attributes?.name) ?? '';
+    const code = (branch.code ?? branch.$attributes?.code) ?? null;
 
     if (code) {
       return `${name} (${code})`;

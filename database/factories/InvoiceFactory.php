@@ -40,6 +40,8 @@ class InvoiceFactory extends Factory
         ];
         $series = ['F', 'A', 'B', 'C'];
         $currencies = ['MXN', 'USD', 'EUR'];
+        $receiptTypes = ['Factura', 'Nota de Crédito', 'Nota de Débito'];
+        $statuses = ['pending', 'approved', 'rejected'];
 
         return [
             'client_id' => Client::factory(),
@@ -53,8 +55,26 @@ class InvoiceFactory extends Factory
             'cfdi_use' => $this->faker->randomElement($cfdiUses),
             'series' => $this->faker->randomElement($series),
             'exchange_rate' => $this->faker->randomFloat(4, 1, 25),
-            'currency' => $this->faker->randomElement($currencies),
+            'import' => $this->faker->randomFloat(2, 100, 10000),
+            'import_usd' => $this->faker->randomFloat(2, 100, 10000),
+            'sub_total' => $this->faker->randomFloat(2, 100, 10000),
+            'retention_tax' => $this->faker->randomFloat(2, 100, 10000),
+            'iva_tax' => $this->faker->randomFloat(2, 100, 10000),
+            'paid' => $this->faker->randomFloat(2, 100, 10000),
+            'sender_name' => $this->faker->name(),
+            'sender_rfc' => $this->faker->regexify('/^[A-Z0-9]{13}$/'),
+            'receipt_rfc' => $this->faker->regexify('/^[A-Z0-9]{13}$/'),
+            'receipt_type' => $this->faker->randomElement($receiptTypes),
+            'complement_id' => $this->faker->unique()->numerify('COMP-#####'),
+            'complement_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'pdf' => $this->faker->imageUrl(),
+            'xml_path' => $this->faker->imageUrl(),
+            'cfdi_json' => json_encode([]),
             'comments' => $this->faker->optional(0.3)->paragraph(),
+            'expenses_type_id' => null,
+            'status' => $this->faker->randomElement($statuses),
+            'token' => $this->faker->uuid(),
+            'currency' => $this->faker->randomElement($currencies),
         ];
     }
 }
