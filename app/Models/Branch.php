@@ -48,6 +48,7 @@ class Branch extends Model implements Auditable
         'country',
         'is_active',
         'description',
+        'company_id',
     ];
 
     protected function casts(): array
@@ -96,5 +97,15 @@ class Branch extends Model implements Auditable
         $mapping = $this->stripeAccountMapping;
 
         return $mapping && $mapping->charges_enabled;
+    }
+
+    /**
+     * Get the company that owns the branch.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Company, Branch>
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 }

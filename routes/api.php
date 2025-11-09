@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\FacialOnboardingController;
 use App\Http\Controllers\Api\FacialOnboardingStatusController;
+use App\Http\Controllers\Api\FacialReferenceImageController;
 use App\Http\Controllers\Api\FacialVerificationController;
 // SAT Catalog Controllers
 use App\Http\Controllers\SAT\ProductKeyController;
@@ -65,6 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Facial recognition onboarding routes (nested under users)
     Route::prefix('users/{userId}/onboarding')->group(function () {
         Route::get('status', [FacialOnboardingStatusController::class, 'index']);
+        Route::get('images/{imageId}', [FacialReferenceImageController::class, 'show'])->name('api.users.onboarding.image');
         Route::get('/', [FacialOnboardingController::class, 'index']);
         Route::post('/', [FacialOnboardingController::class, 'store']);
         Route::delete('/', [FacialOnboardingController::class, 'destroy']);

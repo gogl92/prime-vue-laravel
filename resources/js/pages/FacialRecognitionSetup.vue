@@ -510,7 +510,16 @@ onBeforeUnmount(() => {
               :key="image.id"
               class="relative"
             >
-              <div class="aspect-square bg-surface-100 dark:bg-surface-800 rounded-lg flex items-center justify-center">
+              <img
+                v-if="image.url"
+                :src="image.url"
+                :alt="`Reference Image ${image.order}`"
+                class="w-full aspect-square object-cover rounded-lg"
+              />
+              <div
+                v-else
+                class="aspect-square bg-surface-100 dark:bg-surface-800 rounded-lg flex items-center justify-center"
+              >
                 <i class="pi pi-image text-4xl text-surface-400"></i>
               </div>
               <div class="text-center mt-2 text-sm text-surface-600 dark:text-surface-400">

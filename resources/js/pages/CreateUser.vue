@@ -22,7 +22,7 @@ const { t } = useI18n();
 const toast = useToast();
 
 // State
-const saving = ref(false);
+const saving = ref<boolean>(false);
 const roles = ref<Role[]>([]);
 const companies = ref<Company[]>([]);
 const branches = ref<Branch[]>([]);
@@ -270,7 +270,7 @@ onMounted(() => {
               <MultiSelect
                 v-model="userForm.role_ids"
                 :options="roles"
-                option-label="name"
+                option-label="$attributes.name"
                 option-value="$attributes.id"
                 :placeholder="t('Select roles')"
                 class="w-full"

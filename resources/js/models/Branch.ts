@@ -6,6 +6,7 @@ export class Branch extends Model<{
   code: string;
   email: string;
   phone: string;
+  company_id?: number | null;
   address?: string | null;
   city?: string | null;
   state?: string | null;

@@ -8,6 +8,7 @@ import Container from '@/components/Container.vue';
 import PopupMenuButton from '@/components/PopupMenuButton.vue';
 import FlashMessages from '@/components/FlashMessages.vue';
 import NavLogoLink from '@/components/NavLogoLink.vue';
+import BranchSelector from '@/components/BranchSelector.vue';
 import PanelMenu from '@/components/primevue/menu/PanelMenu.vue';
 import Breadcrumb from '@/components/primevue/menu/Breadcrumb.vue';
 import { type MenuItem } from '@/types';
@@ -91,6 +92,10 @@ watch(
             </div>
             <!-- Right side of navbar - space for future elements -->
             <div class="flex items-center gap-2">
+              <!-- Branch Selector -->
+              <div class="hidden lg:block">
+                <BranchSelector />
+              </div>
               <!-- User menu on mobile -->
               <div class="lg:hidden">
                 <PopupMenuButton
@@ -122,6 +127,10 @@ watch(
       >
         <div class="w-full h-full flex flex-col justify-between p-4">
           <div class="space-y-6">
+            <!-- Branch Selector for Mobile/Sidebar -->
+            <div>
+              <BranchSelector />
+            </div>
             <div>
               <PanelMenu :model="menuItems" class="mt-1 w-full" />
             </div>

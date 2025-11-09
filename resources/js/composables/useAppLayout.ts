@@ -37,16 +37,10 @@ export function useAppLayout() {
       active: currentRoute.value == 'users.management',
     },
     {
-      label: 'Settings',
-      lucideIcon: Settings,
-      items: [
-        {
-          label: 'Stripe Connect',
-          lucideIcon: CreditCard,
-          route: route('stripe.connect'),
-          active: currentRoute.value == 'stripe.connect',
-        },
-      ],
+      label: 'Stripe Connect',
+      lucideIcon: CreditCard,
+      route: route('stripe.connect'),
+      active: currentRoute.value == 'stripe.connect',
     },
   ]);
 

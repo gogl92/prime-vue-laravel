@@ -6,6 +6,7 @@ import ClientOnly from '@/components/ClientOnly.vue';
 import Container from '@/components/Container.vue';
 import PopupMenuButton from '@/components/PopupMenuButton.vue';
 import NavLogoLink from '@/components/NavLogoLink.vue';
+import BranchSelector from '@/components/BranchSelector.vue';
 import FlashMessages from '@/components/FlashMessages.vue';
 import Menubar from '@/components/primevue/menu/Menubar.vue';
 import PanelMenu from '@/components/primevue/menu/PanelMenu.vue';
@@ -31,7 +32,8 @@ const { currentRoute, mobileMenuOpen, menuItems, userMenuItems } = useAppLayout(
       <Teleport to="body">
         <!-- Mobile drawer menu -->
         <Drawer v-model:visible="mobileMenuOpen" position="right">
-          <div>
+          <div class="space-y-4">
+            <BranchSelector />
             <PanelMenu :model="menuItems" class="mt-1 w-full" />
           </div>
           <template #footer>
@@ -72,6 +74,11 @@ const { currentRoute, mobileMenuOpen, menuItems, userMenuItems } = useAppLayout(
               </div>
             </template>
             <template #end>
+              <!-- Branch Selector (Desktop) -->
+              <div class="hidden lg:flex items-center gap-3 mr-4">
+                <BranchSelector />
+              </div>
+
               <!-- User Dropdown Menu -->
               <div class="hidden lg:flex">
                 <PopupMenuButton

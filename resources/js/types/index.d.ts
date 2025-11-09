@@ -9,6 +9,8 @@ export interface User {
   name: string;
   email: string;
   email_verified_at: string | null;
+  current_company_id?: number | null;
+  current_branch_id?: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -97,6 +97,12 @@ export default {
   // Breadcrumb
   'Dashboard': 'Panel de control',
 
+  // Branch Selector
+  'Select Branch': 'Seleccionar Sucursal',
+  'Current Branch': 'Sucursal Actual',
+  'Failed to load branches': 'Error al cargar las sucursales',
+  'Failed to update branch': 'Error al actualizar la sucursal',
+
   // Welcome Page
   'Laravel,': 'Laravel,',
   'Inertia.js,': 'Inertia.js,',

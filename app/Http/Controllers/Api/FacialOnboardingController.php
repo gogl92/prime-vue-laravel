@@ -31,6 +31,7 @@ class FacialOnboardingController extends Controller
                     'order' => $image->order,
                     'created_at' => $image->created_at,
                     'has_file' => file_exists($image->image_path),
+                    'url' => "/api/users/{$image->user_id}/onboarding/images/{$image->id}",
                 ];
             }),
             'count' => $images->count(),
