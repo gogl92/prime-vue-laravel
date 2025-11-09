@@ -32,10 +32,7 @@ const { currentRoute, mobileMenuOpen, menuItems, userMenuItems } = useAppLayout(
       <Teleport to="body">
         <!-- Mobile drawer menu -->
         <Drawer v-model:visible="mobileMenuOpen" position="right">
-          <div class="space-y-4">
-            <BranchSelector />
-            <PanelMenu :model="menuItems" class="mt-1 w-full" />
-          </div>
+          <PanelMenu :model="menuItems" class="mt-1 w-full" />
           <template #footer>
             <PopupMenuButton
               name="mobile-user-menu-dd"
@@ -74,8 +71,8 @@ const { currentRoute, mobileMenuOpen, menuItems, userMenuItems } = useAppLayout(
               </div>
             </template>
             <template #end>
-              <!-- Branch Selector (Desktop) -->
-              <div class="hidden lg:flex items-center gap-3 mr-4">
+              <!-- Branch Selector (All screen sizes) -->
+              <div class="flex items-center gap-3 mr-4">
                 <BranchSelector />
               </div>
 

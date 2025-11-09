@@ -43,7 +43,7 @@ const currentBranchName = computed(() => {
       <Building2 class="size-4 animate-pulse" />
       <span class="text-sm">Loading branches...</span>
     </div>
-    
+
     <!-- Show selector when branches are available -->
     <Select
       v-else-if="branches.length > 0"
@@ -54,7 +54,7 @@ const currentBranchName = computed(() => {
       :loading="isLoading"
       :disabled="isLoading"
       placeholder="Select Branch"
-      class="w-full md:w-56"
+      class="w-40 md:w-56"
       show-clear
     >
       <template #value="slotProps">
@@ -74,7 +74,7 @@ const currentBranchName = computed(() => {
         </div>
       </template>
     </Select>
-    
+
     <!-- Show message when no branches available (for debugging) -->
     <div v-else class="flex items-center gap-2 px-3 py-2 text-sm text-muted">
       <Building2 class="size-4" />

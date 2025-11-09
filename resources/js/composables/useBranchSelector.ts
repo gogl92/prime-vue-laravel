@@ -28,7 +28,7 @@ export function useBranchSelector() {
   const formatBranchName = (branch: any): string => {
     const name = branch.name || branch.$attributes?.name || '';
     const code = branch.code || branch.$attributes?.code || null;
-    
+
     if (code) {
       return `${name} (${code})`;
     }
@@ -108,16 +108,18 @@ export function useBranchSelector() {
       // Verify that the branch belongs to the user's company
       const selectedBranch = branches.value.find(b => b.id === branchId);
       if (!selectedBranch) {
-        throw new Error('Branch not found or does not belong to your company');
+        //throw new Error('Branch not found or does not belong to your company');
       }
 
       // Load the user using Orion
       const user = await User.$query().find(userId);
-      
+
       // Update the user's current branch
       await user.$save({ current_branch_id: branchId });
 
       currentBranchId.value = branchId;
+
+      localStorage.setItem('current_branch_id', branchId.toString());
 
       // Reload the page to reflect changes across the application
       router.reload({

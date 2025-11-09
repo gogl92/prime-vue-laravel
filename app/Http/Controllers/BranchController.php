@@ -28,7 +28,21 @@ class BranchController extends BaseOrionController
      */
     public function searchableBy(): array
     {
-        return ['id', 'name', 'code', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'description'];
+        return [
+            'id',
+            'company_id',
+            'name',
+            'code',
+            'email',
+            'phone',
+            'address',
+            'city',
+            'state',
+            'zip',
+            'country',
+            'is_active',
+            'description',
+        ];
     }
 
     /**
@@ -36,7 +50,20 @@ class BranchController extends BaseOrionController
      */
     public function filterableBy(): array
     {
-        return ['id', 'name', 'code', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'is_active'];
+        return [
+            'id',
+            'company_id',
+            'name',
+            'code',
+            'email',
+            'phone',
+            'address',
+            'city',
+            'state',
+            'zip',
+            'country',
+            'is_active',
+        ];
     }
 
     /**
@@ -49,7 +76,7 @@ class BranchController extends BaseOrionController
 
     /**
      * Authorize all operations for authenticated users
-     * @param array<mixed> $arguments
+     * @param array $arguments
      */
     public function authorize(string $ability, $arguments = []): Response
     {
