@@ -474,12 +474,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppLayout :title="t('Invoices Example - Orion API')">
+  <AppLayout :title="t('Invoices')">
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-surface-900 dark:text-surface-0">
-          {{ t('Invoices Example - Orion API') }}
+          {{ t('Invoices') }}
         </h1>
         <Button
           :label="t('Create Invoice')"
@@ -571,6 +571,7 @@ onMounted(() => {
             @row-expand="onRowExpand"
             @row-collapse="onRowCollapse"
           >
+            <Column expander :header-style="{ width: '3rem' }" />
 
             <Column selection-mode="multiple" :header-style="{ width: '3rem' }" />
 

@@ -16,8 +16,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/invoices', function () {
-    return Inertia::render('InvoicesExample');
-})->middleware(['auth', 'verified'])->name('invoices.example');
+    return Inertia::render('Invoices');
+})->middleware(['auth', 'verified'])->name('invoices');
 
 Route::get('/invoices/create', function () {
     return Inertia::render('CreateInvoice');

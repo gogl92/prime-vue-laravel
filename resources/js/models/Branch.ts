@@ -15,6 +15,7 @@ export class Branch extends Model<{
   is_active?: boolean;
   description?: string | null;
   stripe_id?: string | null;
+  is_stripe_connected?: boolean;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;

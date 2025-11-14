@@ -13,10 +13,28 @@ class FacturapiService implements MexicanInvoicingContract
     protected string $apiUrl;
     protected string $apiKey;
 
-    public function __construct()
-    {
-        $this->apiUrl = config('facturapi.api_url');
-        $this->apiKey = config('facturapi.api_key');
+    /**
+     * Create a new FacturapiService instance
+     *
+     * @param string|null $apiUrl The Facturapi API URL (defaults to config value)
+     * @param string|null $apiKey The API key (defaults to config value)
+     *
+     * @example
+     * // Use config values
+     * $service = new FacturapiService();
+     *
+     * // Use branch-specific credentials
+     * $service = new FacturapiService(
+     *     apiUrl: 'https://api.facturapi.io',
+     *     apiKey: $branch->facturapi_api_key
+     * );
+     */
+    public function __construct(
+        ?string $apiUrl = null,
+        ?string $apiKey = null
+    ) {
+        $this->apiUrl = $apiUrl ?? config('facturapi.api_url');
+        $this->apiKey = $apiKey ?? config('facturapi.api_key');
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Contracts\MexicanInvoicingContract;
 use App\Services\FacturacomService;
 use App\Services\FacturapiService;
 use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
 
 class MexicanInvoicingServiceProvider extends ServiceProvider
 {
@@ -23,7 +24,7 @@ class MexicanInvoicingServiceProvider extends ServiceProvider
             return match ($provider) {
                 'facturapi' => new FacturapiService(),
                 'facturacom' => new FacturacomService(),
-                default => throw new \InvalidArgumentException("Unsupported invoicing provider: {$provider}"),
+                default => throw new InvalidArgumentException("Unsupported invoicing provider: $provider"),
             };
         });
 

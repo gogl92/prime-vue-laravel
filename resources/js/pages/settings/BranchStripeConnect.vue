@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { Head as InertiaHead } from '@inertiajs/vue3';
+import { ref, onMounted, computed } from 'vue';
+import { Head as InertiaHead, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Card from 'primevue/card';
@@ -16,6 +16,7 @@ import { Orion } from '@tailflow/laravel-orion/lib/orion';
 
 const { t } = useI18n();
 const toast = useToast();
+const page = usePage();
 
 const breadcrumbs = [
   { label: t('Settings'), url: '/settings' },
@@ -37,12 +38,38 @@ const onboardingStatus = ref<{
 } | null>(null);
 const statusLoading = ref(false);
 
-// Load branches
+// Get current user from page props
+const currentUser = computed(() => page.props.auth?.user);
+
+// Load branches (automatically filtered by current company on backend)
 const loadBranches = async () => {
   try {
     loading.value = true;
+    
+    // Get the current user's company ID
+    const companyId = currentUser.value?.current_company_id;
+    
+    if (!companyId) {
+      console.warn('[BranchStripeConnect] No company ID found for user');
+      branches.value = [];
+      toast.add({
+        severity: 'warn',
+        summary: t('Warning'),
+        detail: t('No company selected. Please select a company first.'),
+        life: 5000,
+      });
+      return;
+    }
+    
+    // Query branches - filtering by company_id is handled automatically on backend
     const response = await Branch.$query().get();
     branches.value = response;
+    
+    // Debug: log first branch to check attributes
+    if (response.length > 0 && response[0]) {
+      console.log('[BranchStripeConnect] First branch data:', response[0]);
+      console.log('[BranchStripeConnect] First branch attributes:', response[0].$attributes);
+    }
   } catch (error) {
     console.error('Error loading branches:', error);
     toast.add({
@@ -61,7 +88,7 @@ const loadOnboardingStatus = async (branchId: number) => {
   try {
     statusLoading.value = true;
     const httpClient = Orion.makeHttpClient();
-    const response = await httpClient.get(`/api/stripe/branches/${branchId}/status`);
+    const response = await httpClient.get(`/stripe/branches/${branchId}/status`);
 
     onboardingStatus.value = response.data as {
       hasStripeAccount: boolean;
@@ -103,11 +130,11 @@ const generateOnboardingUrl = async () => {
     const branchId = selectedBranch.value.$attributes.id;
     if (!branchId) return;
 
-    const returnURL = `${window.location.origin}/settings/stripe/return`;
-    const refreshURL = `${window.location.origin}/settings/stripe/refresh`;
+    const returnURL = `${window.location.origin}/settings/stripe-connect?stripe_return=true`;
+    const refreshURL = `${window.location.origin}/settings/stripe-connect?stripe_return=true`;
 
     const httpClient = Orion.makeHttpClient();
-    const response = await httpClient.post(`/api/stripe/branches/${branchId}/onboarding`, {
+    const response = await httpClient.post(`/stripe/branches/${branchId}/onboarding`, {
       returnURL,
       refreshURL,
     });
@@ -139,13 +166,13 @@ const generateOnboardingUrl = async () => {
 };
 
 // View dashboard
-const viewDashboard = async (branch: Branch) => {
+const viewDashboard = async (branch: Branch | { $attributes: { id?: number } }) => {
   try {
     const branchId = branch.$attributes.id;
     if (!branchId) return;
 
     const httpClient = Orion.makeHttpClient();
-    const response = await httpClient.get(`/api/stripe/branches/${branchId}/dashboard`);
+    const response = await httpClient.get(`/stripe/branches/${branchId}/dashboard`);
 
     const data = response.data as { url: string };
     window.open(data.url, '_blank');
@@ -179,11 +206,11 @@ const resetAccount = async () => {
     const branchId = selectedBranch.value.$attributes.id;
     if (!branchId) return;
 
-    const returnURL = `${window.location.origin}/settings/stripe/return`;
-    const refreshURL = `${window.location.origin}/settings/stripe/refresh`;
+    const returnURL = `${window.location.origin}/settings/stripe-connect?stripe_return=true`;
+    const refreshURL = `${window.location.origin}/settings/stripe-connect?stripe_return=true`;
 
     const httpClient = Orion.makeHttpClient();
-    const response = await httpClient.post(`/api/stripe/branches/${branchId}/reset`, {
+    const response = await httpClient.post(`/stripe/branches/${branchId}/reset`, {
       returnURL,
       refreshURL,
     });
@@ -231,6 +258,19 @@ const getStatusLabel = (hasAccount: boolean, completed: boolean) => {
 
 onMounted(() => {
   void loadBranches();
+  
+  // Check if we're returning from Stripe onboarding
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('stripe_return')) {
+    toast.add({
+      severity: 'success',
+      summary: t('Success'),
+      detail: t('Returned from Stripe onboarding. Refreshing branches...'),
+      life: 3000,
+    });
+    // Clean up URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 });
 </script>
 
@@ -242,6 +282,15 @@ onMounted(() => {
       <template #title>
         <div class="flex justify-between items-center">
           <span>{{ t('Stripe Connect - Branch Management') }}</span>
+          <Button
+            :label="t('Refresh')"
+            icon="pi pi-refresh"
+            size="small"
+            severity="secondary"
+            outlined
+            :loading="loading"
+            @click="loadBranches"
+          />
         </div>
       </template>
       <template #content>
@@ -438,12 +487,12 @@ onMounted(() => {
               @click="generateOnboardingUrl"
             />
             <Button
-              v-if="onboardingStatus.hasStripeAccount"
+              v-if="onboardingStatus.hasStripeAccount && selectedBranch"
               :label="t('View Dashboard')"
               icon="pi pi-external-link"
               severity="secondary"
               outlined
-              @click="viewDashboard(selectedBranch)"
+              @click="() => selectedBranch && viewDashboard(selectedBranch)"
             />
             <Button
               v-if="onboardingStatus.hasStripeAccount"

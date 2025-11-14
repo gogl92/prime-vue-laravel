@@ -122,7 +122,7 @@ const loadInvoiceStats = async () => {
 };
 
 const goToInvoices = () => {
-  router.visit(route('invoices.example'));
+  router.visit(route('invoices'));
 };
 
 onMounted(() => {

@@ -132,4 +132,37 @@ class BranchController extends BaseOrionController
     {
         return ['stripeAccountMapping'];
     }
+
+    /**
+     * The relations that are always included in the response.
+     *
+     * @return array<int, string>
+     */
+    public function alwaysIncludes(): array
+    {
+        return ['stripeAccountMapping'];
+    }
+
+    /**
+     * Builds Eloquent query for fetching entities in index method.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param array $requestedRelations
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function buildIndexFetchQuery($request, array $requestedRelations): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::buildIndexFetchQuery($request, $requestedRelations);
+
+        // Filter branches by the authenticated user's current company
+        $user = auth()->user();
+        if ($user && $user->current_company_id) {
+            $query->where('company_id', $user->current_company_id);
+        }
+
+        // Eagerly load stripeAccountMapping for is_stripe_connected attribute
+        $query->with('stripeAccountMapping');
+
+        return $query;
+    }
 }

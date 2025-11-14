@@ -24,8 +24,8 @@ type InputTextType = InstanceType<typeof InputText> & { $el: HTMLElement };
 const emailInput = useTemplateRef<InputTextType>('email-input');
 
 const loginForm = ref({
-  email: '',
-  password: '',
+  email: 'superadmin@example.com',
+  password: 'password',
   remember: false,
 });
 

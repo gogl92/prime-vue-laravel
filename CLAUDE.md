@@ -133,7 +133,7 @@ resources/js/
 ├── app.ts                      # Client entry: PrimeVue, Inertia, Ziggy setup
 ├── ssr.ts                      # SSR entry point
 ├── pages/                      # Inertia page components (auto-discovered)
-│   ├── InvoicesExample.vue    # Full CRUD example with Orion API
+│   ├── Invoices.vue           # Full CRUD example with Orion API
 │   └── auth/, settings/        # Feature-based organization
 ├── layouts/                    # Shared layouts
 │   ├── AppLayout.vue          # Main authenticated layout

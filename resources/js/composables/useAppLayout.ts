@@ -27,8 +27,8 @@ export function useAppLayout() {
     {
       label: 'Invoices',
       lucideIcon: FileText,
-      route: route('invoices.example'),
-      active: currentRoute.value == 'invoices.example',
+      route: route('invoices'),
+      active: currentRoute.value == 'invoices',
     },
     {
       label: 'User Management',

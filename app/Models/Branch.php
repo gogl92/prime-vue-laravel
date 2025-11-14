@@ -9,31 +9,35 @@ use Database\Factories\BranchFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-use OwenIt\Auditing\Auditable as AuditableTrait;
-use RichanFongdasen\EloquentBlameable\BlameableTrait;
-use Laravel\Cashier\Billable as CashierBillable;
 use Lanos\CashierConnect\Billable as ConnectBillable;
+use Lanos\CashierConnect\Contracts\StripeAccount;
 use Lanos\CashierConnect\Models\StripeAccountMapping;
+use Laravel\Cashier\Billable as CashierBillable;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
+use RichanFongdasen\EloquentBlameable\BlameableTrait;
 
 /**
  * @property-read StripeAccountMapping|null $stripeAccountMapping
+ *
  * @method string stripeAccountDashboardUrl()
  */
-class Branch extends Model implements Auditable
+class Branch extends Model implements Auditable, StripeAccount
 {
+    use AuditableTrait;
+    use BlameableTrait;
+    use CashierBillable;
+    use ConnectBillable;
     /** @use HasFactory<BranchFactory> */
     use HasFactory;
     use SoftDeletes;
-    use BlameableTrait;
-    use AuditableTrait;
-    use CashierBillable;
-    use ConnectBillable;
+
     /*
      * public string $commission_type = 'fixed';
      * public int $commission_rate = 500; // E.G. $5 application fee
      */
     public string $commission_type = 'percentage';
+
     public int $commission_rate = 5;
 
     protected $fillable = [
@@ -54,7 +58,7 @@ class Branch extends Model implements Auditable
     protected function casts(): array
     {
         return [
-            'phone' => SafePhoneNumberCast::class . ':US,MX',
+            'phone' => SafePhoneNumberCast::class.':US,MX',
             'is_active' => 'boolean',
         ];
     }
@@ -69,12 +73,10 @@ class Branch extends Model implements Auditable
     /**
      * Get the is_stripe_connected attribute.
      * A branch is considered connected when it has a Stripe account and can accept payments.
-     *
-     * @return bool
      */
     public function getIsStripeConnectedAttribute(): bool
     {
-        if (!$this->hasStripeAccount()) {
+        if (! $this->hasStripeAccount()) {
             return false;
         }
 
@@ -85,12 +87,10 @@ class Branch extends Model implements Auditable
 
     /**
      * Check if the branch can accept payments via Stripe Connect.
-     *
-     * @return bool
      */
     public function canAcceptPayments(): bool
     {
-        if (!$this->hasStripeAccount()) {
+        if (! $this->hasStripeAccount()) {
             return false;
         }
 
