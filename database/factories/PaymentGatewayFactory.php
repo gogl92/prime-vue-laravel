@@ -17,7 +17,7 @@ class PaymentGatewayFactory extends Factory
     public function definition(): array
     {
         $businessName = fake()->company();
-        
+
         return [
             'branch_id' => \App\Models\Branch::factory(),
             'is_enabled' => fake()->boolean(80),

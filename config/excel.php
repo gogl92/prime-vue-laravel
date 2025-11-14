@@ -52,7 +52,7 @@ return [
                     'rgb' => 'FFFFFF',
                 ],
                 'fill' => [
-                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'fillType' => PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                     'startColor' => [
                         'rgb' => '4472C4',
                     ],

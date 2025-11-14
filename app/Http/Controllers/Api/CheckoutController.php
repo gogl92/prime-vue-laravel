@@ -150,11 +150,11 @@ class CheckoutController extends Controller
                         'message' => 'Invalid product in order',
                     ], 400);
                 }
-                
+
                 $itemPrice = (float) $product->price;
                 $itemTotal = $itemPrice * $item['quantity'];
                 $totalAmount += $itemTotal;
-                
+
                 $orderItems[] = [
                     'type' => 'product',
                     'id' => $product->id,
@@ -170,11 +170,11 @@ class CheckoutController extends Controller
                         'message' => 'Invalid service in order',
                     ], 400);
                 }
-                
+
                 $itemPrice = (float) $service->price;
                 $itemTotal = $itemPrice * $item['quantity'];
                 $totalAmount += $itemTotal;
-                
+
                 $orderItems[] = [
                     'type' => 'service',
                     'id' => $service->id,
@@ -209,7 +209,7 @@ class CheckoutController extends Controller
         try {
             // Create Stripe payment intent using direct charge to branch's connected account
             $amountInCents = (int) round($totalAmount * 100);
-            
+
             // Use Cashier Connect to create direct charge
             $paymentIntent = $gateway->branch->createDirectCharge(
                 $amountInCents,
@@ -240,7 +240,7 @@ class CheckoutController extends Controller
         } catch (ApiErrorException $e) {
             // Mark order as failed
             $order->update(['status' => 'failed']);
-            
+
             return response()->json([
                 'message' => 'Failed to create payment intent',
                 'error' => $e->getMessage(),
@@ -321,4 +321,3 @@ class CheckoutController extends Controller
         }
     }
 }
-

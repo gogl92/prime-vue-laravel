@@ -124,7 +124,7 @@ class PaymentGatewayController extends BaseOrionController
     /**
      * Builds Eloquent query for fetching entities in index method.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param array $requestedRelations
      * @return \Illuminate\Database\Eloquent\Builder
      */
@@ -157,4 +157,3 @@ class PaymentGatewayController extends BaseOrionController
         return response()->json(['slug' => $slug]);
     }
 }
-

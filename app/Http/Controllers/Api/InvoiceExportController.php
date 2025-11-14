@@ -10,8 +10,6 @@ use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Tailflow\Orion\Drivers\Standard\QueryBuilder;
-use Tailflow\Orion\Http\Requests\Request as OrionRequest;
 
 class InvoiceExportController extends Controller
 {

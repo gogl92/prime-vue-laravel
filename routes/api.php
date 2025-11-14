@@ -95,13 +95,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Branch invoice settings routes
     Route::prefix('branches/{id}/invoice-settings')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'show']);
-        Route::put('/', [\App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'update']);
-        Route::delete('/', [\App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'destroy']);
+        Route::get('/', [App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'show']);
+        Route::put('/', [App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'update']);
+        Route::delete('/', [App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'destroy']);
     });
 
     // Invoice export route
-    Route::get('invoices/export', [\App\Http\Controllers\Api\InvoiceExportController::class, 'export'])->name('invoices.export');
+    Route::get('invoices/export', [App\Http\Controllers\Api\InvoiceExportController::class, 'export'])->name('invoices.export');
 
     // Payment Gateway custom route
     Route::post('payment-gateways/generate-slug', [PaymentGatewayController::class, 'generateSlug']);
