@@ -39,5 +39,10 @@ Route::get('/users/{id}/facial-recognition', function ($id) {
     return Inertia::render('FacialRecognitionSetup', ['userId' => (int)$id]);
 })->middleware(['auth', 'verified'])->name('users.facial-recognition');
 
+// Public checkout page (no authentication required)
+Route::get('/checkout/{slug}', function ($slug) {
+    return Inertia::render('public/Checkout', ['slug' => $slug]);
+})->name('checkout');
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

@@ -28,6 +28,26 @@ const sidebarNavItems = computed(() => [
     route: route('appearance'),
     active: currentRoute.value == 'appearance',
   },
+  {
+    title: 'Stripe Connect',
+    route: route('stripe.connect'),
+    active: currentRoute.value == 'stripe.connect',
+  },
+  {
+    title: 'Branch Invoicing',
+    route: route('branch.invoicing'),
+    active: currentRoute.value == 'branch.invoicing',
+  },
+  {
+    title: 'Services',
+    route: route('settings.services'),
+    active: currentRoute.value == 'settings.services',
+  },
+  {
+    title: 'Payment Gateways',
+    route: route('settings.payment-gateways'),
+    active: currentRoute.value == 'settings.payment-gateways',
+  },
 ]);
 </script>
 

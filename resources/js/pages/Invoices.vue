@@ -467,6 +467,74 @@ const getTotalPayments = (invoiceId: number): number => {
 
 const selectedInvoices = ref<Invoice[]>([]);
 
+// Export to Excel
+const exportToExcel = () => {
+  // Build query params from current filters
+  const params = new URLSearchParams();
+
+  if (filters.search) {
+    params.append('search', filters.search);
+  }
+
+  if (filters.city) {
+    params.append('filters[client.city]', filters.city);
+  }
+
+  if (filters.country) {
+    params.append('filters[client.country]', filters.country);
+  }
+
+  // Build export URL with auth token
+  const token = localStorage.getItem('auth_token');
+  const exportUrl = `/api/invoices/export?${params.toString()}`;
+
+  // Create a temporary link and trigger download
+  const link = document.createElement('a');
+  link.href = exportUrl;
+  link.target = '_blank';
+
+  // Add authorization header via fetch for authenticated request
+  fetch(exportUrl, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    },
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoices_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.add({
+        severity: 'success',
+        summary: t('Success'),
+        detail: t('Invoices exported successfully'),
+        life: 3000,
+      });
+    })
+    .catch(error => {
+      console.error('Export error:', error);
+      toast.add({
+        severity: 'error',
+        summary: t('Error'),
+        detail: t('Failed to export invoices'),
+        life: 3000,
+      });
+    });
+};
+
 // Lifecycle
 onMounted(() => {
   void loadInvoices();
@@ -481,13 +549,22 @@ onMounted(() => {
         <h1 class="text-2xl font-bold text-surface-900 dark:text-surface-0">
           {{ t('Invoices') }}
         </h1>
-        <Button
-          :label="t('Create Invoice')"
-          icon="pi pi-plus"
-          severity="success"
-          class="p-button-success"
-          @click="router.visit('/invoices/create')"
-        />
+        <div class="flex gap-2">
+          <Button
+            :label="t('Export to Excel')"
+            icon="pi pi-file-excel"
+            severity="secondary"
+            outlined
+            @click="exportToExcel"
+          />
+          <Button
+            :label="t('Create Invoice')"
+            icon="pi pi-plus"
+            severity="success"
+            class="p-button-success"
+            @click="router.visit('/invoices/create')"
+          />
+        </div>
       </div>
       <!-- Filters -->
       <Card>

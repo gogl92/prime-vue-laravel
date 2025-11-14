@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { Head as InertiaHead, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
+import SettingsLayout from '@/layouts/UserSettingsLayout.vue';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -242,18 +243,24 @@ const resetAccount = async () => {
   }
 };
 
-// Get status severity
-const getStatusSeverity = (hasAccount: boolean, completed: boolean) => {
-  if (!hasAccount) return 'secondary';
-  if (completed) return 'success';
-  return 'warn';
-};
+// Get connection status for a branch
+const getBranchConnectionStatus = (branch: Branch) => {
+  const isConnected = branch.$attributes.is_stripe_connected;
+  const mapping = branch.$relations?.stripe_account_mapping || branch.$attributes.stripe_account_mapping;
+  const hasStripeAccount = mapping && mapping.stripe_account_id;
 
-// Get status label
-const getStatusLabel = (hasAccount: boolean, completed: boolean) => {
-  if (!hasAccount) return t('Not Connected');
-  if (completed) return t('Connected');
-  return t('Pending');
+  // Fully connected: has account, charges enabled, and onboarding complete
+  if (isConnected) {
+    return { severity: 'success', label: t('Connected') };
+  }
+
+  // Has Stripe account but not fully set up
+  if (hasStripeAccount) {
+    return { severity: 'warn', label: t('Pending Setup') };
+  }
+
+  // No Stripe account at all
+  return { severity: 'secondary', label: t('Not Connected') };
 };
 
 onMounted(() => {
@@ -278,7 +285,8 @@ onMounted(() => {
   <InertiaHead title="Stripe Connect" />
 
   <AppLayout :breadcrumbs>
-    <Card>
+    <SettingsLayout>
+      <Card>
       <template #title>
         <div class="flex justify-between items-center">
           <span>{{ t('Stripe Connect - Branch Management') }}</span>
@@ -337,20 +345,8 @@ onMounted(() => {
 
           <Column field="is_stripe_connected" :header="t('Stripe Status')">
             <template #body="{ data }">
-              <Tag
-                :severity="
-                  getStatusSeverity(
-                    !!data.$attributes.is_stripe_connected,
-                    !!data.$attributes.is_stripe_connected
-                  )
-                "
-              >
-                {{
-                  getStatusLabel(
-                    !!data.$attributes.is_stripe_connected,
-                    !!data.$attributes.is_stripe_connected
-                  )
-                }}
+              <Tag :severity="getBranchConnectionStatus(data).severity">
+                {{ getBranchConnectionStatus(data).label }}
               </Tag>
             </template>
           </Column>
@@ -358,15 +354,36 @@ onMounted(() => {
           <Column :header="t('Actions')">
             <template #body="{ data }">
               <div class="flex gap-2">
+                <!-- Show Setup/Connect button when not fully connected -->
                 <Button
                   v-if="!data.$attributes.is_stripe_connected"
-                  :label="t('Connect')"
-                  icon="pi pi-link"
+                  :label="
+                    data.$relations?.stripe_account_mapping?.stripe_account_id ||
+                    data.$attributes.stripe_account_mapping?.stripe_account_id
+                      ? t('Complete Setup')
+                      : t('Connect')
+                  "
+                  :icon="
+                    data.$relations?.stripe_account_mapping?.stripe_account_id ||
+                    data.$attributes.stripe_account_mapping?.stripe_account_id
+                      ? 'pi pi-cog'
+                      : 'pi pi-link'
+                  "
                   size="small"
+                  :severity="
+                    data.$relations?.stripe_account_mapping?.stripe_account_id ||
+                    data.$attributes.stripe_account_mapping?.stripe_account_id
+                      ? 'warn'
+                      : 'primary'
+                  "
                   @click="startOnboarding(data)"
                 />
+                <!-- Show Dashboard button if has Stripe account -->
                 <Button
-                  v-else
+                  v-if="
+                    data.$relations?.stripe_account_mapping?.stripe_account_id ||
+                    data.$attributes.stripe_account_mapping?.stripe_account_id
+                  "
                   :label="t('Dashboard')"
                   icon="pi pi-external-link"
                   size="small"
@@ -374,6 +391,7 @@ onMounted(() => {
                   outlined
                   @click="viewDashboard(data)"
                 />
+                <!-- Show Manage button if fully connected -->
                 <Button
                   v-if="data.$attributes.is_stripe_connected"
                   :label="t('Manage')"
@@ -492,7 +510,7 @@ onMounted(() => {
               icon="pi pi-external-link"
               severity="secondary"
               outlined
-              @click="() => selectedBranch && viewDashboard(selectedBranch)"
+              @click="viewDashboard(selectedBranch)"
             />
             <Button
               v-if="onboardingStatus.hasStripeAccount"
@@ -516,5 +534,6 @@ onMounted(() => {
         />
       </template>
     </Dialog>
+    </SettingsLayout>
   </AppLayout>
 </template>

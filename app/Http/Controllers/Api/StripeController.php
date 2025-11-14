@@ -40,7 +40,7 @@ class StripeController extends Controller
         // If branch already has completed onboarding, return dashboard URL instead
         if ($branch->hasStripeAccount() && $branch->hasCompletedOnboarding()) {
             return response()->json([
-                'url' => $branch->stripeAccountDashboardUrl(),
+                'url' => $branch->accountDashboardUrl(),
                 'status' => 'completed',
                 'message' => 'Onboarding already completed. Dashboard URL provided.',
             ]);
@@ -157,7 +157,7 @@ class StripeController extends Controller
         }
 
         return response()->json([
-            'url' => $branch->stripeAccountDashboardUrl(),
+            'url' => $branch->accountDashboardUrl(),
         ]);
     }
 

@@ -4,23 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
-use App\Http\Requests\StoreBranchRequest;
-use App\Http\Requests\UpdateBranchRequest;
+use App\Models\Service;
 use Illuminate\Auth\Access\Response;
 
-class BranchController extends BaseOrionController
+class ServiceController extends BaseOrionController
 {
     /**
      * Fully-qualified model class name
      */
-    protected $model = Branch::class;
-
-    /**
-     * Request classes for validation
-     */
-    protected string $storeRequest = StoreBranchRequest::class;
-    protected string $updateRequest = UpdateBranchRequest::class;
+    protected $model = Service::class;
 
     /**
      * Enable Orion search, filter and sort capabilities
@@ -30,18 +22,13 @@ class BranchController extends BaseOrionController
     {
         return [
             'id',
-            'company_id',
+            'branch_id',
             'name',
-            'code',
-            'email',
-            'phone',
-            'address',
-            'city',
-            'state',
-            'zip',
-            'country',
-            'is_active',
             'description',
+            'price',
+            'duration',
+            'sku',
+            'is_active',
         ];
     }
 
@@ -52,16 +39,11 @@ class BranchController extends BaseOrionController
     {
         return [
             'id',
-            'company_id',
+            'branch_id',
             'name',
-            'code',
-            'email',
-            'phone',
-            'address',
-            'city',
-            'state',
-            'zip',
-            'country',
+            'price',
+            'duration',
+            'sku',
             'is_active',
         ];
     }
@@ -71,7 +53,7 @@ class BranchController extends BaseOrionController
      */
     public function sortableBy(): array
     {
-        return ['id', 'name', 'code', 'email', 'phone', 'city', 'state', 'country', 'is_active', 'created_at', 'updated_at'];
+        return ['id', 'name', 'price', 'duration', 'sku', 'is_active', 'created_at', 'updated_at'];
     }
 
     /**
@@ -130,17 +112,7 @@ class BranchController extends BaseOrionController
      */
     public function includes(): array
     {
-        return ['stripeAccountMapping', 'paymentGateway'];
-    }
-
-    /**
-     * The relations that are always included in the response.
-     *
-     * @return array<int, string>
-     */
-    public function alwaysIncludes(): array
-    {
-        return ['stripeAccountMapping'];
+        return ['branch'];
     }
 
     /**
@@ -154,12 +126,15 @@ class BranchController extends BaseOrionController
     {
         $query = parent::buildIndexFetchQuery($request, $requestedRelations);
 
-        // Filter branches by the authenticated user's current company
+        // Filter services by the authenticated user's current company branches
         $user = auth()->user();
         if ($user && $user->current_company_id) {
-            $query->where('company_id', $user->current_company_id);
+            $query->whereHas('branch', function ($q) use ($user) {
+                $q->where('company_id', $user->current_company_id);
+            });
         }
 
         return $query;
     }
 }
+

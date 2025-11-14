@@ -17,10 +17,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StripeController;
+use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\FacialOnboardingController;
 use App\Http\Controllers\Api\FacialOnboardingStatusController;
 use App\Http\Controllers\Api\FacialReferenceImageController;
 use App\Http\Controllers\Api\FacialVerificationController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\PaymentGatewayController;
 // SAT Catalog Controllers
 use App\Http\Controllers\SAT\ProductKeyController;
 use App\Http\Controllers\SAT\UnitKeyController;
@@ -47,6 +50,13 @@ Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::get('create', [AuthController::class, 'create']);
     Route::post('/', [AuthController::class, 'store']); // Register
+});
+
+// Public checkout routes (no authentication required)
+Route::prefix('checkout/{slug}')->group(function () {
+    Route::get('info', [CheckoutController::class, 'getGatewayInfo']);
+    Route::post('payment-intent', [CheckoutController::class, 'createPaymentIntent']);
+    Route::post('confirm', [CheckoutController::class, 'confirmOrder']);
 });
 
 // Protected routes
@@ -83,6 +93,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('reset', [StripeController::class, 'resetAccount']);
     });
 
+    // Branch invoice settings routes
+    Route::prefix('branches/{id}/invoice-settings')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'show']);
+        Route::put('/', [\App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'update']);
+        Route::delete('/', [\App\Http\Controllers\Api\BranchInvoiceSettingsController::class, 'destroy']);
+    });
+
+    // Invoice export route
+    Route::get('invoices/export', [\App\Http\Controllers\Api\InvoiceExportController::class, 'export'])->name('invoices.export');
+
+    // Payment Gateway custom route
+    Route::post('payment-gateways/generate-slug', [PaymentGatewayController::class, 'generateSlug']);
+
     // Resource routes
     Orion::resource('users', UserController::class);
     Orion::resource('roles', RoleController::class)->only(['index', 'search']);
@@ -92,6 +115,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Orion::resource('customers', CustomerController::class);
     Orion::resource('invoices', InvoiceController::class);
     Orion::resource('products', ProductController::class);
+    Orion::resource('services', ServiceController::class);
+    Orion::resource('payment-gateways', PaymentGatewayController::class);
     Orion::resource('payments', PaymentController::class);
     Orion::belongsToManyResource('invoices', 'products', InvoiceProductsController::class);
     Orion::hasManyResource('invoices', 'payments', InvoicePaymentsController::class);

@@ -46,10 +46,10 @@ class FacturacomService implements MexicanInvoicingContract
         ?string $secretKey = null,
         ?string $pluginKey = null
     ) {
-        $this->apiUrl = $apiUrl ?? config('facturacom.api_url');
-        $this->apiKey = $apiKey ?? config('facturacom.api_key');
-        $this->secretKey = $secretKey ?? config('facturacom.secret_key');
-        $this->pluginKey = $pluginKey ?? config('facturacom.plugin_key');
+        $this->apiUrl = $apiUrl ?? config('facturacom.api_url') ?? '';
+        $this->apiKey = $apiKey ?? config('facturacom.api_key') ?? '';
+        $this->secretKey = $secretKey ?? config('facturacom.secret_key') ?? '';
+        $this->pluginKey = $pluginKey ?? config('facturacom.plugin_key') ?? '';
     }
 
     /**

@@ -25,6 +25,26 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('settings/BranchStripeConnect');
     })->name('stripe.connect');
 
+    Route::get('settings/branch-invoicing', function () {
+        return Inertia::render('settings/BranchInvoiceSettings');
+    })->name('branch.invoicing');
+
+    Route::get('settings/services', function () {
+        return Inertia::render('settings/Services');
+    })->name('settings.services');
+
+    Route::get('settings/services/create', function () {
+        return Inertia::render('settings/ServiceForm');
+    })->name('settings.services.create');
+
+    Route::get('settings/services/{id}/edit', function ($id) {
+        return Inertia::render('settings/ServiceForm', ['id' => $id]);
+    })->name('settings.services.edit');
+
+    Route::get('settings/payment-gateways', function () {
+        return Inertia::render('settings/PaymentGatewaySettings');
+    })->name('settings.payment-gateways');
+
     Route::get('settings/stripe/return', function () {
         return Inertia::render('settings/StripeReturn');
     })->name('stripe.return');

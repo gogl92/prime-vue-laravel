@@ -4,23 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
-use App\Http\Requests\StoreBranchRequest;
-use App\Http\Requests\UpdateBranchRequest;
+use App\Models\PaymentGateway;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-class BranchController extends BaseOrionController
+class PaymentGatewayController extends BaseOrionController
 {
     /**
      * Fully-qualified model class name
      */
-    protected $model = Branch::class;
-
-    /**
-     * Request classes for validation
-     */
-    protected string $storeRequest = StoreBranchRequest::class;
-    protected string $updateRequest = UpdateBranchRequest::class;
+    protected $model = PaymentGateway::class;
 
     /**
      * Enable Orion search, filter and sort capabilities
@@ -30,18 +24,10 @@ class BranchController extends BaseOrionController
     {
         return [
             'id',
-            'company_id',
-            'name',
-            'code',
-            'email',
-            'phone',
-            'address',
-            'city',
-            'state',
-            'zip',
-            'country',
-            'is_active',
-            'description',
+            'branch_id',
+            'slug',
+            'business_name',
+            'is_enabled',
         ];
     }
 
@@ -52,17 +38,9 @@ class BranchController extends BaseOrionController
     {
         return [
             'id',
-            'company_id',
-            'name',
-            'code',
-            'email',
-            'phone',
-            'address',
-            'city',
-            'state',
-            'zip',
-            'country',
-            'is_active',
+            'branch_id',
+            'slug',
+            'is_enabled',
         ];
     }
 
@@ -71,7 +49,7 @@ class BranchController extends BaseOrionController
      */
     public function sortableBy(): array
     {
-        return ['id', 'name', 'code', 'email', 'phone', 'city', 'state', 'country', 'is_active', 'created_at', 'updated_at'];
+        return ['id', 'slug', 'business_name', 'is_enabled', 'created_at', 'updated_at'];
     }
 
     /**
@@ -130,7 +108,7 @@ class BranchController extends BaseOrionController
      */
     public function includes(): array
     {
-        return ['stripeAccountMapping', 'paymentGateway'];
+        return ['branch'];
     }
 
     /**
@@ -140,7 +118,7 @@ class BranchController extends BaseOrionController
      */
     public function alwaysIncludes(): array
     {
-        return ['stripeAccountMapping'];
+        return ['branch'];
     }
 
     /**
@@ -154,12 +132,29 @@ class BranchController extends BaseOrionController
     {
         $query = parent::buildIndexFetchQuery($request, $requestedRelations);
 
-        // Filter branches by the authenticated user's current company
+        // Filter payment gateways by the authenticated user's current company branches
         $user = auth()->user();
         if ($user && $user->current_company_id) {
-            $query->where('company_id', $user->current_company_id);
+            $query->whereHas('branch', function ($q) use ($user) {
+                $q->where('company_id', $user->current_company_id);
+            });
         }
 
         return $query;
     }
+
+    /**
+     * Generate a new unique slug for a payment gateway
+     */
+    public function generateSlug(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'business_name' => 'nullable|string',
+        ]);
+
+        $slug = PaymentGateway::generateUniqueSlug($validated['business_name'] ?? null);
+
+        return response()->json(['slug' => $slug]);
+    }
 }
+

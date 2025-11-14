@@ -33,8 +33,8 @@ class FacturapiService implements MexicanInvoicingContract
         ?string $apiUrl = null,
         ?string $apiKey = null
     ) {
-        $this->apiUrl = $apiUrl ?? config('facturapi.api_url');
-        $this->apiKey = $apiKey ?? config('facturapi.api_key');
+        $this->apiUrl = $apiUrl ?? config('facturapi.api_url') ?? '';
+        $this->apiKey = $apiKey ?? config('facturapi.api_key') ?? '';
     }
 
     /**
