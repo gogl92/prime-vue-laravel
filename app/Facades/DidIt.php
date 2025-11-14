@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array patch(string $endpoint, array $data = [])
  * @method static array delete(string $endpoint)
  *
- * @see \App\Services\DidItService
+ * @see DidItService
  */
 class DidIt extends Facade
 {

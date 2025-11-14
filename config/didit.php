@@ -14,4 +14,3 @@ return [
      */
     'api_id' => env('DIDIT_API_ID'),
 ];
-
